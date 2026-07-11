@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Logs
 logs
 *.log
@@ -38,3 +39,8 @@ Thumbs.db
 
 # Project-specific
 backend/firebase-admin.json
+=======
+node_modules
+.env
+>>>>>>> aa14df2 (feat(server): initialize Express backend)
+
