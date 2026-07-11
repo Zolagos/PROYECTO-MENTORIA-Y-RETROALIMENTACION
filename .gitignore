@@ -1,20 +1,40 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencies
 node_modules/
+dist/
+dist-ssr/
+build/
+coverage/
+tmp/
+temp/
+
+# Environment files
 .env
 .env.local
 .env.*.local
-dist/
-build/
-logs/
-*.log
-npm-debug.log*
+
+# Editor / OS files
 .vscode/
+!.vscode/extensions.json
 .idea/
 *.swp
 *~
 .DS_Store
 Thumbs.db
-coverage/
-tmp/
-temp/
-.env
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.local
+
+# Project-specific
 backend/firebase-admin.json
