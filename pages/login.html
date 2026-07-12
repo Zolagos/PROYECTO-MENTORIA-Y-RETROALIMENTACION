@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TutorLink — Iniciar Sesión</title>
+    <!-- CSS global -->
+    <link rel="stylesheet" href="../css/main.css" />
+    <link rel="stylesheet" href="../css/components.css" />
+    <link rel="stylesheet" href="../css/pages/login.css" />
+  </head>
+  <body>
+
+    <main class="login-page" role="main">
+
+      <!-- Panel izquierdo: Branding -->
+      <section class="login-brand" aria-hidden="true">
+        <div class="login-brand__logo">
+          <span class="login-brand__logo-text">TL</span>
+        </div>
+        <h1 class="login-brand__title">TutorLink</h1>
+        <p class="login-brand__subtitle">
+          La plataforma de mentorías de RIWI. Conectamos coders, tutores y team leaders.
+        </p>
+        <ul class="login-brand__features">
+          <li class="login-brand__feature">
+            <div class="login-brand__feature-icon">
+              <!-- Ícono SVG: personas -->
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <span>Gestión de mentorías en tiempo real</span>
+          </li>
+          <li class="login-brand__feature">
+            <div class="login-brand__feature-icon">
+              <!-- Ícono SVG: chat/feedback -->
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+            </div>
+            <span>Feedback y observaciones de progreso</span>
+          </li>
+          <li class="login-brand__feature">
+            <div class="login-brand__feature-icon">
+              <!-- Ícono SVG: métricas -->
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="18" y1="20" x2="18" y2="10"/>
+                <line x1="12" y1="20" x2="12" y2="4"/>
+                <line x1="6" y1="20" x2="6" y2="14"/>
+              </svg>
+            </div>
+            <span>Dashboard de métricas para Team Leaders</span>
+          </li>
+        </ul>
+      </section>
+
+      <!-- Panel derecho: Formulario de Login -->
+      <section class="login-form-panel">
+        <div class="login-form-wrapper">
+
+          <header class="login-form__header">
+            <h2 class="login-form__title">¡Bienvenido de vuelta!</h2>
+            <p class="login-form__description">
+              Ingresa tus credenciales para acceder a la plataforma.
+            </p>
+          </header>
+
+          <!-- Alerta de error — se muestra con JS cuando hay fallo de login -->
+          <div id="login-alert" class="alert alert--error hidden" role="alert" aria-live="polite">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span id="login-alert-text">Credenciales incorrectas. Inténtalo de nuevo.</span>
+          </div>
+
+          <form id="login-form" class="login-form" novalidate aria-label="Formulario de inicio de sesión">
+
+            <!-- Campo Email -->
+            <div class="form-group">
+              <label for="login-email" class="form-label form-label--required">
+                Correo electrónico
+              </label>
+              <input
+                type="email"
+                id="login-email"
+                name="email"
+                class="form-input"
+                placeholder="tucorreo@riwi.io"
+                autocomplete="email"
+                required
+                aria-required="true"
+                aria-describedby="email-error"
+              />
+              <span id="email-error" class="form-error hidden" role="alert">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                Ingresa un correo electrónico válido.
+              </span>
+            </div>
+
+            <!-- Campo Contraseña -->
+            <div class="form-group">
+              <label for="login-password" class="form-label form-label--required">
+                Contraseña
+              </label>
+              <div style="position:relative;">
+                <input
+                  type="password"
+                  id="login-password"
+                  name="password"
+                  class="form-input"
+                  placeholder="••••••••"
+                  autocomplete="current-password"
+                  required
+                  aria-required="true"
+                  aria-describedby="password-error"
+                  style="padding-right: 44px;"
+                />
+                <!-- Botón mostrar/ocultar contraseña -->
+                <button
+                  type="button"
+                  id="toggle-password"
+                  aria-label="Mostrar u ocultar contraseña"
+                  style="
+                    position: absolute;
+                    right: 12px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    color: var(--color-text-muted);
+                    display: flex;
+                    align-items: center;
+                    padding: 0;
+                  "
+                >
+                  <!-- Ojo abierto -->
+                  <svg id="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
+              </div>
+              <span id="password-error" class="form-error hidden" role="alert">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                La contraseña debe tener al menos 6 caracteres.
+              </span>
+            </div>
+
+            <!-- Olvidé mi contraseña -->
+            <div class="login-form__forgot">
+              <a href="#" aria-label="Recuperar contraseña">¿Olvidaste tu contraseña?</a>
+            </div>
+
+            <!-- Botón de submit -->
+            <button type="submit" id="login-btn" class="btn btn-primary btn-full btn-lg">
+              <span id="login-btn-text">Iniciar Sesión</span>
+              <!-- Spinner — oculto por defecto, se muestra al hacer submit -->
+              <svg id="login-spinner" class="hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="animation: spin 1s linear infinite;">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              </svg>
+            </button>
+
+          </form>
+
+          <!-- Footer del formulario -->
+          <p class="login-form__footer">
+            Solo el administrador puede crear cuentas.<br/>
+            Contacta a tu Team Leader si no tienes acceso.
+          </p>
+
+          <!-- Branding Riwi -->
+          <div class="login-riwi">
+            <span>Powered by</span>
+            <strong style="color: var(--color-primary);">&lt;/RIWI&gt;</strong>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Animación del spinner -->
+    <style>
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+      }
+    </style>
+
+    <!-- JavaScript del login -->
+    <script src="../js/pages/login.js"></script>
+
+  </body>
+</html>
