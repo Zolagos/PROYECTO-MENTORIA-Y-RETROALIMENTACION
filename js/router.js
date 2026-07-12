@@ -108,6 +108,8 @@ function initPageScript(path) {
     '/observations': typeof initObservations === 'function' ? initObservations : null,
     '/feedback':     typeof initFeedback     === 'function' ? initFeedback     : null,
     '/users':        typeof initUsers        === 'function' ? initUsers        : null,
+    '/my-coders':    typeof initMyCoders     === 'function' ? initMyCoders     : null,
+    '/metrics':      typeof initMetrics      === 'function' ? initMetrics      : null,
   };
 
   const init = pageInits[path];
