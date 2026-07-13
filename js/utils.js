@@ -19,7 +19,7 @@
 // ============================================================
 
 /**
- * Abre un modal por su ID.
+ * openModal — Abre un modal por su ID.
  * @param {string} modalId - ID del elemento .modal-overlay
  */
 function openModal(modalId) {
@@ -27,10 +27,9 @@ function openModal(modalId) {
   if (!overlay) return;
 
   overlay.classList.add('active');
-  // Bloquea el scroll del body mientras el modal está abierto
   document.body.style.overflow = 'hidden';
 
-  // Foco en el primer elemento interactivo del modal (accesibilidad)
+  // Foco en el primer elemento interactivo (accesibilidad)
   setTimeout(() => {
     const firstFocusable = overlay.querySelector('input, select, textarea, button:not(.modal__close)');
     if (firstFocusable) firstFocusable.focus();
@@ -39,12 +38,15 @@ function openModal(modalId) {
   // Cerrar con Escape
   document.addEventListener('keydown', handleEscapeKey);
 
-  // Cerrar al hacer click en el overlay (fuera del modal)
+  // Focus trap: mantiene el foco dentro del modal con Tab
+  overlay.addEventListener('keydown', handleFocusTrap);
+
+  // Cerrar al hacer click en el fondo oscuro
   overlay.addEventListener('click', handleOverlayClick);
 }
 
 /**
- * Cierra un modal por su ID.
+ * closeModal — Cierra un modal por su ID.
  * @param {string} modalId
  */
 function closeModal(modalId) {
@@ -54,7 +56,7 @@ function closeModal(modalId) {
   overlay.classList.remove('active');
   document.body.style.overflow = '';
 
-  // Limpia errores del formulario dentro del modal
+  // Limpia errores del formulario
   overlay.querySelectorAll('.form-input--error, .form-select--error, .form-textarea--error').forEach(el => {
     el.classList.remove('form-input--error', 'form-select--error', 'form-textarea--error');
     el.removeAttribute('aria-invalid');
@@ -62,7 +64,39 @@ function closeModal(modalId) {
   overlay.querySelectorAll('.form-error').forEach(el => el.classList.add('hidden'));
 
   document.removeEventListener('keydown', handleEscapeKey);
+  overlay.removeEventListener('keydown', handleFocusTrap);
   overlay.removeEventListener('click', handleOverlayClick);
+}
+
+/**
+ * handleFocusTrap — Mantiene el foco dentro del modal al usar Tab.
+ * Accesibilidad: el usuario de teclado no puede salir del modal accidentalmente.
+ */
+function handleFocusTrap(e) {
+  if (e.key !== 'Tab') return;
+
+  const focusableSelectors = 'button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])';
+  const focusable = Array.from(e.currentTarget.querySelectorAll(focusableSelectors))
+    .filter(el => !el.disabled && el.offsetParent !== null);
+
+  if (!focusable.length) return;
+
+  const first = focusable[0];
+  const last  = focusable[focusable.length - 1];
+
+  if (e.shiftKey) {
+    // Shift+Tab: si está en el primero, salta al último
+    if (document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    }
+  } else {
+    // Tab: si está en el último, salta al primero
+    if (document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
 }
 
 /** Cierra el modal activo al presionar Escape */
