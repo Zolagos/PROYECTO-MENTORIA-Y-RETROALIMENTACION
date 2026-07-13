@@ -39,7 +39,6 @@ Thumbs.db
 # Firebase credentials
 server/credentials/
 server/credentials/*.json
-tutorcode-f04e1-firebase-adminsdk-fbsvc-fbaf5fe949.json
 
 # Project-specific
 backend/firebase-admin.json
