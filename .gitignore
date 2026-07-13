@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Logs
 logs
 *.log
@@ -37,10 +36,10 @@ Thumbs.db
 *.sw?
 *.local
 
+# Firebase credentials
+server/credentials/
+server/credentials/*.json
+tutorcode-f04e1-firebase-adminsdk-fbsvc-fbaf5fe949.json
+
 # Project-specific
 backend/firebase-admin.json
-=======
-node_modules
-.env
->>>>>>> aa14df2 (feat(server): initialize Express backend)
-
