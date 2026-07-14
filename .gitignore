@@ -36,5 +36,6 @@ Thumbs.db
 *.sw?
 *.local
 
-# Project-specific
-backend/firebase-admin.json
+server/credentials/
+apps/backend/credentials/
+.env
