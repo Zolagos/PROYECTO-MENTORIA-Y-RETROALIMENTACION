@@ -9,7 +9,7 @@ import errorMiddleware from "./middleware/error.middleware.js";
 const app = express();
 
 
-app.use("/api", routes);
+
 app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
