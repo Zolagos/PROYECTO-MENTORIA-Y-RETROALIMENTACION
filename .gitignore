@@ -36,9 +36,5 @@ Thumbs.db
 *.sw?
 *.local
 
-# Firebase credentials
 server/credentials/
-server/credentials/*.json
-
-# Project-specific
-backend/firebase-admin.json
+apps/backend/credentials/
