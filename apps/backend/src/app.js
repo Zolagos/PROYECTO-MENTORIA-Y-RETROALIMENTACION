@@ -19,7 +19,7 @@ app.get("/", (req, res) => {
   res.json({
     project: "Proyecto Mentorías",
     version: "1.0.0",
-    status: "API Running 🚀"
+    status: "API Running"
   });
 });
 
