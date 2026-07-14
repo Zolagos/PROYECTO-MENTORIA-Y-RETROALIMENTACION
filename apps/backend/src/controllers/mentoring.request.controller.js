@@ -1,16 +1,30 @@
+import pool from '../config/database.js';
 import { createRequest } from '../models/mentoring.request.model.js';
 
 export const createMentoringRequest = async (req, res) => {
   try {
-    let { coder_id, topic, description } = req.body;
+    const { uid } = req.user;
+    //Obtiene el uid del token Firebase
 
-    if (coder_id === undefined || coder_id === null || coder_id === '') {
-      return res.status(400).json({ status: 'error', message: 'coder_id is required' });
+    const { rows: users } = await pool.query(
+      `SELECT u.id, r.name as role
+       FROM users u
+       JOIN roles r ON u.role_id = r.id
+       WHERE u.uid = $1`,
+      [uid]
+    );
+
+    if (users.length === 0) {
+      return res.status(401).json({ status: 'error', message: 'User not found' });
     }
-    coder_id = Number(coder_id);
-    if (!Number.isInteger(coder_id) || coder_id <= 0) {
-      return res.status(400).json({ status: 'error', message: 'coder_id must be a positive integer' });
+
+    const user = users[0];
+
+    if (user.role !== 'Coder') {
+      return res.status(403).json({ status: 'error', message: 'Only coders can create mentoring requests' });
     }
+
+    let { topic, description } = req.body;
 
     if (!topic || typeof topic !== 'string' || topic.trim().length === 0) {
       return res.status(400).json({ status: 'error', message: 'topic is required and must be a non-empty string' });
@@ -28,8 +42,8 @@ export const createMentoringRequest = async (req, res) => {
       return res.status(400).json({ status: 'error', message: 'description must not exceed 1000 characters' });
     }
 
-    const mentoringRequest = await createRequest({ coder_id, topic: topic.trim(), description: description?.trim() });
-
+    const mentoringRequest = await createRequest({ coder_id: user.id, topic: topic.trim(), description: description?.trim() });
+    //coder_id se obtiene automáticamente del usuario autenticado vía Firebase token → uid → consulta DB → user.id.
     res.status(201).json({ status: 'success', data: mentoringRequest });
   } catch (error) {
     if (error.code === '23503') {
