@@ -1,18 +1,34 @@
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000/api";
+import { getToken } from "../utils/storage";
+
+const API_URL =
+    import.meta.env.VITE_API_URL ??
+    "http://localhost:3000/api";
+
 export async function apiFetch(endpoint, options = {}) {
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {}),
-    },
-    ...options,
-  });
 
-  const data = await response.json();
+    const token = getToken();
 
-  if (!response.ok) {
-    throw new Error(data.message || "Request failed");
-  }
+    const response = await fetch(`${API_URL}${endpoint}`, {
 
-  return data;
+        ...options,
+
+        headers: {
+            "Content-Type":"application/json",
+
+            ...(token
+                ? { Authorization: `Bearer ${token}` }
+                : {}),
+
+            ...(options.headers || {})
+        }
+
+    });
+
+    const data = await response.json();
+
+    if(!response.ok){
+        throw new Error(data.message);
+    }
+
+    return data;
 }

@@ -1,6 +1,6 @@
 import "./login.css";
 
-export default function LoginView() {
+export function renderLogin() {
   return `
     <main class="login-container">
 

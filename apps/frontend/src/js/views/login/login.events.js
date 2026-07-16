@@ -4,16 +4,13 @@ export function registerLoginEvents() {
   const button = document.getElementById("google-login-btn");
 
   if (!button) return;
-
   button.addEventListener("click", async () => {
     try {
-      const response = await login();
+      await login();
 
-      console.log(response);
+     location.hash = "#/dashboard";
 
-      alert("Login correcto");
-
-    } catch (error) {
+    }   catch (error) {
       console.error(error);
       alert(error.message);
     }

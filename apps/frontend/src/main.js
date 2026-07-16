@@ -1,9 +1,12 @@
-import router from "./router/router.js";
+import { navigate } from "./router/router.js";
+import { isAuthenticated } from "./utils/storage.js";
+import "./assets/styles.css";
 
-const app = document.querySelector("#app");
-
-function render() {
-  app.innerHTML = router();
+if (!location.hash) {
+    location.hash = isAuthenticated()
+        ? "#/dashboard"
+        : "#/login";
 }
 
-render();
+window.addEventListener("DOMContentLoaded", navigate);
+window.addEventListener("hashchange", navigate);
