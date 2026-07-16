@@ -1,8 +1,6 @@
-import admin from "../config/firebase.js";
+import auth from "../config/firebase.js";
 
-const verifyToken = async (token) => {
-  return await admin.auth().verifyIdToken(token);
-};
+const verifyToken = (token) => auth.verifyIdToken(token);
 
 export default {
   verifyToken,

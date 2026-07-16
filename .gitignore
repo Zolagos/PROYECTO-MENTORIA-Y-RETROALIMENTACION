@@ -21,6 +21,7 @@ temp/
 .env.local
 .env.*.local
 
+
 # Editor / OS files
 .vscode/
 !.vscode/extensions.json
@@ -36,6 +37,10 @@ Thumbs.db
 *.sw?
 *.local
 
-server/credentials/
+# Firebase
 apps/backend/credentials/
-.env
+firebase-admin.json
+
+# Vite
+.vite/
+
