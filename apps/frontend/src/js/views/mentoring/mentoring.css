@@ -1,0 +1,97 @@
+/* mentoring view */
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f4f6f8;
+}
+
+.mentoring {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+}
+
+.mentoring h2 {
+    margin-bottom: 25px;
+    color: #2c3e50;
+}
+
+#mentoring-form {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+#mentoring-form input,
+#mentoring-form select,
+#mentoring-form textarea {
+    padding: 10px;
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+#mentoring-form textarea {
+    min-height: 70px;
+    resize: vertical;
+}
+
+#mentoring-form button {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #2f6fad;
+    color: white;
+    cursor: pointer;
+}
+
+#mentoring-form button:hover {
+    background-color: #255b8f;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th {
+    background-color: #2f6fad;
+    color: white;
+}
+
+table th,
+table td {
+    padding: 12px;
+    border: 1px solid #dcdcdc;
+    text-align: center;
+}
+
+.edit-btn,
+.delete-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.edit-btn {
+    background-color: #ffc107;
+}
+
+.delete-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.edit-btn:hover {
+    background-color: #e0a800;
+}
+
+.delete-btn:hover {
+    background-color: #bb2d3b;
+}

@@ -1,3 +1,14 @@
+/* main */
+
+import "./js/views/mentoring/mentoring.css";
+import { router } from "./router/router.js";
+
+window.addEventListener("DOMContentLoaded", () => {
+    router();
+});
+
+// Roberto's code
+
 import { navigate } from "./router/router.js";
 import { isAuthenticated } from "./utils/storage.js";
 import "./assets/styles.css";
