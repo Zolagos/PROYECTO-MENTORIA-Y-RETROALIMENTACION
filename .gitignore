@@ -21,6 +21,7 @@ temp/
 .env.local
 .env.*.local
 
+
 # Editor / OS files
 .vscode/
 !.vscode/extensions.json
