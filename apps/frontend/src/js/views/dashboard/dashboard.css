@@ -1,0 +1,169 @@
+.dashboard-container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 24px;
+    background-color: #ffffff;
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.dashboard-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 1rem;
+}
+
+.dashboard-container h1 {
+    margin: 0;
+    color: #2c3e50;
+}
+
+.subtitle {
+    color: #475569;
+    margin: 4px 0 0 0;
+    font-size: 14px;
+}
+
+.logout-btn-dash {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: #dc3545;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.logout-btn-dash:hover { background-color: #bb2d3b; }
+
+/* KPIs Grid */
+.kpi-section {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.kpi-metric-card {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+}
+
+.kpi-metric-card h4 {
+    margin: 0 0 8px 0;
+    color: #64748b;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.kpi-num {
+    font-size: 28px;
+    font-weight: bold;
+    margin: 0 0 4px 0;
+    color: #0f172a;
+}
+
+.text-success { color: #10b981; }
+.text-warning { color: #f59e0b; }
+.text-danger { color: #ef4444; }
+
+.kpi-desc { font-size: 11px; color: #94a3b8; }
+
+/* Layout Widgets */
+.dashboard-layout-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.panel-card {
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+.panel-card h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 16px;
+    color: #1f2937;
+}
+
+.full-width-panel { grid-column: 1 / -1; }
+
+/* Widgets Numéricos Exclusivos */
+.text-center-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.volume-big-badge {
+    background-color: #f1f5f9;
+    padding: 24px;
+    border-radius: 12px;
+    width: 80%;
+}
+
+.volume-total-label { font-size: 13px; color: #64748b; text-transform: uppercase; font-weight: 600; }
+.volume-total-num { font-size: 48px; font-weight: 800; margin: 8px 0; color: #1e3a8a; }
+.volume-total-sub { font-size: 12px; color: #94a3b8; }
+
+.numbers-list-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.number-item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background-color: #f8fafc;
+    border-radius: 6px;
+    border: 1px solid #edf2f7;
+}
+
+.indicator-dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 12px; }
+.dot-success { background-color: #10b981; }
+.dot-warning { background-color: #3b82f6; }
+.dot-danger { background-color: #ef4444; }
+
+.item-name-label { font-size: 14px; color: #475569; flex-grow: 1; }
+
+.item-value-badge {
+    font-size: 14px;
+    font-weight: bold;
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+.badge-success { background-color: #d1fae5; color: #065f46; }
+.badge-warning { background-color: #dbeafe; color: #1e40af; }
+.badge-danger { background-color: #fee2e2; color: #991b1b; }
+
+/* Tabla Ejecutiva */
+.metrics-table { width: 100%; border-collapse: collapse; }
+.metrics-table th { background-color: #2f6fad !important; color: white !important; padding: 12px !important; font-size: 14px; }
+.metrics-table td { padding: 12px; border: 1px solid #e2e8f0; text-align: center; font-size: 14px; color: #334155; }
+
+.rating-badge { background-color: #fef3c7; color: #d97706; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+.status-pill { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+.status-pill.excellent { background-color: #d1fae5; color: #065f46; }
+.status-pill.review { background-color: #fee2e2; color: #991b1b; }
+
+.dashboard-denied { display: flex; justify-content: center; align-items: center; min-height: 50vh; font-family: Arial, sans-serif; }
+.denied-card { background: white; padding: 40px; border-radius: 8px; text-align: center; border: 1px solid #fee2e2; max-width: 400px; }
+.lock-icon { font-size: 40px; display: block; margin-bottom: 12px; }
+.denied-card h2 { color: #991b1b; margin: 0 0 10px 0; }
+.denied-card p { color: #64748b; line-height: 1.5; font-size: 14px; }
