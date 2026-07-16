@@ -8,6 +8,8 @@ import errorMiddleware from "./middleware/error.middleware.js";
 
 const app = express();
 
+
+
 app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
@@ -17,7 +19,7 @@ app.get("/", (req, res) => {
   res.json({
     project: "Proyecto Mentorías",
     version: "1.0.0",
-    status: "API Running 🚀",
+    status: "API Running"
   });
 });
 
