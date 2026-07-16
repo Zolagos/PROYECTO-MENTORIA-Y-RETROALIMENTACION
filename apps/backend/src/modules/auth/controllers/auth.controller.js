@@ -10,7 +10,11 @@ const login = asyncHandler(async (req, res) => {
 
   return ApiResponse.success(
     res,
-    user,
+    {
+      uid: user.uid,
+      email: user.email,
+      emailVerified: user.email_verified,
+    },
     "Inicio de sesión exitoso"
   );
 });
@@ -18,8 +22,12 @@ const login = asyncHandler(async (req, res) => {
 const me = asyncHandler(async (req, res) => {
   return ApiResponse.success(
     res,
-    req.user,
-    "Authenticated user"
+    {
+      uid: req.user.uid,
+      email: req.user.email,
+      emailVerified: req.user.email_verified,
+    },
+    "Usuario autenticado"
   );
 });
 
