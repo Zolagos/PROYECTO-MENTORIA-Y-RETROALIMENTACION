@@ -36,6 +36,10 @@ Thumbs.db
 *.sw?
 *.local
 
-server/credentials/
+# Firebase
 apps/backend/credentials/
-.env
+firebase-admin.json
+
+# Vite
+.vite/
+
