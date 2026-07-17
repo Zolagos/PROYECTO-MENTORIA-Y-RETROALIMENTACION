@@ -672,16 +672,22 @@ document.addEventListener('DOMContentLoaded', initApp);
 // ============================================================
 
 /**
- * Genera las cards de mentorías de muestra.
- * Sprint 4: recibirá un array de mentorías del backend.
+ * Genera las cards de mentorías.
+ * Los datos vienen del servicio (js/services/mentoring.js).
+ * Sprint 4: el servicio hará fetch al backend con las mismas firmas.
+ * @param {Array} [list] - Lista ya filtrada; si no se pasa, se cargan todas.
  */
-function getMentoringCards() {
-  // Datos de ejemplo para mostrar el diseño
-  const sample = [
-    { id:1, topic:'JavaScript Avanzado', desc:'Closures, promesas y async/await en profundidad.', tutor:'Ana García', date:'15 Jul 2026', time:'10:00 AM', modality:'virtual', link:'meet.google.com/abc', status:'programada', coders:['KM','JP','LC'] },
-    { id:2, topic:'Bases de Datos SQL', desc:'Normalización hasta 3FN, joins y consultas complejas.', tutor:'Carlos López', date:'16 Jul 2026', time:'2:00 PM', modality:'presencial', sala:'Sala A-101', status:'completada', coders:['MR','SV'] },
-    { id:3, topic:'Git y GitHub Flow', desc:'Ramas, pull requests y resolución de conflictos.', tutor:'María Torres', date:'17 Jul 2026', time:'9:00 AM', modality:'virtual', link:'zoom.us/j/123', status:'en-progreso', coders:['DG','RP','KM','AB'] },
-  ];
+function getMentoringCards(list) {
+  const sample = list || getSessions();
+
+  if (!sample.length) {
+    return `
+      <div class="empty-state">
+        <h2 class="empty-state__title">Sin mentorías</h2>
+        <p class="empty-state__description">No hay mentorías que coincidan. Crea una con "Nueva Mentoría".</p>
+      </div>
+    `;
+  }
 
   return sample.map(m => `
     <article class="mentoring-detail-card" aria-label="Mentoría: ${m.topic}">
@@ -706,7 +712,7 @@ function getMentoringCards() {
           </div>
           <div class="mentoring-detail-card__info-item">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            <span>${m.date} · ${m.time}</span>
+            <span>${formatDate(m.date)} · ${m.time}</span>
           </div>
           <div class="mentoring-detail-card__info-item">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -748,6 +754,8 @@ function getModalMentoring(canCreate) {
         </div>
         <div class="modal__body">
           <form id="form-mentoring" novalidate>
+            <!-- id oculto: vacío = crear, con valor = editar -->
+            <input type="hidden" id="m-id" value="" />
             <div class="form-grid">
               <div class="form-group">
                 <label for="m-topic" class="form-label form-label--required">Temática</label>
@@ -758,8 +766,7 @@ function getModalMentoring(canCreate) {
                 <label for="m-tutor" class="form-label form-label--required">Tutor</label>
                 <select id="m-tutor" class="form-select" required>
                   <option value="">Seleccionar tutor...</option>
-                  <option value="1">Ana García</option>
-                  <option value="2">Carlos López</option>
+                  ${getTutors().map(t => `<option value="${t.id}">${t.name}</option>`).join('')}
                 </select>
                 <span class="form-error hidden" id="m-tutor-error">Selecciona un tutor.</span>
               </div>
@@ -800,7 +807,7 @@ function getModalMentoring(canCreate) {
         </div>
         <div class="modal__footer">
           <button class="btn btn-ghost" onclick="closeModal('modal-mentoring')">Cancelar</button>
-          <button class="btn btn-primary" onclick="submitMentoring()">Crear Mentoría</button>
+          <button class="btn btn-primary" id="m-submit-btn" onclick="submitMentoring()">Crear Mentoría</button>
         </div>
       </div>
     </div>
