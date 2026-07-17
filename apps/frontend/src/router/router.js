@@ -1,34 +1,36 @@
 import { renderLogin } from "../js/views/login/index.js";
 import { renderDashboard } from "../js/views/dashboard/index.js";
 import { renderNotFound } from "../js/views/notFound/index.js";
-import { getToken } from "../utils/storage";
+import { isAuthenticated } from "../utils/storage.js";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const app = document.querySelector("#app");
 
-export async function apiFetch(endpoint, options = {}) {
+const routes = {
+  "/login": renderLogin,
+  "/dashboard": renderDashboard,
+};
 
-    const token = getToken();
+export function navigate() {
+  const path = location.hash.replace("#", "") || "/login";
 
-    const response = await fetch(`${API_URL}${endpoint}`, {
+  if (path !== "/login" && !isAuthenticated()) {
+    location.hash = "#/login";
+    return;
+  }
 
-        headers: {
-            "Content-Type": "application/json",
+  const view = routes[path] || renderNotFound;
 
-            ...(token
-                ? { Authorization: `Bearer ${token}` }
-                : {}),
+  app.innerHTML = view();
 
-            ...(options.headers || {}),
-        },
+  if (path === "/login") {
+    import("../js/views/login/login.events.js").then(
+      ({ registerLoginEvents }) => registerLoginEvents()
+    );
+  }
 
-        ...options,
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-        throw new Error(data.message || "Request failed");
-    }
-
-    return data;
+  if (path === "/dashboard") {
+    import("../js/views/dashboard/dashboard.events.js").then(
+      ({ registerDashboardEvents }) => registerDashboardEvents()
+    );
+  }
 }
