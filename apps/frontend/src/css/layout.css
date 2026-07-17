@@ -1,0 +1,469 @@
+/* ============================================================
+   layout.css — Header, Sidebar, Footer y estructura general
+   TutorLink | Kevin Mendoza | Frontend Developer
+   ============================================================ */
+
+/* ---- ESTRUCTURA PRINCIPAL ---- */
+/* El app-shell envuelve todo: sidebar + contenido principal */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Área de contenido principal (todo lo que no es sidebar) */
+.main-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0; /* Evita overflow en flex */
+  margin-left: var(--sidebar-width);
+  transition: margin-left var(--transition-normal);
+}
+
+/* Cuando el sidebar está colapsado */
+.main-wrapper.sidebar-collapsed {
+  margin-left: var(--sidebar-width-collapsed);
+}
+
+/* Área de contenido de página */
+.page-content {
+  flex: 1;
+  padding: var(--space-6);
+  overflow-y: auto;
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background-color: var(--color-sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width var(--transition-normal);
+  z-index: 100;
+}
+
+/* Sidebar colapsado en desktop */
+.sidebar.collapsed {
+  width: var(--sidebar-width-collapsed);
+}
+
+/* Logo y nombre del proyecto */
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  min-height: var(--header-height);
+  overflow: hidden;
+}
+
+.sidebar__logo {
+  width: 36px;
+  height: 36px;
+  background: var(--color-primary);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-weight: 700;
+  color: white;
+  font-size: var(--font-size-lg);
+}
+
+.sidebar__brand-name {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text-white);
+  white-space: nowrap;
+  transition: opacity var(--transition-normal);
+}
+
+/* Oculta el texto cuando está colapsado */
+.sidebar.collapsed .sidebar__brand-name {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Perfil del usuario en el sidebar */
+.sidebar__user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.sidebar__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+  flex-shrink: 0;
+}
+
+.sidebar__user-info {
+  overflow: hidden;
+  transition: opacity var(--transition-normal);
+}
+
+.sidebar__user-name {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar__user-role {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.sidebar.collapsed .sidebar__user-info {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Navegación del sidebar */
+.sidebar__nav {
+  flex: 1;
+  padding: var(--space-4) var(--space-2);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Etiqueta de sección */
+.sidebar__section-label {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  padding: var(--space-3) var(--space-3) var(--space-2);
+  white-space: nowrap;
+  transition: opacity var(--transition-normal);
+}
+
+.sidebar.collapsed .sidebar__section-label {
+  opacity: 0;
+}
+
+/* Item de navegación */
+.sidebar__nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-sidebar-text);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+  white-space: nowrap;
+  overflow: hidden;
+  margin-bottom: var(--space-1);
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  text-decoration: none;
+}
+
+.sidebar__nav-item:hover {
+  background-color: var(--color-sidebar-hover);
+  color: var(--color-text-white);
+}
+
+/* Item activo */
+.sidebar__nav-item.active {
+  background-color: var(--color-primary);
+  color: var(--color-text-white);
+}
+
+.sidebar__nav-item.active:hover {
+  background-color: var(--color-primary-dark);
+}
+
+/* Icono del item */
+.sidebar__nav-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Texto del item — se oculta cuando colapsado */
+.sidebar__nav-text {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  transition: opacity var(--transition-normal);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar.collapsed .sidebar__nav-text {
+  opacity: 0;
+  width: 0;
+}
+
+/* Botón de colapsar al fondo del sidebar */
+.sidebar__footer {
+  padding: var(--space-4);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar__collapse-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-sidebar-text);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  background: none;
+  border: none;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.sidebar__collapse-btn:hover {
+  background-color: var(--color-sidebar-hover);
+}
+
+.sidebar__collapse-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  transition: transform var(--transition-normal);
+}
+
+.sidebar.collapsed .sidebar__collapse-icon {
+  transform: rotate(180deg);
+}
+
+.sidebar__collapse-text {
+  font-size: var(--font-size-sm);
+  transition: opacity var(--transition-normal);
+}
+
+.sidebar.collapsed .sidebar__collapse-text {
+  opacity: 0;
+  width: 0;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.header {
+  height: var(--header-height);
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-6);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Lado izquierdo: título de la página */
+.header__left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* Botón menú para mobile */
+.header__menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition: background-color var(--transition-fast);
+}
+
+.header__menu-btn:hover {
+  background-color: var(--color-bg);
+}
+
+.header__page-title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+/* Lado derecho: acciones y perfil */
+.header__right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Botón de notificaciones */
+.header__icon-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg);
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.header__icon-btn:hover {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+/* Badge de notificación */
+.header__badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-accent-red);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-surface);
+}
+
+/* Avatar en el header */
+.header__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  border: 2px solid var(--color-border);
+  transition: border-color var(--transition-fast);
+}
+
+.header__avatar:hover {
+  border-color: var(--color-primary);
+}
+
+/* ============================================================
+   PAGE HEADER (título de sección dentro del contenido)
+   ============================================================ */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.page-header__title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.page-header__subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-1);
+}
+
+/* ============================================================
+   OVERLAY (para mobile cuando sidebar está abierto)
+   ============================================================ */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 90;
+}
+
+.sidebar-overlay.active {
+  display: block;
+}
+
+/* ============================================================
+   RESPONSIVE — Mobile
+   ============================================================ */
+@media (max-width: 768px) {
+  /* En mobile, el sidebar se convierte en un panel deslizante */
+  .sidebar {
+    transform: translateX(-100%);
+    width: var(--sidebar-width);
+    transition: transform var(--transition-normal);
+    z-index: 100;
+  }
+
+  /* Sidebar abierto en mobile */
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  /* El contenido ocupa todo el ancho en mobile */
+  .main-wrapper,
+  .main-wrapper.sidebar-collapsed {
+    margin-left: 0;
+  }
+
+  /* Mostrar botón hamburguesa */
+  .header__menu-btn {
+    display: flex;
+  }
+
+  .page-content {
+    padding: var(--space-4);
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 0 var(--space-4);
+  }
+
+  .page-header {
+    flex-direction: column;
+  }
+
+  .page-content {
+    padding: var(--space-3);
+  }
+}

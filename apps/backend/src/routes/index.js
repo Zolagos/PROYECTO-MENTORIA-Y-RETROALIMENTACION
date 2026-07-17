@@ -8,6 +8,8 @@ import sessionFeedback from "./session.feedback.js";
 const router = Router();
 
 router.use("/auth", authRoutes);
+router.use("/users", usersRoutes);
+router.use("/sessions", sessionsRoutes);
 router.use("/", mentoringRequests);
 router.use("/", coderObservations);
 router.use("/", tutorObservations);

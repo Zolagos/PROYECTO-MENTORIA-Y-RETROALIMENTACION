@@ -11,7 +11,11 @@ const app = express();
 
 
 app.use(cors());
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginOpenerPolicy: false,
+  })
+);
 app.use(morgan("dev"));
 app.use(express.json());
 
