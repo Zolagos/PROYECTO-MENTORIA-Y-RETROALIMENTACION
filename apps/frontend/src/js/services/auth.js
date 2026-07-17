@@ -33,7 +33,7 @@ const ROLE_MAP = {
  * @param {string} password
  * @returns {Promise<Object>} - Perfil del usuario guardado en sesión
  */
-async function loginUser(email, password) {
+export async function loginUser(email, password) {
   let response;
 
   try {

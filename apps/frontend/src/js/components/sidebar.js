@@ -1,22 +1,4 @@
-/**
- * sidebar.js — Sidebar dinámico según rol del usuario
- *
- * ¿Qué hace?
- * Construye el menú de navegación dependiendo del rol:
- * CODER, TUTOR o TL (Team Leader).
- * Cada rol ve diferentes opciones de menú.
- *
- * ¿Por qué así?
- * El sidebar no puede ser estático porque cada usuario ve
- * contenido diferente según su rol. Lo generamos con JS.
- *
- * Kevin Mendoza | Frontend Developer
- */
-
-// ---- CONFIGURACIÓN DE MENÚS POR ROL ----
-// Cada rol tiene sus propias secciones y rutas
 const SIDEBAR_MENUS = {
-
   CODER: [
     {
       section: 'Principal',
@@ -27,7 +9,6 @@ const SIDEBAR_MENUS = {
       ]
     }
   ],
-
   TUTOR: [
     {
       section: 'Principal',
@@ -39,7 +20,6 @@ const SIDEBAR_MENUS = {
       ]
     }
   ],
-
   TL: [
     {
       section: 'Principal',
@@ -63,8 +43,6 @@ const SIDEBAR_MENUS = {
       ]
     }
   ],
-
-  // ADMIN puede ver todo
   ADMIN: [
     {
       section: 'Principal',
@@ -91,34 +69,20 @@ const SIDEBAR_MENUS = {
   ]
 };
 
-// ---- ÍCONOS SVG ----
-// Por qué SVG inline: no dependemos de librerías externas
 function getIcon(name) {
   const icons = {
     home: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
-
     calendar: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
-
     users: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
-
     edit: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
-
     message: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
-
     'bar-chart': `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
-
     settings: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
-
     logout: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`,
   };
   return icons[name] || icons['home'];
 }
 
-/**
- * Construye el HTML de un item de navegación.
- * @param {Object} item - { icon, label, route }
- * @param {string} activeRoute - Ruta actualmente activa
- */
 function buildNavItem(item, activeRoute) {
   const isActive = activeRoute === item.route;
   return `
@@ -136,19 +100,13 @@ function buildNavItem(item, activeRoute) {
   `;
 }
 
-/**
- * Construye y renderiza el sidebar completo según el rol.
- * @param {string} role - Rol del usuario: CODER, TUTOR, TL, ADMIN
- * @param {Object} user - { nombre, apellido, rol }
- */
-function buildSidebar(role, user) {
+export function buildSidebar(role, user) {
   const menu = SIDEBAR_MENUS[role] || SIDEBAR_MENUS['CODER'];
-  const activeRoute = window.location.hash.slice(1) || '/dashboard';
+  const activeRoute = window.location.pathname || '/dashboard';
   const navEl = document.getElementById('sidebar-nav');
 
   if (!navEl) return;
 
-  // Construye el HTML del menú
   let html = '<ul role="menu" style="padding:0;">';
 
   menu.forEach(section => {
@@ -160,7 +118,6 @@ function buildSidebar(role, user) {
     html += '</ul></li>';
   });
 
-  // Botón cerrar sesión al fondo
   html += `
     <li role="none" style="margin-top: auto; padding-top: 16px;">
       <button
@@ -178,7 +135,6 @@ function buildSidebar(role, user) {
   html += '</ul>';
   navEl.innerHTML = html;
 
-  // Rellena la info del usuario
   if (user) {
     const initials = `${user.nombre?.[0] || ''}${user.apellido?.[0] || ''}`.toUpperCase() || '?';
     const nameEl   = document.getElementById('sidebar-user-name');
@@ -191,10 +147,7 @@ function buildSidebar(role, user) {
   }
 }
 
-/**
- * Inicializa la lógica de colapsar/expandir el sidebar.
- */
-function initSidebarCollapse() {
+export function initSidebarCollapse() {
   const sidebar      = document.getElementById('sidebar');
   const mainWrapper  = document.getElementById('main-wrapper');
   const collapseBtn  = document.getElementById('sidebar-collapse-btn');
@@ -203,14 +156,12 @@ function initSidebarCollapse() {
 
   if (!sidebar || !collapseBtn) return;
 
-  // ---- Colapsar en desktop ----
   collapseBtn.addEventListener('click', () => {
     const isCollapsed = sidebar.classList.toggle('collapsed');
     mainWrapper?.classList.toggle('sidebar-collapsed', isCollapsed);
     collapseBtn.setAttribute('aria-expanded', String(!isCollapsed));
   });
 
-  // ---- Abrir/cerrar en mobile ----
   if (menuBtn) {
     menuBtn.addEventListener('click', () => {
       const isOpen = sidebar.classList.toggle('mobile-open');
@@ -219,7 +170,6 @@ function initSidebarCollapse() {
     });
   }
 
-  // Cerrar sidebar mobile al hacer click en el overlay
   if (overlay) {
     overlay.addEventListener('click', () => {
       sidebar.classList.remove('mobile-open');
@@ -229,9 +179,8 @@ function initSidebarCollapse() {
   }
 }
 
-// Función global de logout
-function handleLogout() {
+export function handleLogout() {
   sessionStorage.removeItem('tutorlink_user');
   sessionStorage.removeItem('tutorlink_token');
-  window.location.href = '../pages/login.html';
+  window.location.reload();
 }

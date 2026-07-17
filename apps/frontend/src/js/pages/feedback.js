@@ -3,7 +3,7 @@
  * Kevin Mendoza | Frontend Developer
  */
 
-function initFeedback() {
+export function initFeedback() {
   const btnNuevo = document.getElementById('btn-nuevo-feedback');
   if (btnNuevo) {
     btnNuevo.addEventListener('click', () => openModal('modal-feedback'));
@@ -11,7 +11,7 @@ function initFeedback() {
 }
 
 /** Establece la calificación por estrellas */
-function setRating(value) {
+export function setRating(value) {
   const stars = document.querySelectorAll('.star-rating__star');
   const input = document.getElementById('fb-rating');
   if (!stars.length || !input) return;
@@ -35,7 +35,7 @@ function setRating(value) {
 }
 
 /** Envía el formulario de feedback */
-function submitFeedback() {
+export function submitFeedback() {
   const mentoring = document.getElementById('fb-mentoring');
   const rating    = document.getElementById('fb-rating');
   const comment   = document.getElementById('fb-comment');

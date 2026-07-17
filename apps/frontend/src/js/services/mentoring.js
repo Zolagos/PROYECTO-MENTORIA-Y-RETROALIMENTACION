@@ -35,17 +35,17 @@ const MENTORING_SAMPLE = [
 ];
 
 /** Devuelve los tutores disponibles para el select del modal */
-function getTutors() {
+export function getTutors() {
   return TUTORS;
 }
 
 /** Busca un tutor por id */
-function getTutorById(id) {
+export function getTutorById(id) {
   return TUTORS.find(t => t.id === Number(id)) || null;
 }
 
 /** Devuelve todas las mentorías (siembra los datos de muestra la primera vez) */
-function getSessions() {
+export function getSessions() {
   const data = localStorage.getItem(MENTORING_STORAGE_KEY);
   if (data) return JSON.parse(data);
 
@@ -54,7 +54,7 @@ function getSessions() {
 }
 
 /** Busca una mentoría por id */
-function getSessionById(id) {
+export function getSessionById(id) {
   return getSessions().find(m => m.id === Number(id)) || null;
 }
 
@@ -64,7 +64,7 @@ function saveSessions(sessions) {
 }
 
 /** Crea una mentoría nueva */
-function createSession(mentoring) {
+export function createSession(mentoring) {
   const sessions = getSessions();
 
   mentoring.id = Date.now();
@@ -76,7 +76,7 @@ function createSession(mentoring) {
 }
 
 /** Actualiza una mentoría existente (conserva los campos no editados) */
-function updateSession(mentoring) {
+export function updateSession(mentoring) {
   const sessions = getSessions().map(m =>
     m.id === mentoring.id ? { ...m, ...mentoring } : m
   );
@@ -84,7 +84,7 @@ function updateSession(mentoring) {
 }
 
 /** Elimina una mentoría por id */
-function deleteSession(id) {
+export function deleteSession(id) {
   const sessions = getSessions().filter(m => m.id !== Number(id));
   saveSessions(sessions);
 }

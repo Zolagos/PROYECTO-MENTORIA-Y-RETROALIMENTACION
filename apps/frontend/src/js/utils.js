@@ -22,7 +22,7 @@
  * openModal — Abre un modal por su ID.
  * @param {string} modalId - ID del elemento .modal-overlay
  */
-function openModal(modalId) {
+export function openModal(modalId) {
   const overlay = document.getElementById(modalId);
   if (!overlay) return;
 
@@ -49,7 +49,7 @@ function openModal(modalId) {
  * closeModal — Cierra un modal por su ID.
  * @param {string} modalId
  */
-function closeModal(modalId) {
+export function closeModal(modalId) {
   const overlay = document.getElementById(modalId);
   if (!overlay) return;
 
@@ -128,7 +128,7 @@ let toastContainer = null;
  * @param {'success'|'error'|'warning'|'info'} type - Tipo de toast
  * @param {number} duration - Duración en ms (default: 4000)
  */
-function showToast(message, type = 'info', duration = 4000) {
+export function showToast(message, type = 'info', duration = 4000) {
   // Crea el contenedor si no existe
   if (!toastContainer) {
     toastContainer = document.createElement('div');
@@ -226,7 +226,7 @@ if (!document.getElementById('toast-styles')) {
  * @param {string} isoDate - Fecha en formato ISO (ej: "2026-07-15")
  * @returns {string} - Ej: "15 de julio de 2026"
  */
-function formatDate(isoDate) {
+export function formatDate(isoDate) {
   if (!isoDate) return '—';
   const date = new Date(isoDate + 'T00:00:00'); // evita desfase de timezone
   return date.toLocaleDateString('es-CO', {
@@ -239,7 +239,7 @@ function formatDate(isoDate) {
  * @param {string} isoDate
  * @returns {string}
  */
-function timeAgo(isoDate) {
+export function timeAgo(isoDate) {
   const now  = new Date();
   const then = new Date(isoDate);
   const diff = Math.floor((now - then) / 1000); // segundos
@@ -262,7 +262,7 @@ function timeAgo(isoDate) {
  * @param {number} delay - Espera en ms (default: 300)
  * @returns {Function}
  */
-function debounce(fn, delay = 300) {
+export function debounce(fn, delay = 300) {
   let timer;
   return function (...args) {
     clearTimeout(timer);

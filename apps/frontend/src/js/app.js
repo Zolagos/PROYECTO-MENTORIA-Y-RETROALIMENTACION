@@ -1,48 +1,14 @@
-/**
- * app.js — Punto de entrada principal de TutorLink SPA
- *
- * ¿Qué hace?
- * 1. Verifica si el usuario tiene sesión activa
- * 2. Carga el sidebar según el rol del usuario
- * 3. Inicializa el header
- * 4. Registra todas las rutas de la aplicación
- * 5. Arranca el router
- *
- * ¿Por qué aquí?
- * Este es el archivo que se carga último en app.html.
- * Cuando se ejecuta, ya existen router.js, sidebar.js y header.js.
- *
- * Kevin Mendoza | Frontend Developer
- */
+import { registerRoute, navigateTo } from './router.js';
+import { getSessionUser, initHeader } from './components/header.js';
+import { buildSidebar, initSidebarCollapse } from './components/sidebar.js';
+import { getTutors, getSessions, getSessionById, createSession, updateSession, deleteSession } from './services/mentoring.js';
+import { formatDate } from './utils.js';
 
-/**
- * Inicializa la aplicación principal.
- * Se ejecuta cuando el DOM está listo.
- */
-function initApp() {
-  // 1. Guardia de sesión: sin login válido no hay app
-  const user = getSessionUser();
-  const token = sessionStorage.getItem('tutorlink_token');
-
-  if (!user || !token) {
-    window.location.href = '../pages/login.html';
-    return;
-  }
-
-  // 2. Registrar todas las rutas
+export function initApp(user) {
   registerAllRoutes(user.rol);
-
-  // 3. Construir el sidebar según el rol
   buildSidebar(user.rol, user);
-
-  // 4. Inicializar el header
   initHeader(user);
-
-  // 5. Inicializar colapso del sidebar
   initSidebarCollapse();
-
-  // 6. El router ya escucha eventos load y hashchange
-  // (está definido en router.js, no necesitamos llamarlo aquí)
 }
 
 /**
@@ -77,7 +43,7 @@ function registerAllRoutes(role) {
 // Sprint 2: serán reemplazadas por HTML completo con diseño.
 // Por ahora solo muestran que la ruta funciona.
 
-function renderDashboard() {
+export function renderDashboard() {
   const user = getSessionUser();
   const role = user?.rol || 'CODER';
 
@@ -265,7 +231,7 @@ function renderDashboardTL(user) {
 
 // ---- PÁGINAS PLACEHOLDER (Sprint 2 las desarrolla completas) ----
 
-function renderMentoring() {
+export function renderMentoring() {
   const user = getSessionUser();
   const canCreate = user && (user.rol === 'TL' || user.rol === 'TUTOR' || user.rol === 'ADMIN');
   return `
@@ -313,7 +279,7 @@ function renderMentoring() {
   `;
 }
 
-function renderObservations() {
+export function renderObservations() {
   const user = getSessionUser();
   const canAdd = user && (user.rol === 'TL' || user.rol === 'TUTOR' || user.rol === 'ADMIN');
   return `
@@ -355,7 +321,7 @@ function renderObservations() {
   `;
 }
 
-function renderFeedback() {
+export function renderFeedback() {
   const user = getSessionUser();
   const isCoder = user && user.rol === 'CODER';
   return `
@@ -418,7 +384,7 @@ function renderFeedback() {
   `;
 }
 
-function renderUsers() {
+export function renderUsers() {
   return `
     <div class="page-header">
       <div>
@@ -474,7 +440,7 @@ function renderUsers() {
   `;
 }
 
-function renderMyCoders() {
+export function renderMyCoders() {
   return `
     <div class="page-header">
       <div>
@@ -529,7 +495,7 @@ function renderMyCoders() {
   `;
 }
 
-function renderMetrics() {
+export function renderMetrics() {
   return `
     <div class="page-header">
       <div>
@@ -603,7 +569,7 @@ function renderMetrics() {
   `;
 }
 
-function renderSettings() {
+export function renderSettings() {
   return `
     <div class="page-header">
       <div>
@@ -649,10 +615,6 @@ function renderSettings() {
   `;
 }
 
-// ---- ARRANCAR LA APP ----
-// Esperamos a que el DOM esté completamente cargado
-document.addEventListener('DOMContentLoaded', initApp);
-
 // ============================================================
 // HELPERS — Generadores de HTML para cada sección
 // Sprint 4: estas funciones usarán datos reales del backend
@@ -664,7 +626,7 @@ document.addEventListener('DOMContentLoaded', initApp);
  * Sprint 4: el servicio hará fetch al backend con las mismas firmas.
  * @param {Array} [list] - Lista ya filtrada; si no se pasa, se cargan todas.
  */
-function getMentoringCards(list) {
+export function getMentoringCards(list) {
   const sample = list || getSessions();
 
   if (!sample.length) {

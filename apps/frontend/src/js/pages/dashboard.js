@@ -6,7 +6,7 @@
  * Kevin Mendoza | Frontend Developer
  */
 
-function initDashboard() {
+export function initDashboard() {
   // Sprint 4: aquí se llamará al backend para cargar las stats reales
   // Ejemplo: fetchDashboardStats().then(data => renderStats(data));
   console.log('Dashboard inicializado — datos reales en Sprint 4');
