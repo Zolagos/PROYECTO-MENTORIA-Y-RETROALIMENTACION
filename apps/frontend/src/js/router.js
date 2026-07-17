@@ -29,6 +29,14 @@ export function handleRoute() {
     return;
   }
 
+  if (path === '/login') {
+    document.body.classList.remove('route-app');
+    document.body.classList.add('route-login');
+  } else {
+    document.body.classList.remove('route-login');
+    document.body.classList.add('route-app');
+  }
+
   const route = routes[path];
   const pageContent = document.getElementById('page-content');
   const pageTitle = document.getElementById('header-page-title');
