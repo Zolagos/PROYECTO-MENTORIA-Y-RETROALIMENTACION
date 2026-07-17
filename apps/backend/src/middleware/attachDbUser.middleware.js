@@ -1,9 +1,9 @@
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/ApiError.js';
-import { findByUid } from '../modules/users/repositories/users.repository.js';
+import { findById } from '../repositories/users.repository.js';
 
 const attachDbUser = asyncHandler(async (req, res, next) => {
-  const dbUser = await findByUid(req.user.uid);
+  const dbUser = await findById(req.user.id);
   if (!dbUser) throw new ApiError('User not found', 401);
 
   req.user.dbId = dbUser.id;

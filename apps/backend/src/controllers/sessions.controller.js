@@ -1,7 +1,7 @@
-import asyncHnandler from '../../../utils/asyncHandler.js';
-import ApiResponse from '../../../utils/ApiResponse.js';
-import ApiError from '../../../utils/ApiError.js';
-import * as sessionService from '../services/session.service.js';
+import asyncHandler from '../utils/asyncHandler.js';
+import ApiResponse from '../utils/ApiResponse.js';
+import ApiError from '../utils/ApiError.js';
+import * as sessionsService from '../services/sessions.service.js';
 
 export const assignParticipants = asyncHandler(async (req, res) => {
   const sessionId = Number(req.params.id);

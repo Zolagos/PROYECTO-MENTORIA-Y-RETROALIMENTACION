@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import authMiddleware from '../modules/auth/middleware/auth.middleware.js';
+import authMiddleware from '../middleware/auth.middleware.js';
 import { listMentoringRequests, getMentoringRequest, createMentoringRequest } from '../controllers/mentoring.request.controller.js';
 
 const router = Router();
