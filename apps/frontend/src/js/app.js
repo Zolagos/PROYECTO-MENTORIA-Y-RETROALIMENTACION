@@ -15,31 +15,18 @@
  * Kevin Mendoza | Frontend Developer
  */
 
-// ---- USUARIO DE PRUEBA PARA DESARROLLO ----
-// TODO Sprint 4: reemplazar con autenticación Firebase real
-// Este objeto simula lo que devolvería el backend después del login
-const DEV_USER = {
-  nombre:   'Kevin',
-  apellido: 'Mendoza',
-  email:    'kevin@riwi.io',
-  rol:      'TL',         // Cambia a: CODER, TUTOR, TL, ADMIN para probar
-  clan:     'Alpha',
-};
-
 /**
  * Inicializa la aplicación principal.
  * Se ejecuta cuando el DOM está listo.
  */
 function initApp() {
-  // 1. Obtener usuario (de sesión o usar usuario de dev)
-  let user = getSessionUser();
+  // 1. Guardia de sesión: sin login válido no hay app
+  const user = getSessionUser();
+  const token = sessionStorage.getItem('tutorlink_token');
 
-  // En desarrollo usamos el usuario de prueba
-  // Sprint 4: esto será validado contra Firebase + backend
-  if (!user) {
-    user = DEV_USER;
-    // Guardamos en sessionStorage para que los componentes lo lean
-    sessionStorage.setItem('tutorlink_user', JSON.stringify(user));
+  if (!user || !token) {
+    window.location.href = '../pages/login.html';
+    return;
   }
 
   // 2. Registrar todas las rutas

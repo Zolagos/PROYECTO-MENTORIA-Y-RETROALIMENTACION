@@ -230,9 +230,8 @@ function initSidebarCollapse() {
 }
 
 // Función global de logout
-// Por ahora redirige al login (Sprint 4: llamará al backend)
 function handleLogout() {
-  // TODO Sprint 4: llamar endpoint de logout / invalidar token Firebase
   sessionStorage.removeItem('tutorlink_user');
+  sessionStorage.removeItem('tutorlink_token');
   window.location.href = '../pages/login.html';
 }

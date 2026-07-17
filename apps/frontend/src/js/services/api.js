@@ -55,7 +55,15 @@ async function fetchAPI(endpoint, options = {}) {
       },
     });
 
-    // Si el servidor responde con error HTTP (400, 401, 404, 500...)
+    // Sesión vencida o token inválido: limpiar y volver al login
+    if (response.status === 401) {
+      sessionStorage.removeItem('tutorlink_user');
+      sessionStorage.removeItem('tutorlink_token');
+      window.location.href = '../pages/login.html';
+      throw new Error('Tu sesión expiró. Inicia sesión de nuevo.');
+    }
+
+    // Si el servidor responde con error HTTP (400, 404, 500...)
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
