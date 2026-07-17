@@ -12,5 +12,6 @@ router.use("/users", usersRoutes);
 router.use("/sessions", sessionsRoutes);
 router.use("/", mentoringRequests);
 router.use("/", coderObservations);
+router.use("/", tutorObservations);
 
 export default router;
