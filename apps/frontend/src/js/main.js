@@ -16,6 +16,8 @@ import { registerRoute, handleRoute } from './router.js'
 import { renderLogin } from './pages/login.js'
 
 function boot() {
+  registerRoute('/login', 'Iniciar Sesión', renderLogin)
+
   const user = getSessionUser()
   const token = sessionStorage.getItem('tutorlink_token')
   const isAuth = !!(user && token)
@@ -33,7 +35,6 @@ function boot() {
   } else {
     document.body.classList.remove('route-app')
     document.body.classList.add('route-login')
-    registerRoute('/login', 'Iniciar Sesión', renderLogin)
   }
 
   handleRoute()
