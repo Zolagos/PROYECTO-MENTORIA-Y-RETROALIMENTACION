@@ -1,0 +1,200 @@
+/* ============================================================
+   animations.css — Transiciones y animaciones globales
+   TutorLink | Kevin Mendoza | Frontend Developer
+   ============================================================ */
+
+/* ---- Transición de entrada de página ---- */
+/* Cada vez que el router inyecta una vista nueva, se anima */
+#page-content > * {
+  animation: pageFadeIn 220ms ease both;
+}
+
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- Cards con delay escalonado ---- */
+/* Las stat-cards entran una por una, no todas juntas */
+.stats-grid .stat-card:nth-child(1) { animation-delay: 0ms; }
+.stats-grid .stat-card:nth-child(2) { animation-delay: 60ms; }
+.stats-grid .stat-card:nth-child(3) { animation-delay: 120ms; }
+.stats-grid .stat-card:nth-child(4) { animation-delay: 180ms; }
+
+.stats-grid .stat-card {
+  animation: cardSlideUp 280ms ease both;
+}
+
+@keyframes cardSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- Mentoría cards escalonadas ---- */
+.mentoring-grid .mentoring-detail-card {
+  animation: cardSlideUp 280ms ease both;
+}
+
+.mentoring-grid .mentoring-detail-card:nth-child(1) { animation-delay: 0ms; }
+.mentoring-grid .mentoring-detail-card:nth-child(2) { animation-delay: 80ms; }
+.mentoring-grid .mentoring-detail-card:nth-child(3) { animation-delay: 160ms; }
+.mentoring-grid .mentoring-detail-card:nth-child(4) { animation-delay: 240ms; }
+.mentoring-grid .mentoring-detail-card:nth-child(5) { animation-delay: 320ms; }
+.mentoring-grid .mentoring-detail-card:nth-child(6) { animation-delay: 400ms; }
+
+/* ---- Timeline items ---- */
+.timeline-item {
+  animation: timelineSlideIn 300ms ease both;
+}
+
+.timeline-item:nth-child(1) { animation-delay: 0ms; }
+.timeline-item:nth-child(2) { animation-delay: 100ms; }
+.timeline-item:nth-child(3) { animation-delay: 200ms; }
+.timeline-item:nth-child(4) { animation-delay: 300ms; }
+
+@keyframes timelineSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ---- Welcome banner ---- */
+.welcome-banner {
+  animation: bannerIn 350ms ease both;
+}
+
+@keyframes bannerIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ---- Sidebar nav items ---- */
+.sidebar__nav-item {
+  animation: sidebarItemIn 200ms ease both;
+}
+
+/* ---- Número en stat-card (contador) ---- */
+.stat-card__value {
+  animation: numberPop 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+  animation-delay: 200ms;
+}
+
+@keyframes numberPop {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ---- Progress bars ---- */
+/* Se animan al aparecer en pantalla */
+.progress-bar__fill {
+  animation: progressGrow 800ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation-delay: 400ms;
+}
+
+@keyframes progressGrow {
+  from { width: 0% !important; }
+}
+
+/* ---- Pulse para badges activos ---- */
+.badge--active::before,
+.badge--en-progreso::before {
+  animation: pulseDot 2s ease infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(1.3); }
+}
+
+/* ---- Shimmer para skeleton loading ---- */
+/* Ya está en components.css, aquí reforzamos */
+@keyframes skeleton-loading {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ---- Hover en botones (micro-interacción) ---- */
+.btn {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Efecto ripple al hacer click */
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.15);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  border-radius: inherit;
+}
+
+.btn:active::after {
+  opacity: 1;
+}
+
+/* ---- Transición suave del sidebar al colapsar ---- */
+.sidebar__nav-text,
+.sidebar__brand-name,
+.sidebar__user-info,
+.sidebar__section-label,
+.sidebar__collapse-text {
+  transition: opacity var(--transition-normal), width var(--transition-normal);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* ---- Focus visible mejorado (accesibilidad) ---- */
+/* Reemplaza el outline por defecto por uno más bonito */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Quita outline cuando se usa mouse (solo teclado) */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ---- Reduce animaciones si el usuario lo prefiere ---- */
+/* Accesibilidad: respeta prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
