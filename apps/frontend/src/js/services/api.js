@@ -20,6 +20,8 @@
  * Kevin Mendoza | Frontend Developer
  */
 
+import { navigateTo } from '../router.js';
+
 // ---- URL BASE DEL BACKEND ----
 // TODO Sprint 4: cambiar a la URL real del servidor de tu equipo
 const API_BASE_URL = 'http://localhost:3000/api';
@@ -36,6 +38,7 @@ const API_BASE_URL = 'http://localhost:3000/api';
  * @param {Object} options - Opciones de fetch (method, body, etc.)
  * @returns {Promise<any>} - Datos de la respuesta JSON
  */
+
 export async function fetchAPI(endpoint, options = {}) {
   // Obtiene el token de Firebase del sessionStorage
   // Sprint 4: esto vendrá de Firebase Auth directamente
@@ -59,7 +62,7 @@ export async function fetchAPI(endpoint, options = {}) {
     if (response.status === 401) {
       sessionStorage.removeItem('tutorlink_user');
       sessionStorage.removeItem('tutorlink_token');
-      window.location.href = '../pages/login.html';
+      navigateTo('/login');
       throw new Error('Tu sesión expiró. Inicia sesión de nuevo.');
     }
 
@@ -117,7 +120,7 @@ export const authService = {
     // TODO Sprint 4: firebase.auth().signOut()
     sessionStorage.removeItem('tutorlink_user');
     sessionStorage.removeItem('tutorlink_token');
-    window.location.href = '../pages/login.html';
+    navigateTo('/login');
   },
 };
 

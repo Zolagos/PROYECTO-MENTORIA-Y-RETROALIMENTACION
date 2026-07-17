@@ -182,5 +182,5 @@ export function initSidebarCollapse() {
 export function handleLogout() {
   sessionStorage.removeItem('tutorlink_user');
   sessionStorage.removeItem('tutorlink_token');
-  window.location.reload();
+  window.navigateTo('/login');
 }
