@@ -1,0 +1,368 @@
+/* ============================================================
+   responsive.css — Ajustes responsive finales
+   TutorLink | Kevin Mendoza | Frontend Developer
+
+   Breakpoints usados:
+   - 1200px: desktop grande
+   - 1024px: desktop normal / tablet landscape
+   - 768px:  tablet portrait
+   - 640px:  móvil grande
+   - 480px:  móvil normal
+   - 360px:  móvil pequeño
+   ============================================================ */
+
+/* ============================================================
+   DESKTOP GRANDE (> 1200px)
+   ============================================================ */
+@media (min-width: 1200px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .mentoring-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ============================================================
+   TABLET LANDSCAPE / DESKTOP PEQUEÑO (≤ 1024px)
+   ============================================================ */
+@media (max-width: 1024px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .mentoring-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Login: panel de branding más pequeño */
+  .login-brand {
+    padding: var(--space-8);
+  }
+
+  .login-brand__features {
+    display: none; /* Oculta la lista de features en pantallas medianas */
+  }
+}
+
+/* ============================================================
+   TABLET PORTRAIT (≤ 768px)
+   ============================================================ */
+@media (max-width: 768px) {
+  /* Login: solo muestra el formulario */
+  .login-page {
+    grid-template-columns: 1fr;
+  }
+
+  .login-brand {
+    display: none;
+  }
+
+  .login-form-panel {
+    padding: var(--space-8) var(--space-6);
+    min-height: 100vh;
+    justify-content: center;
+  }
+
+  /* App: sidebar se convierte en drawer */
+  .sidebar {
+    transform: translateX(-100%);
+    width: var(--sidebar-width);
+    transition: transform var(--transition-normal);
+    z-index: 100;
+    box-shadow: none;
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: var(--shadow-xl);
+  }
+
+  .main-wrapper,
+  .main-wrapper.sidebar-collapsed {
+    margin-left: 0;
+  }
+
+  .header__menu-btn {
+    display: flex;
+  }
+
+  /* Stats: 2 columnas en tablet */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Mentorías: 1 columna */
+  .mentoring-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Filtros: se apilan */
+  .filters-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filters-bar .search-bar {
+    max-width: 100%;
+  }
+
+  .filters-bar__spacer {
+    display: none;
+  }
+
+  .filters-bar .view-toggle {
+    align-self: flex-end;
+  }
+
+  /* Page header: se apila */
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .page-header .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Welcome banner */
+  .welcome-banner {
+    padding: var(--space-5);
+  }
+
+  .welcome-banner__greeting {
+    font-size: var(--font-size-xl);
+  }
+
+  /* Card info grid: 1 columna */
+  .mentoring-detail-card__info {
+    grid-template-columns: 1fr;
+  }
+
+  /* Tabla: scroll horizontal */
+  .table-container {
+    border-radius: var(--radius-md);
+  }
+
+  .table th,
+  .table td {
+    padding: var(--space-3);
+    font-size: var(--font-size-xs);
+  }
+
+  /* Timeline: menos padding lateral */
+  .timeline {
+    padding-left: var(--space-6);
+  }
+
+  /* Form grid: 1 columna */
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Modal: pantalla completa en mobile */
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal {
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    max-height: 92vh;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  /* Header: sin padding lateral grande */
+  .header {
+    padding: 0 var(--space-4);
+  }
+
+  .page-content {
+    padding: var(--space-4);
+  }
+}
+
+/* ============================================================
+   MÓVIL GRANDE (≤ 640px)
+   ============================================================ */
+@media (max-width: 640px) {
+  /* Stats: 1 columna en móvil */
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Stat card horizontal en móvil para ahorrar espacio */
+  .stat-card {
+    padding: var(--space-4);
+  }
+
+  .stat-card__value {
+    font-size: var(--font-size-2xl);
+  }
+
+  /* Ocultar texto de algunas columnas de tabla */
+  .table .hide-mobile {
+    display: none;
+  }
+
+  /* Login: menos padding */
+  .login-form-panel {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  /* Header: ocultar texto del título en pantallas pequeñas */
+  .header__page-title {
+    font-size: var(--font-size-lg);
+    /* Limita longitud con ellipsis si el título es largo */
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Feedback card */
+  .feedback-card__meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  /* Mentoría card bottom */
+  .mentoring-detail-card__bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .mentoring-detail-card__bottom .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ============================================================
+   MÓVIL PEQUEÑO (≤ 480px)
+   ============================================================ */
+@media (max-width: 480px) {
+  :root {
+    /* Reduce un poco la tipografía base */
+    font-size: 15px;
+  }
+
+  .page-content {
+    padding: var(--space-3);
+  }
+
+  /* Welcome banner: más compacto */
+  .welcome-banner {
+    padding: var(--space-4);
+  }
+
+  .welcome-banner__greeting {
+    font-size: var(--font-size-lg);
+  }
+
+  .welcome-banner__subtitle {
+    font-size: var(--font-size-xs);
+  }
+
+  /* Modales: full screen */
+  .modal {
+    border-radius: 0;
+    max-height: 100vh;
+    height: 100vh;
+  }
+
+  .modal-overlay {
+    align-items: flex-start;
+    padding: 0;
+  }
+
+  /* Botones del modal footer */
+  .modal__footer {
+    flex-direction: column-reverse;
+    gap: var(--space-2);
+  }
+
+  .modal__footer .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Timeline: compacto */
+  .timeline {
+    padding-left: var(--space-5);
+  }
+
+  .timeline::before {
+    left: 7px;
+  }
+
+  .timeline-item::before {
+    left: calc(-1 * var(--space-5) + 0px);
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Ocultar badge de notificación del header en móvil muy pequeño */
+  .header__right > .header__icon-btn:first-child {
+    display: none;
+  }
+}
+
+/* ============================================================
+   MÓVIL MUY PEQUEÑO (≤ 360px)
+   ============================================================ */
+@media (max-width: 360px) {
+  .stat-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .stat-card__icon {
+    margin: 0 auto;
+  }
+
+  .login-form-wrapper {
+    padding: 0 var(--space-2);
+  }
+}
+
+/* ============================================================
+   PRINT (para imprimir reportes / documentación)
+   ============================================================ */
+@media print {
+  .sidebar,
+  .header,
+  .sidebar-overlay,
+  .btn,
+  .filters-bar,
+  .modal-overlay {
+    display: none !important;
+  }
+
+  .main-wrapper {
+    margin-left: 0 !important;
+  }
+
+  .page-content {
+    padding: 0;
+  }
+
+  .card {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+}
