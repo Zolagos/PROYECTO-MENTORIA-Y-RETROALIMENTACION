@@ -18,7 +18,7 @@ CREATE TABLE clans (
 
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    uid VARCHAR(128) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
     lastname VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,

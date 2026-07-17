@@ -1,4 +1,4 @@
-import firebaseService from "../../../services/firebase.service.js";
+import authService from "../services/auth.service.js";
 
 const authMiddleware = async (req, res, next) => {
   try {
@@ -13,7 +13,7 @@ const authMiddleware = async (req, res, next) => {
 
     const token = authHeader.split(" ")[1];
 
-    req.user = await firebaseService.verifyToken(token);
+    req.user = authService.verifyToken(token);
 
     next();
   } catch (error) {

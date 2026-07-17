@@ -1,4 +1,4 @@
-import pool from '../../../config/database.js';
+import pool from '../config/database.js';
 
 export const findById = async (id) => {
     const { rows } = await pool.query(
@@ -8,7 +8,7 @@ export const findById = async (id) => {
     return rows[0] ?? null;
 };
 
-export const assignParticipant = async ({ sessionId, tutorId, coderId }) => {
+export const assignParticipants = async ({ sessionId, tutorId, coderIds }) => {
     const client = await pool.connect();
     try {
         await client.query('BEGIN');

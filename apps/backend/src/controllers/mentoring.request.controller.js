@@ -3,15 +3,15 @@ import { createRequest } from '../models/mentoring.request.model.js';
 
 export const createMentoringRequest = async (req, res) => {
   try {
-    const { uid } = req.user;
-    //Obtiene el uid del token Firebase
+    const { id } = req.user;
+    //Obtiene el id del usuario autenticado (payload del JWT)
 
     const { rows: users } = await pool.query(
       `SELECT u.id, r.name as role
        FROM users u
        JOIN roles r ON u.role_id = r.id
-       WHERE u.uid = $1`,
-      [uid]
+       WHERE u.id = $1`,
+      [id]
     );
 
     if (users.length === 0) {
@@ -43,7 +43,7 @@ export const createMentoringRequest = async (req, res) => {
     }
 
     const mentoringRequest = await createRequest({ coder_id: user.id, topic: topic.trim(), description: description?.trim() });
-    //coder_id se obtiene automáticamente del usuario autenticado vía Firebase token → uid → consulta DB → user.id.
+    //coder_id se obtiene automáticamente del usuario autenticado vía JWT → id → consulta DB → user.id.
     res.status(201).json({ status: 'success', data: mentoringRequest });
   } catch (error) {
     if (error.code === '23503') {

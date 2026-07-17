@@ -1,20 +1,20 @@
 import pool from '../config/database.js';
 import * as coderObservationModel from '../models/coder.observation.model.js';
 
-const getUserByUid = async (uid) => {
+const getUserById = async (id) => {
   const { rows } = await pool.query(
     `SELECT u.id, r.name AS role
      FROM users u
      JOIN roles r ON u.role_id = r.id
-     WHERE u.uid = $1`,
-    [uid]
+     WHERE u.id = $1`,
+    [id]
   );
   return rows[0] || null;
 };
 
 export const listObservations = async (req, res) => {
   try {
-    const user = await getUserByUid(req.user.uid);
+    const user = await getUserById(req.user.id);
 
     if (!user) {
       return res.status(401).json({ status: 'error', message: 'User not found' });
@@ -39,7 +39,7 @@ export const listObservations = async (req, res) => {
 
 export const getObservation = async (req, res) => {
   try {
-    const user = await getUserByUid(req.user.uid);
+    const user = await getUserById(req.user.id);
 
     if (!user) {
       return res.status(401).json({ status: 'error', message: 'User not found' });
@@ -69,7 +69,7 @@ export const getObservation = async (req, res) => {
 
 export const createObservation = async (req, res) => {
   try {
-    const user = await getUserByUid(req.user.uid);
+    const user = await getUserById(req.user.id);
 
     if (!user) {
       return res.status(401).json({ status: 'error', message: 'User not found' });
@@ -117,7 +117,7 @@ export const createObservation = async (req, res) => {
 
 export const updateObservation = async (req, res) => {
   try {
-    const user = await getUserByUid(req.user.uid);
+    const user = await getUserById(req.user.id);
 
     if (!user) {
       return res.status(401).json({ status: 'error', message: 'User not found' });
@@ -158,7 +158,7 @@ export const updateObservation = async (req, res) => {
 
 export const deleteObservation = async (req, res) => {
   try {
-    const user = await getUserByUid(req.user.uid);
+    const user = await getUserById(req.user.id);
 
     if (!user) {
       return res.status(401).json({ status: 'error', message: 'User not found' });
