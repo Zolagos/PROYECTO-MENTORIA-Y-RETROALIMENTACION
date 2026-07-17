@@ -4,8 +4,10 @@
    ============================================================ */
 
 /* ---- Transición de entrada de página ---- */
-/* Cada vez que el router inyecta una vista nueva, se anima */
-#page-content > * {
+/* Cada vez que el router inyecta una vista nueva, se anima.
+   Los modales quedan excluidos: el fill-mode "both" dejaría su
+   opacity en 1 para siempre y aparecerían abiertos al cargar. */
+#page-content > *:not(.modal-overlay) {
   animation: pageFadeIn 220ms ease both;
 }
 

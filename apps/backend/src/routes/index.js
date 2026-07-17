@@ -14,5 +14,6 @@ router.use("/sessions", sessionsRoutes);
 router.use("/", mentoringRequests);
 router.use("/", coderObservations);
 router.use("/", tutorObservations);
+router.use("/", sessionFeedback);
 
 export default router;
