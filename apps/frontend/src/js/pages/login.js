@@ -14,6 +14,11 @@
  * Kevin Mendoza | Frontend Developer
  */
 
+// ---- SESIÓN ACTIVA ----
+if (sessionStorage.getItem('tutorlink_token') && sessionStorage.getItem('tutorlink_user')) {
+  window.location.href = '../pages/app.html';
+}
+
 // Referencias a elementos del DOM
 const loginForm     = document.getElementById('login-form');
 const emailInput    = document.getElementById('login-email');
@@ -176,13 +181,13 @@ if (loginForm) {
       return;
     }
 
-    // ---- Simular envío (Sprint 4: reemplazar con llamada real) ----
+    // ---- Envío al backend ----
     setLoadingState(true);
 
     try {
-      // TODO Sprint 4: reemplazar con llamada real a Firebase Auth
-      // const result = await authService.login(email, password);
-      await simulateLogin(email, password);
+      // loginUser (services/auth.js) valida contra el backend,
+      // guarda token + perfil en sessionStorage y devuelve el usuario
+      await loginUser(email, password);
 
       // Redirige a la app principal
       window.location.href = '../pages/app.html';
@@ -192,36 +197,5 @@ if (loginForm) {
       showLoginAlert(error.message || 'Error al iniciar sesión. Intenta de nuevo.');
       setLoadingState(false);
     }
-  });
-}
-
-/**
- * Simula el proceso de login para desarrollo.
- * Sprint 4: esto se reemplaza con Firebase Authentication real.
- *
- * @param {string} email
- * @param {string} password
- * @returns {Promise}
- */
-function simulateLogin(email, password) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      // Cualquier email/contraseña válidos pasan en desarrollo
-      // Sprint 4: Firebase validará las credenciales reales
-      if (email && password.length >= 6) {
-        // Guarda un usuario de prueba en sessionStorage
-        const mockUser = {
-          nombre:   'Kevin',
-          apellido: 'Mendoza',
-          email:    email,
-          rol:      'TL',   // Cambia para probar roles
-          clan:     'Alpha',
-        };
-        sessionStorage.setItem('tutorlink_user', JSON.stringify(mockUser));
-        resolve(mockUser);
-      } else {
-        reject(new Error('Credenciales inválidas.'));
-      }
-    }, 1200); // Simula 1.2 segundos de delay de red
   });
 }
