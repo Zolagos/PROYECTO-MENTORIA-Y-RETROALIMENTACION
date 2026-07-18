@@ -80,3 +80,279 @@ body {
     font-size:2rem;
 
 }
+
+/*==========================
+LOGIN
+==========================*/
+
+.login-page{
+
+    min-height:100vh;
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+}
+
+.login-left{
+
+    position:relative;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    padding:80px;
+
+    color:white;
+
+    overflow:hidden;
+
+    background:
+        radial-gradient(circle at top,#646cff55,transparent 45%),
+        linear-gradient(135deg,#1B1F52,#2E3E9B,#4F46E5);
+
+}
+
+.login-left::after{
+
+    content:"";
+
+    position:absolute;
+
+    inset:0;
+
+    background:url("/src/assets/hero.png");
+
+    background-repeat:no-repeat;
+
+    background-position:bottom right;
+
+    background-size:70%;
+
+    opacity:.12;
+
+    pointer-events:none;
+}
+
+.login-left>*{
+
+    position:relative;
+
+    z-index:1;
+}
+
+.riwi-logo{
+
+    width:170px;
+
+    margin-bottom:40px;
+}
+
+.login-left h1{
+
+    font-size:3rem;
+
+    margin-bottom:10px;
+}
+
+.login-left h2{
+
+    font-size:2rem;
+
+    margin-bottom:20px;
+
+    font-weight:600;
+}
+
+.login-left p{
+
+    max-width:430px;
+
+    line-height:1.8;
+
+    color:#ECECEC;
+}
+
+.login-right{
+
+    background:#F5F7FB;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    padding:40px;
+}
+
+.login-card{
+
+    width:420px;
+
+    background:white;
+
+    padding:45px;
+
+    border-radius:20px;
+
+    box-shadow:0 20px 40px rgba(0,0,0,.08);
+}
+
+.login-card h2{
+
+    color:#1B1F52;
+
+    margin-bottom:5px;
+}
+
+.subtitle{
+
+    color:#777;
+
+    margin-bottom:30px;
+}
+
+.login-card label{
+
+    display:block;
+
+    margin-bottom:8px;
+
+    font-weight:600;
+}
+
+.login-card input{
+
+    width:100%;
+
+    height:48px;
+
+    border-radius:10px;
+
+    border:1px solid #ddd;
+
+    padding:0 15px;
+
+    margin-bottom:20px;
+
+    font-size:.95rem;
+
+    background:#fafafa;
+}
+
+.disabled-btn{
+
+    width:100%;
+
+    height:48px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#A5B4FC;
+
+    color:white;
+
+    font-weight:600;
+
+    cursor:not-allowed;
+
+    opacity:.7;
+}
+
+.divider{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    margin:30px 0;
+}
+
+.divider::before,
+.divider::after{
+
+    content:"";
+
+    flex:1;
+
+    height:1px;
+
+    background:#ddd;
+}
+
+.divider span{
+
+    color:#888;
+
+    font-size:.9rem;
+}
+
+.google-btn{
+
+    width:100%;
+
+    height:50px;
+
+    border-radius:10px;
+
+    border:1px solid #ddd;
+
+    background:white;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:12px;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.25s;
+}
+
+.google-btn img{
+
+    width:20px;
+}
+
+.google-btn:hover{
+
+    background:#f8f8f8;
+
+    transform:translateY(-2px);
+
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+}
+
+@media(max-width:900px){
+
+.login-page{
+
+    grid-template-columns:1fr;
+}
+
+.login-left{
+
+    display:none;
+}
+
+.login-card{
+
+    width:min(95%,420px);
+}
+
+}
