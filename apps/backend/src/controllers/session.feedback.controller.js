@@ -1,132 +1,108 @@
 import pool from '../config/database.js';
 import * as sessionFeedbackModel from '../models/session.feedback.model.js';
+import asyncHandler from '../utils/asyncHandler.js';
+import ApiError from '../utils/ApiError.js';
+import ApiResponse from '../utils/ApiResponse.js';
+import { ROLES } from '../config/roles.js';
 
-const getUserByUid = async (uid) => {
-  const { rows } = await pool.query(
-    `SELECT u.id, r.name AS role
-     FROM users u
-     JOIN roles r ON u.role_id = r.id
-     WHERE u.uid = $1`,
-    [uid]
-  );
-  return rows[0] || null;
-};
-
-export const getSessionFeedback = async (req, res) => {
-  try {
-    const user = await getUserByUid(req.user.uid);
-
-    if (!user) {
-      return res.status(401).json({ status: 'error', message: 'User not found' });
-    }
-
-    if (user.role !== 'Coder' && user.role !== 'Team Leader') {
-      return res.status(403).json({ status: 'error', message: 'Access denied' });
-    }
-
-    const sessionId = parseInt(req.params.sessionId, 10);
-
-    if (!Number.isInteger(sessionId)) {
-      return res.status(400).json({ status: 'error', message: 'sessionId must be an integer' });
-    }
-
-    if (user.role === 'Coder') {
-      const { rows: coderSessions } = await pool.query(
-        `SELECT 1 FROM session_coders WHERE session_id = $1 AND coder_id = $2`,
-        [sessionId, user.id]
-      );
-
-      if (coderSessions.length === 0) {
-        return res.status(403).json({ status: 'error', message: 'You are not part of this session' });
-      }
-    }
-
-    const coderId = user.role === 'Coder' ? user.id : req.query.coder_id;
-
-    if (!coderId) {
-      return res.status(400).json({ status: 'error', message: 'coder_id is required for Team Leaders' });
-    }
-
-    const feedback = await sessionFeedbackModel.findBySessionAndCoder(sessionId, coderId);
-
-    res.status(200).json({ status: 'success', data: feedback });
-  } catch (error) {
-    console.error('Error getting session feedback:', error);
-    res.status(500).json({ status: 'error', message: 'Internal server error' });
+export const getSessionFeedback = asyncHandler(async (req, res) => {
+  if (req.user.role !== ROLES.CODER && req.user.role !== ROLES.TEAM_LEADER) {
+    throw new ApiError('Access denied', 403);
   }
-};
 
-export const createSessionFeedback = async (req, res) => {
-  try {
-    const user = await getUserByUid(req.user.uid);
+  const sessionId = parseInt(req.params.sessionId, 10);
 
-    if (!user) {
-      return res.status(401).json({ status: 'error', message: 'User not found' });
-    }
+  if (!Number.isInteger(sessionId)) {
+    throw new ApiError('sessionId must be an integer', 400);
+  }
 
-    if (user.role !== 'Coder') {
-      return res.status(403).json({ status: 'error', message: 'Only coders can submit feedback' });
-    }
-
-    const sessionId = parseInt(req.params.sessionId, 10);
-
-    if (!Number.isInteger(sessionId)) {
-      return res.status(400).json({ status: 'error', message: 'sessionId must be an integer' });
-    }
-
-    const { rows: sessions } = await pool.query(
-      `SELECT id, status FROM mentoring_sessions WHERE id = $1`,
-      [sessionId]
-    );
-
-    if (sessions.length === 0) {
-      return res.status(404).json({ status: 'error', message: 'Session not found' });
-    }
-
-    if (sessions[0].status !== 'completed') {
-      return res.status(400).json({ status: 'error', message: 'Feedback can only be submitted for completed sessions' });
-    }
-
+  if (req.user.role === ROLES.CODER) {
     const { rows: coderSessions } = await pool.query(
       `SELECT 1 FROM session_coders WHERE session_id = $1 AND coder_id = $2`,
-      [sessionId, user.id]
+      [sessionId, req.user.id]
     );
 
     if (coderSessions.length === 0) {
-      return res.status(403).json({ status: 'error', message: 'You are not part of this session' });
+      throw new ApiError('You are not part of this session', 403);
     }
+  }
 
-    const { tutor_rating, session_rating, comments } = req.body;
+  const coderId = req.user.role === ROLES.CODER ? req.user.id : Number(req.query.coder_id);
 
-    if (!Number.isInteger(tutor_rating) || tutor_rating < 1 || tutor_rating > 5) {
-      return res.status(400).json({ status: 'error', message: 'tutor_rating is required and must be an integer between 1 and 5' });
-    }
+  if (!Number.isInteger(coderId) || coderId <= 0) {
+    throw new ApiError('coder_id is required and must be a positive integer for Team Leaders', 400);
+  }
 
-    if (!Number.isInteger(session_rating) || session_rating < 1 || session_rating > 5) {
-      return res.status(400).json({ status: 'error', message: 'session_rating is required and must be an integer between 1 and 5' });
-    }
+  const feedback = await sessionFeedbackModel.findBySessionAndCoder(sessionId, coderId);
 
-    if (comments !== undefined && comments !== null && typeof comments !== 'string') {
-      return res.status(400).json({ status: 'error', message: 'comments must be a string' });
-    }
+  return ApiResponse.success(res, feedback);
+});
 
-    const feedback = await sessionFeedbackModel.create({
+export const createSessionFeedback = asyncHandler(async (req, res) => {
+  if (req.user.role !== ROLES.CODER) {
+    throw new ApiError('Only coders can submit feedback', 403);
+  }
+
+  const sessionId = parseInt(req.params.sessionId, 10);
+
+  if (!Number.isInteger(sessionId)) {
+    throw new ApiError('sessionId must be an integer', 400);
+  }
+
+  const { rows: sessions } = await pool.query(
+    `SELECT id, status FROM mentoring_sessions WHERE id = $1`,
+    [sessionId]
+  );
+
+  if (sessions.length === 0) {
+    throw new ApiError('Session not found', 404);
+  }
+
+  if (sessions[0].status !== 'completed') {
+    throw new ApiError('Feedback can only be submitted for completed sessions', 400);
+  }
+
+  const { rows: coderSessions } = await pool.query(
+    `SELECT 1 FROM session_coders WHERE session_id = $1 AND coder_id = $2`,
+    [sessionId, req.user.id]
+  );
+
+  if (coderSessions.length === 0) {
+    throw new ApiError('You are not part of this session', 403);
+  }
+
+  const { tutor_rating, session_rating, comments } = req.body;
+
+  if (!Number.isInteger(tutor_rating) || tutor_rating < 1 || tutor_rating > 5) {
+    throw new ApiError('tutor_rating is required and must be an integer between 1 and 5', 400);
+  }
+
+  if (!Number.isInteger(session_rating) || session_rating < 1 || session_rating > 5) {
+    throw new ApiError('session_rating is required and must be an integer between 1 and 5', 400);
+  }
+
+  if (comments !== undefined && comments !== null && typeof comments !== 'string') {
+    throw new ApiError('comments must be a string', 400);
+  }
+
+  let feedback;
+  try {
+    feedback = await sessionFeedbackModel.create({
       sessionId,
-      coderId: user.id,
+      coderId: req.user.id,
       tutorRating: tutor_rating,
       sessionRating: session_rating,
       comments: comments?.trim() || null,
     });
-
-    res.status(201).json({ status: 'success', data: feedback });
   } catch (error) {
     if (error.code === '23505') {
-      return res.status(409).json({ status: 'error', message: 'You have already submitted feedback for this session' });
+      throw new ApiError('You have already submitted feedback for this session', 409);
     }
     if (error.code === '23503') {
-      return res.status(400).json({ status: 'error', message: 'Invalid session_id or coder_id' });
+      throw new ApiError('Invalid session_id or coder_id', 400);
     }
-    console.error('Error creating session feedback:', error);
-    res.status(500).json({ status: 'error', message: 'Internal server error' });
+    throw error;
   }
-};
+
+  return ApiResponse.created(res, feedback);
+});

@@ -1,131 +1,75 @@
-import pool from '../config/database.js';
 import * as mentoringRequestModel from '../models/mentoring.request.model.js';
+import asyncHandler from '../utils/asyncHandler.js';
+import ApiError from '../utils/ApiError.js';
+import ApiResponse from '../utils/ApiResponse.js';
+import { ROLES } from '../config/roles.js';
 
-export const listMentoringRequests = async (req, res) => {
-  try {
-    const { uid } = req.user;
+export const listMentoringRequests = asyncHandler(async (req, res) => {
+  let { coder_id } = req.query;
 
-    const { rows: users } = await pool.query(
-      `SELECT u.id, r.name as role
-       FROM users u
-       JOIN roles r ON u.role_id = r.id
-       WHERE u.uid = $1`,
-      [uid]
-    );
-
-    if (users.length === 0) {
-      return res.status(401).json({ status: 'error', message: 'User not found' });
-    }
-
-    const user = users[0];
-    let { coder_id } = req.query;
-
-    if (user.role === 'Coder') {
-      coder_id = user.id;
-    } else if (user.role === 'Team Leader') {
-      coder_id = coder_id ? Number(coder_id) : undefined;
-    } else {
-      return res.status(403).json({ status: 'error', message: 'Access denied' });
-    }
-
-    const requests = await mentoringRequestModel.findAll({ coder_id });
-
-    res.status(200).json({ status: 'success', data: requests });
-  } catch (error) {
-    console.error('Error listing mentoring requests:', error);
-    res.status(500).json({ status: 'error', message: 'Internal server error' });
+  if (req.user.role === ROLES.CODER) {
+    coder_id = req.user.id;
+  } else if (req.user.role === ROLES.TEAM_LEADER) {
+    coder_id = coder_id ? Number(coder_id) : undefined;
+  } else {
+    throw new ApiError('Access denied', 403);
   }
-};
 
-export const getMentoringRequest = async (req, res) => {
-  try {
-    const { uid } = req.user;
+  const requests = await mentoringRequestModel.findAll({ coder_id });
 
-    const { rows: users } = await pool.query(
-      `SELECT u.id, r.name as role
-       FROM users u
-       JOIN roles r ON u.role_id = r.id
-       WHERE u.uid = $1`,
-      [uid]
-    );
+  return ApiResponse.success(res, requests);
+});
 
-    if (users.length === 0) {
-      return res.status(401).json({ status: 'error', message: 'User not found' });
-    }
-
-    const user = users[0];
-
-    if (user.role !== 'Coder' && user.role !== 'Team Leader') {
-      return res.status(403).json({ status: 'error', message: 'Access denied' });
-    }
-
-    const { id } = req.params;
-    const request = await mentoringRequestModel.findById(id);
-
-    if (!request) {
-      return res.status(404).json({ status: 'error', message: 'Mentoring request not found' });
-    }
-
-    if (user.role === 'Coder' && request.coder_id !== user.id) {
-      return res.status(403).json({ status: 'error', message: 'Access denied' });
-    }
-
-    res.status(200).json({ status: 'success', data: request });
-  } catch (error) {
-    console.error('Error getting mentoring request:', error);
-    res.status(500).json({ status: 'error', message: 'Internal server error' });
+export const getMentoringRequest = asyncHandler(async (req, res) => {
+  if (req.user.role !== ROLES.CODER && req.user.role !== ROLES.TEAM_LEADER) {
+    throw new ApiError('Access denied', 403);
   }
-};
 
-export const createMentoringRequest = async (req, res) => {
+  const request = await mentoringRequestModel.findById(req.params.id);
+
+  if (!request) {
+    throw new ApiError('Mentoring request not found', 404);
+  }
+
+  if (req.user.role === ROLES.CODER && request.coder_id !== req.user.id) {
+    throw new ApiError('Access denied', 403);
+  }
+
+  return ApiResponse.success(res, request);
+});
+
+export const createMentoringRequest = asyncHandler(async (req, res) => {
+  if (req.user.role !== ROLES.CODER) {
+    throw new ApiError('Only coders can create mentoring requests', 403);
+  }
+
+  let { topic, description } = req.body;
+
+  if (!topic || typeof topic !== 'string' || topic.trim().length === 0) {
+    throw new ApiError('topic is required and must be a non-empty string', 400);
+  }
+
+  if (topic.length > 200) {
+    throw new ApiError('topic must not exceed 200 characters', 400);
+  }
+
+  if (description !== undefined && typeof description !== 'string') {
+    throw new ApiError('description must be a string', 400);
+  }
+
+  if (description && description.length > 1000) {
+    throw new ApiError('description must not exceed 1000 characters', 400);
+  }
+
+  let mentoringRequest;
   try {
-    const { id } = req.user;
-    //Obtiene el id del usuario autenticado (payload del JWT)
-
-    const { rows: users } = await pool.query(
-      `SELECT u.id, r.name as role
-       FROM users u
-       JOIN roles r ON u.role_id = r.id
-       WHERE u.id = $1`,
-      [id]
-    );
-
-    if (users.length === 0) {
-      return res.status(401).json({ status: 'error', message: 'User not found' });
-    }
-
-    const user = users[0];
-
-    if (user.role !== 'Coder') {
-      return res.status(403).json({ status: 'error', message: 'Only coders can create mentoring requests' });
-    }
-
-    let { topic, description } = req.body;
-
-    if (!topic || typeof topic !== 'string' || topic.trim().length === 0) {
-      return res.status(400).json({ status: 'error', message: 'topic is required and must be a non-empty string' });
-    }
-
-    if (topic.length > 200) {
-      return res.status(400).json({ status: 'error', message: 'topic must not exceed 200 characters' });
-    }
-
-    if (description !== undefined && typeof description !== 'string') {
-      return res.status(400).json({ status: 'error', message: 'description must be a string' });
-    }
-
-    if (description && description.length > 1000) {
-      return res.status(400).json({ status: 'error', message: 'description must not exceed 1000 characters' });
-    }
-
-    const mentoringRequest = await mentoringRequestModel.createRequest({ coder_id: user.id, topic: topic.trim(), description: description?.trim() });
-    //coder_id se obtiene automáticamente del usuario autenticado vía Firebase token → uid → consulta DB → user.id.
-    res.status(201).json({ status: 'success', data: mentoringRequest });
+    mentoringRequest = await mentoringRequestModel.createRequest({ coder_id: req.user.id, topic: topic.trim(), description: description?.trim() });
   } catch (error) {
     if (error.code === '23503') {
-      return res.status(400).json({ status: 'error', message: 'coder_id does not reference an existing user' });
+      throw new ApiError('coder_id does not reference an existing user', 400);
     }
-    console.error('Error creating mentoring request:', error);
-    res.status(500).json({ status: 'error', message: 'Internal server error' });
+    throw error;
   }
-};
+
+  return ApiResponse.created(res, mentoringRequest);
+});
