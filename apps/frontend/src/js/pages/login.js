@@ -1,163 +1,234 @@
-/**
- * login.js — Lógica de la pantalla de inicio de sesión
- *
- * ¿Qué hace?
- * 1. Valida el formulario de login (email y contraseña)
- * 2. Muestra errores claros al usuario
- * 3. Simula el estado de "cargando" mientras se procesa
- * 4. Redirige a app.html al enviar (Sprint 4: conectará con Firebase)
- *
- * ¿Por qué validamos en el frontend?
- * Para dar feedback inmediato al usuario sin esperar al servidor.
- * El backend TAMBIÉN valida — la validación frontend es solo UX.
- *
- * Kevin Mendoza | Frontend Developer
- */
+import { loginUser } from '../services/auth.js'
+import { navigateTo } from '../router.js'
+import { initApp } from '../app.js'
 
-// ---- SESIÓN ACTIVA ----
-if (sessionStorage.getItem('tutorlink_token') && sessionStorage.getItem('tutorlink_user')) {
-  window.location.href = '../pages/app.html';
+export function renderLogin() {
+  return `
+    <main class="login-page" role="main">
+      <section class="login-brand" aria-hidden="true">
+        <div class="login-brand__logo">
+          <span class="login-brand__logo-text">TL</span>
+        </div>
+        <h1 class="login-brand__title">TutorLink</h1>
+        <p class="login-brand__subtitle">
+          La plataforma de mentorías de RIWI. Conectamos coders, tutores y team leaders.
+        </p>
+        <ul class="login-brand__features">
+          <li class="login-brand__feature">
+            <div class="login-brand__feature-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <span>Gestión de mentorías en tiempo real</span>
+          </li>
+          <li class="login-brand__feature">
+            <div class="login-brand__feature-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+            </div>
+            <span>Feedback y observaciones de progreso</span>
+          </li>
+          <li class="login-brand__feature">
+            <div class="login-brand__feature-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="18" y1="20" x2="18" y2="10"/>
+                <line x1="12" y1="20" x2="12" y2="4"/>
+                <line x1="6" y1="20" x2="6" y2="14"/>
+              </svg>
+            </div>
+            <span>Dashboard de métricas para Team Leaders</span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="login-form-panel">
+        <div class="login-form-wrapper">
+          <header class="login-form__header">
+            <h2 class="login-form__title">¡Bienvenido de vuelta!</h2>
+            <p class="login-form__description">
+              Ingresa tus credenciales para acceder a la plataforma.
+            </p>
+          </header>
+
+          <div id="login-alert" class="alert alert--error hidden" role="alert" aria-live="polite">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span id="login-alert-text">Credenciales incorrectas. Inténtalo de nuevo.</span>
+          </div>
+
+          <form id="login-form" class="login-form" novalidate aria-label="Formulario de inicio de sesión">
+            <div class="form-group">
+              <label for="login-email" class="form-label form-label--required">Correo electrónico</label>
+              <input
+                type="email" id="login-email" name="email" class="form-input"
+                placeholder="tucorreo@riwi.io" autocomplete="email" required
+                aria-required="true" aria-describedby="email-error"
+              />
+              <span id="email-error" class="form-error hidden" role="alert">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                Ingresa un correo electrónico válido.
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="login-password" class="form-label form-label--required">Contraseña</label>
+              <div style="position:relative;">
+                <input
+                  type="password" id="login-password" name="password" class="form-input"
+                  placeholder="••••••••" autocomplete="current-password" required
+                  aria-required="true" aria-describedby="password-error"
+                  style="padding-right: 44px;"
+                />
+                <button
+                  type="button" id="toggle-password" aria-label="Mostrar u ocultar contraseña"
+                  style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--color-text-muted);display:flex;align-items:center;padding:0;"
+                >
+                  <svg id="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
+              </div>
+              <span id="password-error" class="form-error hidden" role="alert">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                La contraseña debe tener al menos 6 caracteres.
+              </span>
+            </div>
+
+            <div class="login-form__forgot">
+              <a href="#" aria-label="Recuperar contraseña">¿Olvidaste tu contraseña?</a>
+            </div>
+
+            <button type="submit" id="login-btn" class="btn btn-primary btn-full btn-lg">
+              <span id="login-btn-text">Iniciar Sesión</span>
+              <svg id="login-spinner" class="hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="animation: spin 1s linear infinite;">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              </svg>
+            </button>
+          </form>
+
+          <p class="login-form__footer">
+            Solo el administrador puede crear cuentas.<br/>
+            Contacta a tu Team Leader si no tienes acceso.
+          </p>
+
+          <div class="login-riwi">
+            <span>Powered by</span>
+            <strong style="color: var(--color-primary);">&lt;/RIWI&gt;</strong>
+          </div>
+        </div>
+      </section>
+    </main>
+    <style>
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+      }
+    </style>
+  `;
 }
 
-// Referencias a elementos del DOM
-const loginForm     = document.getElementById('login-form');
-const emailInput    = document.getElementById('login-email');
-const passwordInput = document.getElementById('login-password');
-const loginBtn      = document.getElementById('login-btn');
-const loginBtnText  = document.getElementById('login-btn-text');
-const loginSpinner  = document.getElementById('login-spinner');
-const loginAlert    = document.getElementById('login-alert');
-const emailError    = document.getElementById('email-error');
-const passwordError = document.getElementById('password-error');
-const togglePwdBtn  = document.getElementById('toggle-password');
-const eyeIcon       = document.getElementById('eye-icon');
-
-// ---- VALIDACIÓN ----
-
-/**
- * Valida que el email tenga formato correcto.
- * @param {string} email
- * @returns {boolean}
- */
 function isValidEmail(email) {
-  // Regex simple pero efectivo para formato email
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email.trim());
 }
 
-/**
- * Muestra un error de validación en un campo específico.
- * @param {HTMLElement} input - El campo con error
- * @param {HTMLElement} errorEl - El span de error
- */
 function showFieldError(input, errorEl) {
   input.classList.add('form-input--error');
   errorEl.classList.remove('hidden');
-  // Accesibilidad: anuncia el error al lector de pantalla
   input.setAttribute('aria-invalid', 'true');
 }
 
-/**
- * Limpia el error de un campo específico.
- * @param {HTMLElement} input
- * @param {HTMLElement} errorEl
- */
 function clearFieldError(input, errorEl) {
   input.classList.remove('form-input--error');
   errorEl.classList.add('hidden');
   input.setAttribute('aria-invalid', 'false');
 }
 
-/**
- * Muestra el alert general de error (credenciales incorrectas).
- * @param {string} message
- */
 function showLoginAlert(message) {
   const alertText = document.getElementById('login-alert-text');
   if (alertText) alertText.textContent = message;
-  loginAlert.classList.remove('hidden');
+  const alert = document.getElementById('login-alert');
+  if (alert) alert.classList.remove('hidden');
 }
 
-/**
- * Oculta el alert general.
- */
 function hideLoginAlert() {
-  loginAlert.classList.add('hidden');
+  const alert = document.getElementById('login-alert');
+  if (alert) alert.classList.add('hidden');
 }
 
-/**
- * Activa/desactiva el estado de carga del botón.
- * @param {boolean} loading
- */
 function setLoadingState(loading) {
-  loginBtn.disabled = loading;
-  loginBtnText.textContent = loading ? 'Iniciando sesión...' : 'Iniciar Sesión';
-  if (loading) {
-    loginSpinner.classList.remove('hidden');
-  } else {
-    loginSpinner.classList.add('hidden');
+  const btn = document.getElementById('login-btn');
+  const btnText = document.getElementById('login-btn-text');
+  const spinner = document.getElementById('login-spinner');
+  if (!btn) return;
+  btn.disabled = loading;
+  if (btnText) btnText.textContent = loading ? 'Iniciando sesión...' : 'Iniciar Sesión';
+  if (spinner) spinner.classList.toggle('hidden', !loading);
+}
+
+export function initLogin() {
+  const loginForm = document.getElementById('login-form');
+  const emailInput = document.getElementById('login-email');
+  const passwordInput = document.getElementById('login-password');
+  const togglePwdBtn = document.getElementById('toggle-password');
+  const eyeIcon = document.getElementById('eye-icon');
+  const emailError = document.getElementById('email-error');
+  const passwordError = document.getElementById('password-error');
+
+  if (!loginForm) return;
+
+  if (togglePwdBtn && passwordInput && eyeIcon) {
+    togglePwdBtn.addEventListener('click', () => {
+      const isPassword = passwordInput.type === 'password';
+      passwordInput.type = isPassword ? 'text' : 'password';
+
+      if (isPassword) {
+        eyeIcon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+        togglePwdBtn.setAttribute('aria-label', 'Ocultar contraseña');
+      } else {
+        eyeIcon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+        togglePwdBtn.setAttribute('aria-label', 'Mostrar contraseña');
+      }
+    });
   }
-}
 
-// ---- TOGGLE MOSTRAR/OCULTAR CONTRASEÑA ----
-if (togglePwdBtn) {
-  togglePwdBtn.addEventListener('click', () => {
-    const isPassword = passwordInput.type === 'password';
+  if (emailInput) {
+    emailInput.addEventListener('input', () => {
+      clearFieldError(emailInput, emailError);
+      hideLoginAlert();
+    });
+  }
 
-    // Cambia el tipo del input
-    passwordInput.type = isPassword ? 'text' : 'password';
+  if (passwordInput) {
+    passwordInput.addEventListener('input', () => {
+      clearFieldError(passwordInput, passwordError);
+      hideLoginAlert();
+    });
+  }
 
-    // Actualiza el ícono y el aria-label
-    if (isPassword) {
-      // Ojo cerrado (contraseña visible)
-      eyeIcon.innerHTML = `
-        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-        <line x1="1" y1="1" x2="23" y2="23"/>
-      `;
-      togglePwdBtn.setAttribute('aria-label', 'Ocultar contraseña');
-    } else {
-      // Ojo abierto (contraseña oculta)
-      eyeIcon.innerHTML = `
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-        <circle cx="12" cy="12" r="3"/>
-      `;
-      togglePwdBtn.setAttribute('aria-label', 'Mostrar contraseña');
-    }
-  });
-}
-
-// ---- LIMPIAR ERRORES EN TIEMPO REAL ----
-// Cuando el usuario empieza a escribir, limpiamos el error
-
-if (emailInput) {
-  emailInput.addEventListener('input', () => {
-    clearFieldError(emailInput, emailError);
-    hideLoginAlert();
-  });
-}
-
-if (passwordInput) {
-  passwordInput.addEventListener('input', () => {
-    clearFieldError(passwordInput, passwordError);
-    hideLoginAlert();
-  });
-}
-
-// ---- SUBMIT DEL FORMULARIO ----
-if (loginForm) {
   loginForm.addEventListener('submit', async (e) => {
-    // Prevenir envío por defecto del formulario
     e.preventDefault();
 
-    // Limpiar errores anteriores
     hideLoginAlert();
     clearFieldError(emailInput, emailError);
     clearFieldError(passwordInput, passwordError);
 
-    const email    = emailInput.value.trim();
-    const password = passwordInput.value;
+    const email = emailInput?.value.trim();
+    const password = passwordInput?.value;
 
-    // ---- Validación ----
     let hasError = false;
 
     if (!email || !isValidEmail(email)) {
@@ -170,30 +241,25 @@ if (loginForm) {
       hasError = true;
     }
 
-    // Si hay errores, no continuar
     if (hasError) {
-      // Foco al primer campo con error para accesibilidad
-      if (emailInput.classList.contains('form-input--error')) {
+      if (emailInput?.classList.contains('form-input--error')) {
         emailInput.focus();
       } else {
-        passwordInput.focus();
+        passwordInput?.focus();
       }
       return;
     }
 
-    // ---- Envío al backend ----
     setLoadingState(true);
 
     try {
-      // loginUser (services/auth.js) valida contra el backend,
-      // guarda token + perfil en sessionStorage y devuelve el usuario
-      await loginUser(email, password);
+      const user = await loginUser(email, password);
 
-      // Redirige a la app principal
-      window.location.href = '../pages/app.html';
-
+      document.body.classList.remove('route-login');
+      document.body.classList.add('route-app');
+      initApp(user);
+      navigateTo('/dashboard');
     } catch (error) {
-      // Muestra el error al usuario
       showLoginAlert(error.message || 'Error al iniciar sesión. Intenta de nuevo.');
       setLoadingState(false);
     }

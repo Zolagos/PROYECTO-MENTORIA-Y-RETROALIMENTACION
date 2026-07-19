@@ -3,7 +3,7 @@
  * Kevin Mendoza | Frontend Developer
  */
 
-function initObservations() {
+export function initObservations() {
   const btnNueva = document.getElementById('btn-nueva-obs');
   if (btnNueva) {
     btnNueva.addEventListener('click', () => openModal('modal-observation'));
@@ -22,7 +22,7 @@ function initObservations() {
 }
 
 /** Envía el formulario de nueva observación */
-function submitObservation() {
+export function submitObservation() {
   const target = document.getElementById('obs-target');
   const text   = document.getElementById('obs-text');
   let valid = true;

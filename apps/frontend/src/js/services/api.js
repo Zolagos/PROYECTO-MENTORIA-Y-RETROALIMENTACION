@@ -20,6 +20,8 @@
  * Kevin Mendoza | Frontend Developer
  */
 
+import { navigateTo } from '../router.js';
+
 // ---- URL BASE DEL BACKEND ----
 // TODO Sprint 4: cambiar a la URL real del servidor de tu equipo
 const API_BASE_URL = 'http://localhost:3000/api';
@@ -36,7 +38,8 @@ const API_BASE_URL = 'http://localhost:3000/api';
  * @param {Object} options - Opciones de fetch (method, body, etc.)
  * @returns {Promise<any>} - Datos de la respuesta JSON
  */
-async function fetchAPI(endpoint, options = {}) {
+
+export async function fetchAPI(endpoint, options = {}) {
   // Obtiene el token de Firebase del sessionStorage
   // Sprint 4: esto vendrá de Firebase Auth directamente
   const token = sessionStorage.getItem('tutorlink_token');
@@ -59,7 +62,7 @@ async function fetchAPI(endpoint, options = {}) {
     if (response.status === 401) {
       sessionStorage.removeItem('tutorlink_user');
       sessionStorage.removeItem('tutorlink_token');
-      window.location.href = '../pages/login.html';
+      navigateTo('/login');
       throw new Error('Tu sesión expiró. Inicia sesión de nuevo.');
     }
 
@@ -87,7 +90,7 @@ async function fetchAPI(endpoint, options = {}) {
 // SERVICIOS DE AUTENTICACIÓN
 // ============================================================
 
-const authService = {
+export const authService = {
   /**
    * Inicia sesión con Firebase y valida contra el backend.
    * TODO Sprint 4: integrar Firebase Auth SDK
@@ -117,7 +120,7 @@ const authService = {
     // TODO Sprint 4: firebase.auth().signOut()
     sessionStorage.removeItem('tutorlink_user');
     sessionStorage.removeItem('tutorlink_token');
-    window.location.href = '../pages/login.html';
+    navigateTo('/login');
   },
 };
 
@@ -125,7 +128,7 @@ const authService = {
 // SERVICIOS DE MENTORÍAS
 // ============================================================
 
-const mentoringService = {
+export const mentoringService = {
   /**
    * Obtiene todas las mentorías (filtradas según el rol).
    * TODO Sprint 4: GET /api/mentorias
@@ -190,7 +193,7 @@ const mentoringService = {
 // SERVICIOS DE OBSERVACIONES
 // ============================================================
 
-const observationsService = {
+export const observationsService = {
   /**
    * Obtiene todas las observaciones.
    * TODO Sprint 4: GET /api/observaciones
@@ -236,7 +239,7 @@ const observationsService = {
 // SERVICIOS DE FEEDBACK
 // ============================================================
 
-const feedbackService = {
+export const feedbackService = {
   /**
    * Obtiene todos los feedbacks.
    * TODO Sprint 4: GET /api/feedback
@@ -262,7 +265,7 @@ const feedbackService = {
 // SERVICIOS DE USUARIOS
 // ============================================================
 
-const usersService = {
+export const usersService = {
   /**
    * Obtiene todos los usuarios (solo TL/ADMIN).
    * TODO Sprint 4: GET /api/usuarios

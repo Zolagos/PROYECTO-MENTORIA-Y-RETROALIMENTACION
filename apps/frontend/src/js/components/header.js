@@ -13,7 +13,7 @@
  * Inicializa el header con la información del usuario activo.
  * @param {Object} user - { nombre, apellido, rol }
  */
-function initHeader(user) {
+export function initHeader(user) {
   const avatarEl = document.getElementById('header-avatar');
   if (!avatarEl || !user) return;
 
@@ -140,7 +140,7 @@ function toggleUserMenu() {
  * Sprint 4: esto vendrá del token de Firebase/backend.
  * Por ahora usa sessionStorage como placeholder.
  */
-function getSessionUser() {
+export function getSessionUser() {
   try {
     const stored = sessionStorage.getItem('tutorlink_user');
     return stored ? JSON.parse(stored) : null;

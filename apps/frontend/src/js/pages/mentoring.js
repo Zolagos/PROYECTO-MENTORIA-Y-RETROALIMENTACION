@@ -1,16 +1,12 @@
-/**
- * mentoring.js — Interacciones de la página de Mentorías
- * Sprint 2: bind de botones y modal
- * Sprint 3: filtros, búsqueda, edición, eliminación en vivo ✔
- * Sprint 4: fetch real al backend
- *
- * Los datos vienen de js/services/mentoring.js (localStorage por ahora).
- *
- * Kevin Mendoza | Frontend Developer
- */
+import {
+  getSessions, getSessionById,
+  getTutors, getTutorById,
+  createSession, updateSession, deleteSession
+} from '../services/mentoring.js'
+import { getMentoringCards } from '../app.js'
+import { openModal, closeModal, showToast } from '../utils.js'
 
-// Se llama desde router.js después de inyectar el HTML
-function initMentoring() {
+export function initMentoring() {
   // Botón "Nueva Mentoría" — abre el modal en modo crear
   const btnNueva = document.getElementById('btn-nueva-mentoria');
   if (btnNueva) {
@@ -58,12 +54,12 @@ function initMentoring() {
 }
 
 /** Vuelve a pintar las cards respetando búsqueda y filtros activos */
-function refreshMentoringCards() {
+export function refreshMentoringCards() {
   applyMentoringFilters();
 }
 
 /** Filtra las mentorías por búsqueda, estado y modalidad */
-function applyMentoringFilters() {
+export function applyMentoringFilters() {
   const container = document.getElementById('mentoring-container');
   if (!container) return;
 
@@ -82,7 +78,7 @@ function applyMentoringFilters() {
 }
 
 /** Alterna el menú de acciones de una card */
-function toggleActionMenu(btn, id) {
+export function toggleActionMenu(btn, id) {
   // Cierra cualquier menú abierto
   document.querySelectorAll('.action-menu__dropdown').forEach(d => d.remove());
 
@@ -117,7 +113,7 @@ function toggleActionMenu(btn, id) {
 }
 
 /** Abre el modal en modo edición con los datos de la mentoría */
-function editMentoring(id) {
+export function editMentoring(id) {
   const mentoring = getSessionById(id);
   if (!mentoring) return;
 
@@ -141,7 +137,7 @@ function editMentoring(id) {
 }
 
 /** Avanza el estado: programada → en-progreso → completada */
-function changeMentoringStatus(id) {
+export function changeMentoringStatus(id) {
   const mentoring = getSessionById(id);
   if (!mentoring) return;
 
@@ -159,7 +155,7 @@ function changeMentoringStatus(id) {
 }
 
 /** Elimina una mentoría previa confirmación */
-function deleteMentoring(id) {
+export function deleteMentoring(id) {
   const mentoring = getSessionById(id);
   if (!mentoring) return;
 
@@ -193,7 +189,7 @@ function clearMentoringErrors() {
 }
 
 /** Alterna el campo enlace/sala según modalidad */
-function toggleModalityField() {
+export function toggleModalityField() {
   const modality = document.getElementById('m-modality')?.value;
   const label = document.getElementById('m-location-label');
   const input = document.getElementById('m-location');
@@ -209,7 +205,7 @@ function toggleModalityField() {
 }
 
 /** Envía el formulario de crear/editar mentoría */
-function submitMentoring() {
+export function submitMentoring() {
   clearMentoringErrors();
 
   const topic    = document.getElementById('m-topic');
