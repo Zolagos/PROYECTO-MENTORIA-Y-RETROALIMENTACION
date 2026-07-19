@@ -2,6 +2,7 @@ import pool from '../config/database.js';
 import * as tutorObservationModel from '../models/tutor.observation.model.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/ApiError.js';
+import ApiResponse from '../utils/ApiResponse.js';
 
 const getUserById = async (id) => {
   const { rows } = await pool.query(
@@ -31,7 +32,7 @@ export const listObservations = asyncHandler(async (req, res) => {
 
   const observations = await tutorObservationModel.findAll({ tutor_id });
 
-  res.status(200).json({ status: 'success', data: observations });
+  return ApiResponse.success(res, observations);
 });
 
 export const getObservation = asyncHandler(async (req, res) => {
@@ -56,7 +57,7 @@ export const getObservation = asyncHandler(async (req, res) => {
     throw new ApiError('Access denied', 403);
   }
 
-  res.status(200).json({ status: 'success', data: observation });
+  return ApiResponse.success(res, observation);
 });
 
 export const createObservation = asyncHandler(async (req, res) => {
@@ -109,7 +110,7 @@ export const createObservation = asyncHandler(async (req, res) => {
     throw error;
   }
 
-  res.status(201).json({ status: 'success', data: newObservation });
+  return ApiResponse.created(res, newObservation);
 });
 
 export const updateObservation = asyncHandler(async (req, res) => {
@@ -150,7 +151,7 @@ export const updateObservation = asyncHandler(async (req, res) => {
     technical_notes: technical_notes?.trim() || null,
   });
 
-  res.status(200).json({ status: 'success', data: updated });
+  return ApiResponse.success(res, updated);
 });
 
 export const deleteObservation = asyncHandler(async (req, res) => {
@@ -173,5 +174,5 @@ export const deleteObservation = asyncHandler(async (req, res) => {
 
   await tutorObservationModel.remove(id);
 
-  res.status(200).json({ status: 'success', message: 'Observation deleted' });
+  return ApiResponse.success(res, null, 'Observation deleted');
 });

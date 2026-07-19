@@ -2,6 +2,7 @@ import pool from '../config/database.js';
 import * as mentoringRequestModel from '../models/mentoring.request.model.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/ApiError.js';
+import ApiResponse from '../utils/ApiResponse.js';
 
 export const listMentoringRequests = asyncHandler(async (req, res) => {
   const { id } = req.user;
@@ -31,7 +32,7 @@ export const listMentoringRequests = asyncHandler(async (req, res) => {
 
   const requests = await mentoringRequestModel.findAll({ coder_id });
 
-  res.status(200).json({ status: 'success', data: requests });
+  return ApiResponse.success(res, requests);
 });
 
 export const getMentoringRequest = asyncHandler(async (req, res) => {
@@ -65,7 +66,7 @@ export const getMentoringRequest = asyncHandler(async (req, res) => {
     throw new ApiError('Access denied', 403);
   }
 
-  res.status(200).json({ status: 'success', data: request });
+  return ApiResponse.success(res, request);
 });
 
 export const createMentoringRequest = asyncHandler(async (req, res) => {
@@ -117,5 +118,5 @@ export const createMentoringRequest = asyncHandler(async (req, res) => {
     throw error;
   }
 
-  res.status(201).json({ status: 'success', data: mentoringRequest });
+  return ApiResponse.created(res, mentoringRequest);
 });

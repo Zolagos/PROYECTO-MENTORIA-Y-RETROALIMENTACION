@@ -2,6 +2,7 @@ import pool from '../config/database.js';
 import * as sessionFeedbackModel from '../models/session.feedback.model.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/ApiError.js';
+import ApiResponse from '../utils/ApiResponse.js';
 
 const getUserById = async (id) => {
   const { rows } = await pool.query(
@@ -50,7 +51,7 @@ export const getSessionFeedback = asyncHandler(async (req, res) => {
 
   const feedback = await sessionFeedbackModel.findBySessionAndCoder(sessionId, coderId);
 
-  res.status(200).json({ status: 'success', data: feedback });
+  return ApiResponse.success(res, feedback);
 });
 
 export const createSessionFeedback = asyncHandler(async (req, res) => {
@@ -125,5 +126,5 @@ export const createSessionFeedback = asyncHandler(async (req, res) => {
     throw error;
   }
 
-  res.status(201).json({ status: 'success', data: feedback });
+  return ApiResponse.created(res, feedback);
 });
