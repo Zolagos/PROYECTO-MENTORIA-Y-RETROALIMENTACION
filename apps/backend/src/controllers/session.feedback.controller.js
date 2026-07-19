@@ -43,10 +43,10 @@ export const getSessionFeedback = asyncHandler(async (req, res) => {
     }
   }
 
-  const coderId = user.role === 'Coder' ? user.id : req.query.coder_id;
+  const coderId = user.role === 'Coder' ? user.id : Number(req.query.coder_id);
 
-  if (!coderId) {
-    throw new ApiError('coder_id is required for Team Leaders', 400);
+  if (!Number.isInteger(coderId) || coderId <= 0) {
+    throw new ApiError('coder_id is required and must be a positive integer for Team Leaders', 400);
   }
 
   const feedback = await sessionFeedbackModel.findBySessionAndCoder(sessionId, coderId);

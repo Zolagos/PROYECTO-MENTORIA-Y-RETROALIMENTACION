@@ -22,7 +22,7 @@ export const listObservations = asyncHandler(async (req, res) => {
     throw new ApiError('User not found', 401);
   }
 
-  let { coder_id } = req.query;
+  let coder_id = req.query.coder_id ? Number(req.query.coder_id) : undefined;
 
   if (user.role === 'Coder') {
     coder_id = user.id;
@@ -73,16 +73,21 @@ export const createObservation = asyncHandler(async (req, res) => {
 
   const { coder_id, session_id, observation, recommendation } = req.body;
 
-  if (!coder_id || !Number.isInteger(coder_id)) {
-    throw new ApiError('coder_id is required and must be an integer', 400);
+  const parsedCoderId = Number(coder_id);
+  if (!Number.isInteger(parsedCoderId) || parsedCoderId <= 0) {
+    throw new ApiError('coder_id is required and must be a positive integer', 400);
   }
 
   if (!observation || typeof observation !== 'string' || observation.trim().length === 0) {
     throw new ApiError('observation is required and must be a non-empty string', 400);
   }
 
-  if (session_id !== undefined && session_id !== null && !Number.isInteger(session_id)) {
-    throw new ApiError('session_id must be an integer', 400);
+  let parsedSessionId;
+  if (session_id !== undefined && session_id !== null) {
+    parsedSessionId = Number(session_id);
+    if (!Number.isInteger(parsedSessionId) || parsedSessionId <= 0) {
+      throw new ApiError('session_id must be a positive integer', 400);
+    }
   }
 
   if (recommendation !== undefined && recommendation !== null && typeof recommendation !== 'string') {
@@ -92,9 +97,9 @@ export const createObservation = asyncHandler(async (req, res) => {
   let newObservation;
   try {
     newObservation = await coderObservationModel.create({
-      coder_id,
+      coder_id: parsedCoderId,
       observed_by: user.id,
-      session_id: session_id || null,
+      session_id: parsedSessionId || null,
       observation: observation.trim(),
       recommendation: recommendation?.trim() || null,
     });
