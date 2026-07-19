@@ -3,14 +3,14 @@ import * as mentoringRequestModel from '../models/mentoring.request.model.js';
 
 export const listMentoringRequests = async (req, res) => {
   try {
-    const { uid } = req.user;
+    const { id } = req.user;
 
     const { rows: users } = await pool.query(
       `SELECT u.id, r.name as role
        FROM users u
        JOIN roles r ON u.role_id = r.id
-       WHERE u.uid = $1`,
-      [uid]
+       WHERE u.id = $1`,
+      [id]
     );
 
     if (users.length === 0) {
@@ -39,14 +39,14 @@ export const listMentoringRequests = async (req, res) => {
 
 export const getMentoringRequest = async (req, res) => {
   try {
-    const { uid } = req.user;
+    const { id } = req.user;
 
     const { rows: users } = await pool.query(
       `SELECT u.id, r.name as role
        FROM users u
        JOIN roles r ON u.role_id = r.id
-       WHERE u.uid = $1`,
-      [uid]
+       WHERE u.id = $1`,
+      [id]
     );
 
     if (users.length === 0) {
@@ -119,7 +119,6 @@ export const createMentoringRequest = async (req, res) => {
     }
 
     const mentoringRequest = await mentoringRequestModel.createRequest({ coder_id: user.id, topic: topic.trim(), description: description?.trim() });
-    //coder_id se obtiene automáticamente del usuario autenticado vía Firebase token → uid → consulta DB → user.id.
     res.status(201).json({ status: 'success', data: mentoringRequest });
   } catch (error) {
     if (error.code === '23503') {

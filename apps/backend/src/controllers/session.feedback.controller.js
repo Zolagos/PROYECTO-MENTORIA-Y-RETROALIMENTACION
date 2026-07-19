@@ -1,20 +1,20 @@
 import pool from '../config/database.js';
 import * as sessionFeedbackModel from '../models/session.feedback.model.js';
 
-const getUserByUid = async (uid) => {
+const getUserById = async (id) => {
   const { rows } = await pool.query(
     `SELECT u.id, r.name AS role
      FROM users u
      JOIN roles r ON u.role_id = r.id
-     WHERE u.uid = $1`,
-    [uid]
+     WHERE u.id = $1`,
+    [id]
   );
   return rows[0] || null;
 };
 
 export const getSessionFeedback = async (req, res) => {
   try {
-    const user = await getUserByUid(req.user.uid);
+    const user = await getUserById(req.user.id);
 
     if (!user) {
       return res.status(401).json({ status: 'error', message: 'User not found' });
@@ -58,7 +58,7 @@ export const getSessionFeedback = async (req, res) => {
 
 export const createSessionFeedback = async (req, res) => {
   try {
-    const user = await getUserByUid(req.user.uid);
+    const user = await getUserById(req.user.id);
 
     if (!user) {
       return res.status(401).json({ status: 'error', message: 'User not found' });
