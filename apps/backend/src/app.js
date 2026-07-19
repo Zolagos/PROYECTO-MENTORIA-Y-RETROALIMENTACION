@@ -5,12 +5,13 @@ import morgan from "morgan";
 
 import routes from "./routes/index.js";
 import errorMiddleware from "./middleware/error.middleware.js";
+import env from "./config/env.js";
 
 const app = express();
 
-
-
-app.use(cors());
+app.use(cors({
+  origin: env.CORS_ORIGIN,
+}));
 app.use(
   helmet({
     crossOriginOpenerPolicy: false,
