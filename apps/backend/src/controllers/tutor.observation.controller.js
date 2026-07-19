@@ -2,13 +2,14 @@ import * as tutorObservationModel from '../models/tutor.observation.model.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
+import { ROLES } from '../config/roles.js';
 
 export const listObservations = asyncHandler(async (req, res) => {
   let tutor_id = req.query.tutor_id ? Number(req.query.tutor_id) : undefined;
-  //obtener el id del tutor si el usuario es un tutor sino sera undefined
-  if (req.user.role === 'Tutor') {
+
+  if (req.user.role === ROLES.TUTOR) {
     tutor_id = req.user.id;
-  } else if (req.user.role !== 'Team Leader') {
+  } else if (req.user.role !== ROLES.TEAM_LEADER) {
     throw new ApiError('Access denied', 403);
   }
 
@@ -18,7 +19,7 @@ export const listObservations = asyncHandler(async (req, res) => {
 });
 
 export const getObservation = asyncHandler(async (req, res) => {
-  if (req.user.role !== 'Team Leader' && req.user.role !== 'Tutor') {
+  if (req.user.role !== ROLES.TEAM_LEADER && req.user.role !== ROLES.TUTOR) {
     throw new ApiError('Access denied', 403);
   }
 
@@ -29,7 +30,7 @@ export const getObservation = asyncHandler(async (req, res) => {
     throw new ApiError('Observation not found', 404);
   }
 
-  if (req.user.role === 'Tutor' && observation.tutor_id !== req.user.id) {
+  if (req.user.role === ROLES.TUTOR && observation.tutor_id !== req.user.id) {
     throw new ApiError('Access denied', 403);
   }
 
@@ -37,7 +38,7 @@ export const getObservation = asyncHandler(async (req, res) => {
 });
 
 export const createObservation = asyncHandler(async (req, res) => {
-  if (req.user.role !== 'Team Leader') {
+  if (req.user.role !== ROLES.TEAM_LEADER) {
     throw new ApiError('Only Team Leaders can create tutor observations', 403);
   }
 
@@ -89,7 +90,7 @@ export const createObservation = asyncHandler(async (req, res) => {
 });
 
 export const updateObservation = asyncHandler(async (req, res) => {
-  if (req.user.role !== 'Team Leader') {
+  if (req.user.role !== ROLES.TEAM_LEADER) {
     throw new ApiError('Only Team Leaders can edit tutor observations', 403);
   }
 
@@ -124,7 +125,7 @@ export const updateObservation = asyncHandler(async (req, res) => {
 });
 
 export const deleteObservation = asyncHandler(async (req, res) => {
-  if (req.user.role !== 'Team Leader') {
+  if (req.user.role !== ROLES.TEAM_LEADER) {
     throw new ApiError('Only Team Leaders can delete tutor observations', 403);
   }
 

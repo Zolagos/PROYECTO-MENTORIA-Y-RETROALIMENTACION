@@ -2,13 +2,14 @@ import * as mentoringRequestModel from '../models/mentoring.request.model.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
+import { ROLES } from '../config/roles.js';
 
 export const listMentoringRequests = asyncHandler(async (req, res) => {
   let { coder_id } = req.query;
 
-  if (req.user.role === 'Coder') {
+  if (req.user.role === ROLES.CODER) {
     coder_id = req.user.id;
-  } else if (req.user.role === 'Team Leader') {
+  } else if (req.user.role === ROLES.TEAM_LEADER) {
     coder_id = coder_id ? Number(coder_id) : undefined;
   } else {
     throw new ApiError('Access denied', 403);
@@ -20,7 +21,7 @@ export const listMentoringRequests = asyncHandler(async (req, res) => {
 });
 
 export const getMentoringRequest = asyncHandler(async (req, res) => {
-  if (req.user.role !== 'Coder' && req.user.role !== 'Team Leader') {
+  if (req.user.role !== ROLES.CODER && req.user.role !== ROLES.TEAM_LEADER) {
     throw new ApiError('Access denied', 403);
   }
 
@@ -30,7 +31,7 @@ export const getMentoringRequest = asyncHandler(async (req, res) => {
     throw new ApiError('Mentoring request not found', 404);
   }
 
-  if (req.user.role === 'Coder' && request.coder_id !== req.user.id) {
+  if (req.user.role === ROLES.CODER && request.coder_id !== req.user.id) {
     throw new ApiError('Access denied', 403);
   }
 
@@ -38,7 +39,7 @@ export const getMentoringRequest = asyncHandler(async (req, res) => {
 });
 
 export const createMentoringRequest = asyncHandler(async (req, res) => {
-  if (req.user.role !== 'Coder') {
+  if (req.user.role !== ROLES.CODER) {
     throw new ApiError('Only coders can create mentoring requests', 403);
   }
 

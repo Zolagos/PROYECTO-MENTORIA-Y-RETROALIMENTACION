@@ -3,9 +3,10 @@ import * as sessionFeedbackModel from '../models/session.feedback.model.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
+import { ROLES } from '../config/roles.js';
 
 export const getSessionFeedback = asyncHandler(async (req, res) => {
-  if (req.user.role !== 'Coder' && req.user.role !== 'Team Leader') {
+  if (req.user.role !== ROLES.CODER && req.user.role !== ROLES.TEAM_LEADER) {
     throw new ApiError('Access denied', 403);
   }
 
@@ -15,7 +16,7 @@ export const getSessionFeedback = asyncHandler(async (req, res) => {
     throw new ApiError('sessionId must be an integer', 400);
   }
 
-  if (req.user.role === 'Coder') {
+  if (req.user.role === ROLES.CODER) {
     const { rows: coderSessions } = await pool.query(
       `SELECT 1 FROM session_coders WHERE session_id = $1 AND coder_id = $2`,
       [sessionId, req.user.id]
@@ -26,7 +27,7 @@ export const getSessionFeedback = asyncHandler(async (req, res) => {
     }
   }
 
-  const coderId = req.user.role === 'Coder' ? req.user.id : Number(req.query.coder_id);
+  const coderId = req.user.role === ROLES.CODER ? req.user.id : Number(req.query.coder_id);
 
   if (!Number.isInteger(coderId) || coderId <= 0) {
     throw new ApiError('coder_id is required and must be a positive integer for Team Leaders', 400);
@@ -38,7 +39,7 @@ export const getSessionFeedback = asyncHandler(async (req, res) => {
 });
 
 export const createSessionFeedback = asyncHandler(async (req, res) => {
-  if (req.user.role !== 'Coder') {
+  if (req.user.role !== ROLES.CODER) {
     throw new ApiError('Only coders can submit feedback', 403);
   }
 
