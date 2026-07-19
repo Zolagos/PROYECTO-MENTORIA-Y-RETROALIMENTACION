@@ -177,7 +177,10 @@ export const deleteObservation = asyncHandler(async (req, res) => {
     throw new ApiError('Observation not found', 404);
   }
 
-  await tutorObservationModel.remove(id);
+  const deleted = await tutorObservationModel.remove(id);
+  if (!deleted) {
+    throw new ApiError('Observation not found', 404);
+  }
 
   return ApiResponse.success(res, null, 'Observation deleted');
 });
