@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import authMiddleware from '../middleware/auth.middleware.js';
+import attachDbUser from '../middleware/attachDbUser.middleware.js';
 import {
   listObservations,
   getObservation,
@@ -10,10 +11,12 @@ import {
 
 const router = Router();
 
-router.get('/coder-observations', authMiddleware, listObservations);
-router.get('/coder-observations/:id', authMiddleware, getObservation);
-router.post('/coder-observations', authMiddleware, createObservation);
-router.put('/coder-observations/:id', authMiddleware, updateObservation);
-router.delete('/coder-observations/:id', authMiddleware, deleteObservation);
+router.use(authMiddleware, attachDbUser);
+
+router.get('/coder-observations', listObservations);
+router.get('/coder-observations/:id', getObservation);
+router.post('/coder-observations', createObservation);
+router.put('/coder-observations/:id', updateObservation);
+router.delete('/coder-observations/:id', deleteObservation);
 
 export default router;

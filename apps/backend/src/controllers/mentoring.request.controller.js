@@ -1,30 +1,14 @@
-import pool from '../config/database.js';
 import * as mentoringRequestModel from '../models/mentoring.request.model.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 
 export const listMentoringRequests = asyncHandler(async (req, res) => {
-  const { id } = req.user;
-
-  const { rows: users } = await pool.query(
-    `SELECT u.id, r.name as role
-     FROM users u
-     JOIN roles r ON u.role_id = r.id
-     WHERE u.id = $1`,
-    [id]
-  );
-
-  if (users.length === 0) {
-    throw new ApiError('User not found', 401);
-  }
-
-  const user = users[0];
   let { coder_id } = req.query;
 
-  if (user.role === 'Coder') {
-    coder_id = user.id;
-  } else if (user.role === 'Team Leader') {
+  if (req.user.role === 'Coder') {
+    coder_id = req.user.id;
+  } else if (req.user.role === 'Team Leader') {
     coder_id = coder_id ? Number(coder_id) : undefined;
   } else {
     throw new ApiError('Access denied', 403);
@@ -36,23 +20,7 @@ export const listMentoringRequests = asyncHandler(async (req, res) => {
 });
 
 export const getMentoringRequest = asyncHandler(async (req, res) => {
-  const { id } = req.user;
-
-  const { rows: users } = await pool.query(
-    `SELECT u.id, r.name as role
-     FROM users u
-     JOIN roles r ON u.role_id = r.id
-     WHERE u.id = $1`,
-    [id]
-  );
-
-  if (users.length === 0) {
-    throw new ApiError('User not found', 401);
-  }
-
-  const user = users[0];
-
-  if (user.role !== 'Coder' && user.role !== 'Team Leader') {
+  if (req.user.role !== 'Coder' && req.user.role !== 'Team Leader') {
     throw new ApiError('Access denied', 403);
   }
 
@@ -62,7 +30,7 @@ export const getMentoringRequest = asyncHandler(async (req, res) => {
     throw new ApiError('Mentoring request not found', 404);
   }
 
-  if (user.role === 'Coder' && request.coder_id !== user.id) {
+  if (req.user.role === 'Coder' && request.coder_id !== req.user.id) {
     throw new ApiError('Access denied', 403);
   }
 
@@ -70,23 +38,7 @@ export const getMentoringRequest = asyncHandler(async (req, res) => {
 });
 
 export const createMentoringRequest = asyncHandler(async (req, res) => {
-  const { id } = req.user;
-
-  const { rows: users } = await pool.query(
-    `SELECT u.id, r.name as role
-     FROM users u
-     JOIN roles r ON u.role_id = r.id
-     WHERE u.id = $1`,
-    [id]
-  );
-
-  if (users.length === 0) {
-    throw new ApiError('User not found', 401);
-  }
-
-  const user = users[0];
-
-  if (user.role !== 'Coder') {
+  if (req.user.role !== 'Coder') {
     throw new ApiError('Only coders can create mentoring requests', 403);
   }
 
@@ -110,7 +62,7 @@ export const createMentoringRequest = asyncHandler(async (req, res) => {
 
   let mentoringRequest;
   try {
-    mentoringRequest = await mentoringRequestModel.createRequest({ coder_id: user.id, topic: topic.trim(), description: description?.trim() });
+    mentoringRequest = await mentoringRequestModel.createRequest({ coder_id: req.user.id, topic: topic.trim(), description: description?.trim() });
   } catch (error) {
     if (error.code === '23503') {
       throw new ApiError('coder_id does not reference an existing user', 400);

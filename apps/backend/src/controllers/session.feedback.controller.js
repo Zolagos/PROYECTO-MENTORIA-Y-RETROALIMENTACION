@@ -4,25 +4,8 @@ import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 
-const getUserById = async (id) => {
-  const { rows } = await pool.query(
-    `SELECT u.id, r.name AS role
-     FROM users u
-     JOIN roles r ON u.role_id = r.id
-     WHERE u.id = $1`,
-    [id]
-  );
-  return rows[0] || null;
-};
-
 export const getSessionFeedback = asyncHandler(async (req, res) => {
-  const user = await getUserById(req.user.id);
-
-  if (!user) {
-    throw new ApiError('User not found', 401);
-  }
-
-  if (user.role !== 'Coder' && user.role !== 'Team Leader') {
+  if (req.user.role !== 'Coder' && req.user.role !== 'Team Leader') {
     throw new ApiError('Access denied', 403);
   }
 
@@ -32,10 +15,10 @@ export const getSessionFeedback = asyncHandler(async (req, res) => {
     throw new ApiError('sessionId must be an integer', 400);
   }
 
-  if (user.role === 'Coder') {
+  if (req.user.role === 'Coder') {
     const { rows: coderSessions } = await pool.query(
       `SELECT 1 FROM session_coders WHERE session_id = $1 AND coder_id = $2`,
-      [sessionId, user.id]
+      [sessionId, req.user.id]
     );
 
     if (coderSessions.length === 0) {
@@ -43,7 +26,7 @@ export const getSessionFeedback = asyncHandler(async (req, res) => {
     }
   }
 
-  const coderId = user.role === 'Coder' ? user.id : Number(req.query.coder_id);
+  const coderId = req.user.role === 'Coder' ? req.user.id : Number(req.query.coder_id);
 
   if (!Number.isInteger(coderId) || coderId <= 0) {
     throw new ApiError('coder_id is required and must be a positive integer for Team Leaders', 400);
@@ -55,13 +38,7 @@ export const getSessionFeedback = asyncHandler(async (req, res) => {
 });
 
 export const createSessionFeedback = asyncHandler(async (req, res) => {
-  const user = await getUserById(req.user.id);
-
-  if (!user) {
-    throw new ApiError('User not found', 401);
-  }
-
-  if (user.role !== 'Coder') {
+  if (req.user.role !== 'Coder') {
     throw new ApiError('Only coders can submit feedback', 403);
   }
 
@@ -86,7 +63,7 @@ export const createSessionFeedback = asyncHandler(async (req, res) => {
 
   const { rows: coderSessions } = await pool.query(
     `SELECT 1 FROM session_coders WHERE session_id = $1 AND coder_id = $2`,
-    [sessionId, user.id]
+    [sessionId, req.user.id]
   );
 
   if (coderSessions.length === 0) {
@@ -111,7 +88,7 @@ export const createSessionFeedback = asyncHandler(async (req, res) => {
   try {
     feedback = await sessionFeedbackModel.create({
       sessionId,
-      coderId: user.id,
+      coderId: req.user.id,
       tutorRating: tutor_rating,
       sessionRating: session_rating,
       comments: comments?.trim() || null,

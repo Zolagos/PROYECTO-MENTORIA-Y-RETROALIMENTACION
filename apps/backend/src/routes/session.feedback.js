@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import authMiddleware from '../middleware/auth.middleware.js';
+import attachDbUser from '../middleware/attachDbUser.middleware.js';
 import {
   getSessionFeedback,
   createSessionFeedback,
@@ -7,7 +8,9 @@ import {
 
 const router = Router();
 
-router.get('/sessions/:sessionId/feedback', authMiddleware, getSessionFeedback);
-router.post('/sessions/:sessionId/feedback', authMiddleware, createSessionFeedback);
+router.use(authMiddleware, attachDbUser);
+
+router.get('/sessions/:sessionId/feedback', getSessionFeedback);
+router.post('/sessions/:sessionId/feedback', createSessionFeedback);
 
 export default router;

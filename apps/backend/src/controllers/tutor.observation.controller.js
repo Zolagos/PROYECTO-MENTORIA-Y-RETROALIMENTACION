@@ -1,32 +1,14 @@
-import pool from '../config/database.js';
 import * as tutorObservationModel from '../models/tutor.observation.model.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 
-const getUserById = async (id) => {
-  const { rows } = await pool.query(
-    `SELECT u.id, r.name AS role
-     FROM users u
-     JOIN roles r ON u.role_id = r.id
-     WHERE u.id = $1`,
-    [id]
-  );
-  return rows[0] || null;
-};
-
 export const listObservations = asyncHandler(async (req, res) => {
-  const user = await getUserById(req.user.id);
-
-  if (!user) {
-    throw new ApiError('User not found', 401);
-  }
-
   let tutor_id = req.query.tutor_id ? Number(req.query.tutor_id) : undefined;
-
-  if (user.role === 'Tutor') {
-    tutor_id = user.id;
-  } else if (user.role !== 'Team Leader') {
+  //obtener el id del tutor si el usuario es un tutor sino sera undefined
+  if (req.user.role === 'Tutor') {
+    tutor_id = req.user.id;
+  } else if (req.user.role !== 'Team Leader') {
     throw new ApiError('Access denied', 403);
   }
 
@@ -36,13 +18,7 @@ export const listObservations = asyncHandler(async (req, res) => {
 });
 
 export const getObservation = asyncHandler(async (req, res) => {
-  const user = await getUserById(req.user.id);
-
-  if (!user) {
-    throw new ApiError('User not found', 401);
-  }
-
-  if (user.role !== 'Team Leader' && user.role !== 'Tutor') {
+  if (req.user.role !== 'Team Leader' && req.user.role !== 'Tutor') {
     throw new ApiError('Access denied', 403);
   }
 
@@ -53,7 +29,7 @@ export const getObservation = asyncHandler(async (req, res) => {
     throw new ApiError('Observation not found', 404);
   }
 
-  if (user.role === 'Tutor' && observation.tutor_id !== user.id) {
+  if (req.user.role === 'Tutor' && observation.tutor_id !== req.user.id) {
     throw new ApiError('Access denied', 403);
   }
 
@@ -61,13 +37,7 @@ export const getObservation = asyncHandler(async (req, res) => {
 });
 
 export const createObservation = asyncHandler(async (req, res) => {
-  const user = await getUserById(req.user.id);
-
-  if (!user) {
-    throw new ApiError('User not found', 401);
-  }
-
-  if (user.role !== 'Team Leader') {
+  if (req.user.role !== 'Team Leader') {
     throw new ApiError('Only Team Leaders can create tutor observations', 403);
   }
 
@@ -102,7 +72,7 @@ export const createObservation = asyncHandler(async (req, res) => {
   try {
     newObservation = await tutorObservationModel.create({
       tutor_id: parsedTutorId,
-      observed_by: user.id,
+      observed_by: req.user.id,
       session_id: parsedSessionId || null,
       observation: observation.trim(),
       recommendation: recommendation?.trim() || null,
@@ -119,13 +89,7 @@ export const createObservation = asyncHandler(async (req, res) => {
 });
 
 export const updateObservation = asyncHandler(async (req, res) => {
-  const user = await getUserById(req.user.id);
-
-  if (!user) {
-    throw new ApiError('User not found', 401);
-  }
-
-  if (user.role !== 'Team Leader') {
+  if (req.user.role !== 'Team Leader') {
     throw new ApiError('Only Team Leaders can edit tutor observations', 403);
   }
 
@@ -160,13 +124,7 @@ export const updateObservation = asyncHandler(async (req, res) => {
 });
 
 export const deleteObservation = asyncHandler(async (req, res) => {
-  const user = await getUserById(req.user.id);
-
-  if (!user) {
-    throw new ApiError('User not found', 401);
-  }
-
-  if (user.role !== 'Team Leader') {
+  if (req.user.role !== 'Team Leader') {
     throw new ApiError('Only Team Leaders can delete tutor observations', 403);
   }
 
