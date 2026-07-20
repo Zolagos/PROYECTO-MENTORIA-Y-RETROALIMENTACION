@@ -3,16 +3,27 @@ import {
   getTutors, getTutorById,
   createSession, updateSession, deleteSession,
   changeRequestStatus, deleteRequestItem
+  loadSessions, loadTutors,
 } from '../services/mentoring.js'
 import { getMentoringCards } from '../app.js'
 import { getSessionUser } from '../components/header.js'
 import { openModal, closeModal, showToast } from '../utils.js'
 
-export function initMentoring() {
-  // Loads sessions + mentoring requests and paints the initial cards
+export async function initMentoring() {
+  // 1. Fetch sessions and tutors from the API in parallel
+  await Promise.all([loadSessions(), loadTutors()]);
+
+  // 2. Populate the tutor select in the modal
+  const tutorSelect = document.getElementById('m-tutor');
+  if (tutorSelect) {
+    tutorSelect.innerHTML = '<option value="">Select tutor...</option>' +
+      getTutors().map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+  }
+
+  // 3. Render the session cards
   refreshMentoringCards();
 
-  // "New Mentorship" button — opens the modal in create mode
+  // 4. "New Mentorship" button — opens the modal in create mode
   const btnNueva = document.getElementById('btn-new-mentoring');
   if (btnNueva) {
     btnNueva.addEventListener('click', () => {
@@ -21,7 +32,7 @@ export function initMentoring() {
     });
   }
 
-  // Grid / list view toggle
+  // 5. Grid / list view toggle
   const btnGrid = document.getElementById('view-grid');
   const btnList = document.getElementById('view-list');
   const container = document.getElementById('mentoring-container');
@@ -48,7 +59,7 @@ export function initMentoring() {
     });
   }
 
-  // Live search and filters
+  // 6. Live search and filters
   const searchInput = document.getElementById('search-mentoring');
   const filterStatus = document.getElementById('filter-status');
   const filterModality = document.getElementById('filter-modality');
@@ -147,7 +158,16 @@ export function toggleActionMenu(btn, id) {
 
   const dropdown = document.createElement('div');
   dropdown.className = 'action-menu__dropdown';
-  dropdown.innerHTML = itemsHtml;
+  dropdown.innerHTML = `
+    <button class="action-menu__item" onclick="editMentoring(${id})">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Edit
+    </button>
+    <button class="action-menu__item action-menu__item--danger" onclick="deleteMentoring(${id})">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      Delete
+    </button>
+  `;
 
   btn.parentElement.appendChild(dropdown);
 
@@ -186,22 +206,151 @@ export function editMentoring(id) {
   openModal('modal-mentoring');
 }
 
-/** Advances a session's status: scheduled → in-progress → completed (local only) */
-export function changeMentoringStatus(id) {
-  const mentoring = getSessionById(id);
-  if (!mentoring || mentoring.kind !== 'session') return;
+/** Opens a modal to choose a new status for the session */
+export function openStatusModal(id) {
+  const session = getSessionById(id);
+  if (!session) return;
 
-  const next = { 'scheduled': 'in-progress', 'in-progress': 'completed' };
+  const existing = document.getElementById('modal-status');
+  if (existing) existing.remove();
 
-  if (!next[mentoring.status]) {
-    showToast('This mentorship is already finished.', 'info');
-    return;
-  }
+  const options = {
+    'scheduled': [
+      { label: 'In Progress', value: 'in-progress' },
+      { label: 'Cancelled', value: 'cancelled' },
+    ],
+    'in-progress': [
+      { label: 'Completed', value: 'completed' },
+      { label: 'Cancelled', value: 'cancelled' },
+    ],
+    'completed': [],
+    'cancelled': [
+      { label: 'Reactivate (Scheduled)', value: 'scheduled' },
+    ],
+  };
 
-  mentoring.status = next[mentoring.status];
-  updateSession(mentoring);
+  const available = options[session.status] || [];
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay active';
+  overlay.id = 'modal-status';
+  overlay.style.display = 'flex';
+  overlay.innerHTML = `
+    <div class="modal modal--sm">
+      <div class="modal__header">
+        <h2 class="modal__title">Change status</h2>
+        <button class="modal__close" onclick="closeStatusModal()" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <p style="font-size:var(--font-size-sm);color:var(--color-text-secondary);margin:0 0 var(--space-3);">
+          ${session.topic} · <span class="badge badge--${session.status}">${session.status}</span>
+        </p>
+        ${available.length === 0
+          ? '<p class="text-muted">No further status changes available.</p>'
+          : `<div style="display:flex;flex-direction:column;gap:var(--space-2);">
+               ${available.map(opt => `
+                 <button class="btn btn-primary" onclick="confirmStatusChange(${id}, '${opt.value}')" style="width:100%">
+                   ${opt.label}
+                 </button>
+               `).join('')}
+             </div>`
+        }
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+
+  const escHandler = (e) => {
+    if (e.key === 'Escape') { closeStatusModal(); document.removeEventListener('keydown', escHandler); }
+  };
+  document.addEventListener('keydown', escHandler);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeStatusModal(); });
+}
+
+export function closeStatusModal() {
+  const overlay = document.getElementById('modal-status');
+  if (overlay) { overlay.remove(); document.body.style.overflow = ''; }
+}
+
+export function confirmStatusChange(id, newStatus) {
+  const session = getSessionById(id);
+  if (!session) return;
+
+  session.status = newStatus;
+  updateSession(session);
   refreshMentoringCards();
-  showToast(`Mentorship now in status: ${mentoring.status}.`, 'success');
+  closeStatusModal();
+  showToast(`Status changed to "${newStatus}".`, 'success');
+}
+
+/** Opens a unified modal showing the tutor first, then participants */
+export function openParticipantsModal(id) {
+  const session = getSessionById(id);
+  if (!session) return;
+  if (!session.tutorDetail && !session.codersDetail.length) return;
+
+  const existing = document.getElementById('modal-participants');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay active';
+  overlay.id = 'modal-participants';
+  overlay.style.display = 'flex';
+  overlay.innerHTML = `
+    <div class="modal modal--sm">
+      <div class="modal__header">
+        <h2 class="modal__title">Session members</h2>
+        <button class="modal__close" onclick="closeParticipantsModal()" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        ${session.tutorDetail
+          ? `<div style="margin-bottom:var(--space-3);padding-bottom:var(--space-3);border-bottom:1px solid var(--color-border);">
+               <p style="font-size:var(--font-size-xs);color:var(--color-text-muted);margin:0 0 var(--space-1);">TUTOR</p>
+               <div style="display:flex;justify-content:space-between;align-items:center;">
+                 <span style="font-weight:600;">${session.tutorDetail.name} ${session.tutorDetail.lastname}</span>
+                 <span class="badge badge--role-tutor">${session.tutorDetail.role}</span>
+               </div>
+             </div>`
+          : ''
+        }
+        ${session.codersDetail.length === 0
+          ? '<p class="text-muted">No participants assigned.</p>'
+          : `<p style="font-size:var(--font-size-xs);color:var(--color-text-muted);margin:0 0 var(--space-1);">PARTICIPANTS</p>
+             <ul style="list-style:none;padding:0;margin:0;">
+               ${session.codersDetail.map(c => `
+                 <li style="display:flex;justify-content:space-between;align-items:center;padding:var(--space-2) 0;border-bottom:1px solid var(--color-border);">
+                   <span>${c.name} ${c.lastname}</span>
+                   <span class="badge badge--role-${c.role.toLowerCase().replace(/\s+/g, '-')}">${c.role}</span>
+                 </li>
+               `).join('')}
+             </ul>`
+        }
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+
+  const escHandler = (e) => {
+    if (e.key === 'Escape') { closeParticipantsModal(); document.removeEventListener('keydown', escHandler); }
+  };
+  document.addEventListener('keydown', escHandler);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeParticipantsModal(); });
+}
+
+export function closeParticipantsModal() {
+  const overlay = document.getElementById('modal-participants');
+  if (overlay) {
+    overlay.remove();
+    document.body.style.overflow = '';
+  }
 }
 
 /** Accepts or denies a mentoring request against the backend */

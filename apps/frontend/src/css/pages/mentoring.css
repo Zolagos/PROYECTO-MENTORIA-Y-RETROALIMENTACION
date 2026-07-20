@@ -70,6 +70,8 @@
   overflow: hidden;
   transition: box-shadow var(--transition-normal), transform var(--transition-normal);
   box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
 }
 
 .mentoring-detail-card:hover {
@@ -82,6 +84,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  flex: 1;
 }
 
 .mentoring-detail-card__header {

@@ -2,6 +2,8 @@ import { registerRoute, navigateTo } from './router.js';
 import { getSessionUser, initHeader } from './components/header.js';
 import { buildSidebar, initSidebarCollapse } from './components/sidebar.js';
 import { getTutors } from './services/mentoring.js';
+import { getSessions } from './services/mentoring.js';
+import { getObservations } from './services/observations.js';
 import { formatDate } from './utils.js';
 
 export function initApp(user) {
@@ -272,7 +274,11 @@ export function renderMentoring() {
         </button>
       </div>
     </div>
-    <div class="mentoring-grid" id="mentoring-container"></div>
+    <div class="mentoring-grid" id="mentoring-container">
+      <div class="empty-state">
+        <p class="empty-state__description">Loading sessions...</p>
+      </div>
+    </div>
     ${getModalMentoring(canCreate)}
   `;
 }
@@ -291,28 +297,20 @@ export function renderObservations() {
         New Observation
       </button>` : ''}
     </div>
-    <div class="content-grid">
+    <div>
       <div>
         <div class="filters-bar" style="margin-bottom:var(--space-5);">
           <div class="search-bar">
             <svg class="search-bar__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="search" class="search-bar__input" id="search-obs" placeholder="Search coder..." aria-label="Search observation" />
+            <input type="search" class="search-bar__input" id="search-obs" placeholder="Search observation..." aria-label="Search observation" />
           </div>
-          <select class="filters-bar__select" aria-label="Filter by type">
+          <select class="filters-bar__select" id="filter-obs-type" aria-label="Filter by type">
             <option value="">All types</option>
-            <option value="positive">Positive</option>
-            <option value="improvement">To improve</option>
+            <option value="coder">Coder</option>
+            <option value="tutor">Tutor</option>
           </select>
         </div>
-        <div class="timeline" id="observations-timeline">
-          ${getObservationsTimeline()}
-        </div>
-      </div>
-      <div>
-        <div class="card">
-          <div class="card__header"><h3 class="card__title">Tracked Coders</h3></div>
-          <div class="card__body" style="padding:var(--space-3);">${getCodersList()}</div>
-        </div>
+        <div class="timeline" id="observations-timeline"></div>
       </div>
     </div>
     ${getModalObservation(canAdd)}
@@ -655,9 +653,9 @@ function getSessionCard(m) {
         </div>
         <p class="mentoring-detail-card__desc">${m.desc}</p>
         <div class="mentoring-detail-card__info">
-          <div class="mentoring-detail-card__info-item">
+          <div class="mentoring-detail-card__info-item" onclick="openParticipantsModal(${m.id})" style="cursor:pointer">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <span>${m.tutor}</span>
+            <span style="text-decoration:underline dotted">${m.tutor}</span>
           </div>
           <div class="mentoring-detail-card__info-item">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -667,22 +665,22 @@ function getSessionCard(m) {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             <span class="mentoring-type mentoring-type--${m.modality}">${m.modality === 'virtual' ? '🔗 Virtual' : '📍 In-person'}</span>
           </div>
-          <div class="mentoring-detail-card__info-item">
+          <div class="mentoring-detail-card__info-item" onclick="openParticipantsModal(${m.id})" style="cursor:pointer">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-            <span>${m.coders.length} participante${m.coders.length !== 1 ? 's' : ''}</span>
+            <span style="text-decoration:underline dotted">${m.coders.length} participante${m.coders.length !== 1 ? 's' : ''}</span>
           </div>
         </div>
       </div>
-      <div class="mentoring-detail-card__bottom">
-        <div class="participant-avatars" aria-label="Participants">
-          ${m.coders.slice(0,3).map(c => `<div class="participant-avatars__item" title="${c}">${c}</div>`).join('')}
-          ${m.coders.length > 3 ? `<div class="participant-avatars__item participant-avatars__item--more">+${m.coders.length - 3}</div>` : ''}
-        </div>
+      <div class="mentoring-detail-card__bottom" style="gap:var(--space-2)">
+        <button class="btn btn-sm btn-secondary" onclick="openStatusModal(${m.id})" style="flex:1">Status</button>
         ${m.status === 'completed'
-          ? `<button class="btn btn-sm btn-secondary" onclick="navigateTo('/feedback')">View feedback</button>`
-          : m.status === 'scheduled'
-          ? `<button class="btn btn-sm btn-primary" onclick="alert('Join the mentorship')">Join</button>`
-          : `<span class="text-sm text-muted">In progress</span>`
+          ? `
+            <button class="btn btn-sm btn-secondary" onclick="navigateTo('/feedback')" style="flex:1">Feedback</button>
+            <button class="btn btn-sm btn-secondary" onclick="navigateTo('/observations')" style="flex:1">Observations</button>
+          `
+          : m.status === 'in-progress'
+          ? `<button class="btn btn-sm btn-secondary" onclick="navigateTo('/observations')" style="flex:1">Observations</button>`
+          : ''
         }
       </div>
     </article>
@@ -755,7 +753,6 @@ function getModalMentoring(canCreate) {
                 <label for="m-tutor" class="form-label form-label--required">Tutor</label>
                 <select id="m-tutor" class="form-select" required>
                   <option value="">Select tutor...</option>
-                  ${getTutors().map(t => `<option value="${t.id}">${t.name}</option>`).join('')}
                 </select>
                 <span class="form-error hidden" id="m-tutor-error">Select a tutor.</span>
               </div>
@@ -803,60 +800,41 @@ function getModalMentoring(canCreate) {
   `;
 }
 
-/** Generates the sample observations timeline */
-function getObservationsTimeline() {
-  const sample = [
-    { type:'blue', author:'María Torres (TL)', initials:'MT', date:'10 Jul 2026', target:'Kevin Mendoza', text:'Excellent progress in JavaScript. Kevin shows a solid understanding of closures and can explain them with his own examples.' },
-    { type:'green', author:'Carlos López (Tutor)', initials:'CL', date:'8 Jul 2026', target:'Kevin Mendoza', text:'Active participation in the database mentoring session. Recommended to reinforce the concept of normalization.' },
-    { type:'orange', author:'María Torres (TL)', initials:'MT', date:'5 Jul 2026', target:'Juan Pérez', text:'The coder is asked to show greater commitment to the set schedule. This is the second time they have arrived late to the mentoring session.' },
-  ];
+/** Generates the observations timeline */
+export function getObservationsTimeline(list) {
+  const items = list || getObservations();
+  if (!items.length) {
+    return '<p style="text-align:center;color:var(--color-text-muted);padding:var(--space-10) 0;">No observations found.</p>';
+  }
 
-  return sample.map(o => `
-    <div class="timeline-item timeline-item--${o.type}">
+  return items.map(o => {
+    const typeClass = o.type === 'tutor' ? 'timeline-item--orange' : 'timeline-item--green';
+    return `
+    <div class="timeline-item ${typeClass}" data-type="${o.type}">
       <div class="timeline-item__card">
         <div class="timeline-item__header">
           <div class="timeline-item__author">
             <div class="timeline-item__avatar">${o.initials}</div>
             <div>
-              <div class="timeline-item__author-name">${o.author}</div>
+              <div class="timeline-item__author-name">${o.observer}</div>
               <div class="timeline-item__date">${o.date}</div>
             </div>
           </div>
-          <button class="btn btn-ghost btn-sm btn-icon" aria-label="Edit observation">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
+          <span class="badge badge--obs-${o.type}">${o.type === 'tutor' ? 'Tutor' : 'Coder'}</span>
         </div>
-        <p class="timeline-item__text">${o.text}</p>
-        <span class="timeline-item__target">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          ${o.target}
-        </span>
-      </div>
-    </div>
-  `).join('');
-}
-
-/** Generates the coder list in the observations sidebar */
-function getCodersList() {
-  const coders = [
-    { name:'Kevin Mendoza', clan:'Alpha', obs: 2 },
-    { name:'Juan Pérez', clan:'Beta', obs: 1 },
-    { name:'Laura Castro', clan:'Alpha', obs: 3 },
-  ];
-  return coders.map(c => `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--space-3);border-radius:var(--radius-md);cursor:pointer;transition:background-color 150ms;"
-      onmouseenter="this.style.backgroundColor='var(--color-bg)'"
-      onmouseleave="this.style.backgroundColor='transparent'">
-      <div style="display:flex;align-items:center;gap:var(--space-2);">
-        <div class="table__user-avatar">${c.name.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
-        <div>
-          <div style="font-size:var(--font-size-sm);font-weight:600;">${c.name}</div>
-          <div style="font-size:var(--font-size-xs);color:var(--color-text-muted);">Clan ${c.clan}</div>
+        <p class="timeline-item__text">${o.observation}</p>
+        ${o.recommendation ? `<div class="timeline-item__extra"><strong>Recommendation:</strong> ${o.recommendation}</div>` : ''}
+        ${o.technicalNotes ? `<div class="timeline-item__extra"><strong>Technical notes:</strong> ${o.technicalNotes}</div>` : ''}
+        <div class="timeline-item__meta">
+          <span class="timeline-item__target">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            ${o.target}
+          </span>
+          <span class="timeline-item__session">${o.sessionTopic}</span>
         </div>
       </div>
-      <span class="badge badge--info">${c.obs}</span>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 /** New observation modal */

@@ -194,6 +194,16 @@ export const sessionsService = {
 };
 
 // ============================================================
+// SESSIONS SERVICES
+// ============================================================
+
+export const sessionsService = {
+  async getAll() {
+    return await fetchAPI('/sessions');
+  },
+};
+
+// ============================================================
 // OBSERVATIONS SERVICES
 // ============================================================
 
@@ -204,7 +214,7 @@ export const observationsService = {
    */
   async getAll(filters = {}) {
     const params = new URLSearchParams(filters).toString();
-    return await fetchAPI(`/observation${params ? '?' + params : ''}`);
+    return await fetchAPI(`/observations${params ? '?' + params : ''}`);
   },
 
   /**

@@ -300,6 +300,10 @@
 .badge--role-tutor  { background-color: rgba(0, 196, 140, 0.12); color: var(--color-accent-green); }
 .badge--role-coder  { background-color: rgba(255, 107, 53, 0.12); color: var(--color-accent-orange); }
 
+/* Observation type badges */
+.badge--obs-tutor { background-color: rgba(94, 165, 41, 0.12); color: #5EA529; }
+.badge--obs-coder { background-color: rgba(225, 42, 251, 0.12); color: #E12AFB; }
+
 /* ============================================================
    TABLES
    ============================================================ */

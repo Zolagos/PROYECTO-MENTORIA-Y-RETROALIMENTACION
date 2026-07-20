@@ -127,3 +127,67 @@ VALUES
      'Repaso de estructuras de datos',
      'Quisiera reforzar pilas, colas y listas enlazadas antes del proyecto.',
      '2025-01-19 11:00:00-05', 'denied');
+    ('Pair Programming', 'laura.castro@tutorlink.com')
+    ) AS v(topic, email)
+JOIN inserted_sessions s ON s.topic = v.topic
+JOIN users u ON u.email = v.email;
+
+-- ---- CODER OBSERVATIONS ----
+INSERT INTO coder_observations (coder_id, observed_by, session_id, observation, recommendation)
+SELECT u_coder.id, u_obs.id, s.id, v.observation, v.recommendation
+FROM (VALUES
+    ('kevin.mendoza@tutorlink.com', 'ana.garcia@tutorlink.com', 'Fundamentos de JavaScript',
+     'Kevin necesita reforzar el concepto de prototipos, pero entiende bien closures.',
+     'Practicar ejercicios de la cadena de prototipos.'),
+
+    ('kevin.mendoza@tutorlink.com', 'ana.garcia@tutorlink.com', 'Pair Programming',
+     'Buena comunicación como navegante, debe mejorar cuando le toca conducir.',
+     'Alternar más seguido los roles durante la práctica.'),
+
+    ('juan.perez@tutorlink.com', 'ana.garcia@tutorlink.com', 'Fundamentos de JavaScript',
+     'Juan tiene claros los fundamentos, participó activamente y ayudó a sus compañeros.',
+     'Puede comenzar a explorar temas avanzados por su cuenta.'),
+
+    ('juan.perez@tutorlink.com', 'ana.garcia@tutorlink.com', 'Fundamentos de JavaScript',
+     'Se le dificulta la depuración en consola, confunde typeof con instanceOf.',
+     'Hacer el ejercicio guiado de depuración paso a paso.'),
+
+    ('laura.castro@tutorlink.com', 'carlos.lopez@tutorlink.com', 'Resolución de dudas SQL',
+     'Laura comprende bien JOINs pero tiene dudas con subconsultas correlacionadas.',
+     'Revisar el capítulo de subconsultas y resolver 5 ejercicios.'),
+
+    ('laura.castro@tutorlink.com', 'ana.garcia@tutorlink.com', 'Pair Programming',
+     'Buena lógica pero tiende a acaparar el teclado, debe practicar la comunicación.',
+     'Rotar roles cada 15 minutos con cronómetro.')
+) AS v(coder_email, observer_email, session_topic, observation, recommendation)
+JOIN users u_coder ON u_coder.email = v.coder_email
+JOIN users u_obs   ON u_obs.email   = v.observer_email
+JOIN mentoring_sessions s ON s.topic = v.session_topic;
+
+-- ---- TUTOR OBSERVATIONS ----
+INSERT INTO tutor_observations (tutor_id, observed_by, session_id, observation, recommendation, technical_notes)
+SELECT u_tutor.id, u_obs.id, s.id, v.observation, v.recommendation, v.technical_notes
+FROM (VALUES
+    ('ana.garcia@tutorlink.com', 'maria.torres@tutorlink.com', 'Fundamentos de JavaScript',
+     'Manejó bien el grupo, supo responder dudas técnicas con claridad.',
+     'Incluir más ejemplos prácticos antes de la teoría.',
+     'Se recomienda repasar el temario antes de cada sesión.'),
+
+    ('ana.garcia@tutorlink.com', 'maria.torres@tutorlink.com', 'Pair Programming',
+     'Excelente dinamismo, logró mantener a los coders enfocados todo el tiempo.',
+     'Podría intentar sesiones más largas o con más participantes.',
+     'Considerar para mentorías grupales avanzadas.'),
+
+    ('carlos.lopez@tutorlink.com', 'maria.torres@tutorlink.com', 'Resolución de dudas SQL',
+     'Buena disposición y paciencia, pero la explicación fue muy teórica.',
+     'Preparar un ejercicio práctico para la siguiente sesión individual.',
+     'Tiene potencial para liderar sesiones grupales.'),
+
+    ('carlos.lopez@tutorlink.com', 'maria.torres@tutorlink.com', 'Resolución de dudas SQL',
+     'Debe mejorar la comunicación escrita en la descripción de la sesión.',
+     'Usar listas de verificación en las descripciones de las sesiones.',
+     'Monitorear progreso en las próximas 2 semanas.')
+) AS v(tutor_email, observer_email, session_topic, observation, recommendation, technical_notes)
+JOIN users u_tutor ON u_tutor.email = v.tutor_email
+JOIN users u_obs   ON u_obs.email   = v.observer_email
+JOIN mentoring_sessions s ON s.topic = v.session_topic;
