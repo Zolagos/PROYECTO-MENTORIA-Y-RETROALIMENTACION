@@ -4,16 +4,7 @@ export const findAll = async ({ role, userId, sessionId, coderId, tutorId } = {}
   const queries = [];
   const params = [];
   let idx = 0;
-  const p = (val) => { idx++; params.push(val); return idx; };
-
-  const SELECT = `SELECT
-    type, id, target_id,
-    target_name, target_lastname,
-    observed_by,
-    observer_name, observer_lastname,
-    session_id, session_topic,
-    observation, recommendation, technical_notes,
-    created_at`;
+  const p = (val) => { idx++; params.push(val); return `$${idx}`; };
 
   if (role === 'Tutor') {
     queries.push(`
