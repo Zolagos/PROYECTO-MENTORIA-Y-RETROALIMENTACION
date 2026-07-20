@@ -3,8 +3,11 @@ import { handleLogout } from './components/sidebar.js'
 import { openModal, closeModal, showToast } from './utils.js'
 import {
   toggleActionMenu, editMentoring,
-  changeMentoringStatus, deleteMentoring,
-  submitMentoring, toggleModalityField
+  deleteMentoring,
+  submitMentoring, toggleModalityField,
+  openParticipantsModal, closeParticipantsModal,
+  openStatusModal, closeStatusModal, confirmStatusChange,
+  respondMentoringRequest,
 } from './pages/mentoring.js'
 import { submitObservation } from './pages/observations.js'
 import { setRating, submitFeedback } from './pages/feedback.js'
@@ -21,10 +24,15 @@ window.closeModal = closeModal
 window.showToast = showToast
 window.toggleActionMenu = toggleActionMenu
 window.editMentoring = editMentoring
-window.changeMentoringStatus = changeMentoringStatus
 window.deleteMentoring = deleteMentoring
+window.respondMentoringRequest = respondMentoringRequest
 window.submitMentoring = submitMentoring
 window.toggleModalityField = toggleModalityField
+window.openParticipantsModal = openParticipantsModal
+window.closeParticipantsModal = closeParticipantsModal
+window.openStatusModal = openStatusModal
+window.closeStatusModal = closeStatusModal
+window.confirmStatusChange = confirmStatusChange
 window.submitObservation = submitObservation
 window.setRating = setRating
 window.submitFeedback = submitFeedback

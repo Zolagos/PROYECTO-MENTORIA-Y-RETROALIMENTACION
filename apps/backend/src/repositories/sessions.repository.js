@@ -1,7 +1,28 @@
 import pool from '../config/database.js';
 export const findById = async (id) => {
     const { rows } = await pool.query(
-        'SELECT * FROM mentoring_sessions WHERE id = $1',
+        `SELECT ms.*,
+                t.name AS tutor_name,
+                t.lastname AS tutor_lastname,
+                u.name AS creator_name,
+                u.lastname AS creator_lastname,
+                COALESCE(
+                    (SELECT json_agg(json_build_object(
+                        'id', c.id,
+                        'name', c.name,
+                        'lastname', c.lastname,
+                        'role', r.name
+                    ))
+                    FROM session_coders sc
+                    JOIN users c ON sc.coder_id = c.id
+                    JOIN roles r ON c.role_id = r.id
+                    WHERE sc.session_id = ms.id),
+                    '[]'::json
+                ) AS coders
+         FROM mentoring_sessions ms
+         LEFT JOIN users t ON ms.tutor_id = t.id
+         JOIN users u ON ms.created_by = u.id
+         WHERE ms.id = $1`,
         [id]
     );
     return rows[0] ?? null;

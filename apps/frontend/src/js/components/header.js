@@ -1,26 +1,25 @@
 /**
- * header.js — Lógica del header principal
+ * header.js — Main header logic
  *
- * ¿Qué hace?
- * - Actualiza el avatar del header con las iniciales del usuario
- * - Maneja el menú de usuario al hacer click en el avatar
- * - Prepara el botón de notificaciones
- *
- * Kevin Mendoza | Frontend Developer
+ * What does it do?
+ * - Updates the header avatar with the user's initials
+ * - Handles the user menu when clicking the avatar
+ * - Sets up the notifications button
+
  */
 
 /**
- * Inicializa el header con la información del usuario activo.
- * @param {Object} user - { nombre, apellido, rol }
+ * Initializes the header with the active user's information.
+ * @param {Object} user - { name, lastName, role }
  */
 export function initHeader(user) {
   const avatarEl = document.getElementById('header-avatar');
   if (!avatarEl || !user) return;
 
-  const initials = `${user.nombre?.[0] || ''}${user.apellido?.[0] || ''}`.toUpperCase() || '?';
+  const initials = `${user.name?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() || '?';
   avatarEl.textContent = initials;
 
-  // Click en avatar: toggle del menú de usuario
+  // Click on avatar: toggle the user menu
   avatarEl.addEventListener('click', toggleUserMenu);
   avatarEl.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -31,10 +30,10 @@ export function initHeader(user) {
 }
 
 /**
- * Muestra u oculta el menú desplegable del usuario en el header.
+ * Shows or hides the user dropdown menu in the header.
  */
 function toggleUserMenu() {
-  // Si el menú ya existe, lo cierra
+  // If the menu already exists, close it
   const existing = document.getElementById('user-dropdown');
   if (existing) {
     existing.remove();
@@ -49,7 +48,7 @@ function toggleUserMenu() {
   const dropdown = document.createElement('div');
   dropdown.id = 'user-dropdown';
   dropdown.setAttribute('role', 'menu');
-  dropdown.setAttribute('aria-label', 'Menú de usuario');
+  dropdown.setAttribute('aria-label', 'User menu');
   dropdown.style.cssText = `
     position: fixed;
     top: ${rect.bottom + 8}px;
@@ -73,7 +72,7 @@ function toggleUserMenu() {
     </style>
     <div style="padding: 12px 16px; border-bottom: 1px solid var(--color-border);">
       <div style="font-size: 13px; font-weight: 600; color: var(--color-text-primary);" id="dropdown-name">
-        Mi Cuenta
+        My Account
       </div>
       <div style="font-size: 12px; color: var(--color-text-muted);" id="dropdown-role"></div>
     </div>
@@ -92,7 +91,7 @@ function toggleUserMenu() {
         onmouseleave="this.style.backgroundColor='transparent'"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        Mi Perfil
+        My Profile
       </button>
       <button
         role="menuitem"
@@ -108,23 +107,23 @@ function toggleUserMenu() {
         onmouseleave="this.style.backgroundColor='transparent'"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Cerrar Sesión
+        Log Out
       </button>
     </div>
   `;
 
   document.body.appendChild(dropdown);
 
-  // Rellena nombre y rol
+  // Fills in name and role
   const user = getSessionUser();
   if (user) {
     const dropName = document.getElementById('dropdown-name');
     const dropRole = document.getElementById('dropdown-role');
-    if (dropName) dropName.textContent = `${user.nombre} ${user.apellido}`;
-    if (dropRole) dropRole.textContent = user.rol;
+    if (dropName) dropName.textContent = `${user.name} ${user.lastName}`;
+    if (dropRole) dropRole.textContent = user.role;
   }
 
-  // Cierra al hacer click fuera
+  // Closes when clicking outside
   setTimeout(() => {
     document.addEventListener('click', function closeDropdown(e) {
       if (!dropdown.contains(e.target) && e.target !== avatarEl) {
@@ -136,13 +135,13 @@ function toggleUserMenu() {
 }
 
 /**
- * Obtiene el usuario de la sesión actual.
- * Sprint 4: esto vendrá del token de Firebase/backend.
- * Por ahora usa sessionStorage como placeholder.
+ * Gets the current session's user.
+ * Sprint 4: this will come from the Firebase/backend token.
+ * For now it uses sessionStorage as a placeholder.
  */
 export function getSessionUser() {
   try {
-    const stored = sessionStorage.getItem('tutorlink_user');
+    const stored = sessionStorage.getItem('tutorcode_user');
     return stored ? JSON.parse(stored) : null;
   } catch {
     return null;

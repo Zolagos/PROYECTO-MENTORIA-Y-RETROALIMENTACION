@@ -1,45 +1,9 @@
-/* ============================================================
-   observations.css — Observaciones y Feedback
-   TutorLink | Kevin Mendoza | Frontend Developer
-   ============================================================ */
 
-/* Timeline de observaciones */
-.timeline {
-  position: relative;
-  padding-left: var(--space-8);
-}
 
-.timeline::before {
-  content: '';
-  position: absolute;
-  left: 11px;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: var(--color-border);
-}
-
+/* Observations timeline */
 .timeline-item {
-  position: relative;
   margin-bottom: var(--space-6);
 }
-
-.timeline-item::before {
-  content: '';
-  position: absolute;
-  left: calc(-1 * var(--space-8) + 4px);
-  top: 6px;
-  width: 16px;
-  height: 16px;
-  border-radius: var(--radius-full);
-  background: var(--color-primary);
-  border: 3px solid var(--color-surface);
-  box-shadow: 0 0 0 2px var(--color-primary);
-}
-
-.timeline-item--green::before  { background: var(--color-accent-green); box-shadow: 0 0 0 2px var(--color-accent-green); }
-.timeline-item--orange::before { background: var(--color-accent-orange); box-shadow: 0 0 0 2px var(--color-accent-orange); }
-.timeline-item--red::before    { background: var(--color-accent-red); box-shadow: 0 0 0 2px var(--color-accent-red); }
 
 .timeline-item__card {
   background: var(--color-surface);
@@ -107,7 +71,36 @@
   font-weight: 500;
 }
 
-/* Rating de estrellas (para feedback) */
+.timeline-item__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.timeline-item__session {
+  font-size: var(--font-size-xs);
+  color: #FF9A1F;
+  background-color: rgba(255, 154, 31, 0.12);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+  font-weight: 500;
+}
+
+.timeline-item__extra {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  padding: var(--space-2) var(--space-3);
+  margin-top: var(--space-2);
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-primary-light);
+  line-height: 1.6;
+}
+
+/* Star rating (for feedback) */
 .star-rating {
   display: flex;
   gap: var(--space-1);

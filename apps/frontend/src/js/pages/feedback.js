@@ -1,16 +1,16 @@
 /**
- * feedback.js — Interacciones de la página de Feedback
+ * feedback.js — Feedback page interactions
  * Kevin Mendoza | Frontend Developer
  */
 
 export function initFeedback() {
-  const btnNuevo = document.getElementById('btn-nuevo-feedback');
+  const btnNuevo = document.getElementById('btn-new-feedback');
   if (btnNuevo) {
     btnNuevo.addEventListener('click', () => openModal('modal-feedback'));
   }
 }
 
-/** Establece la calificación por estrellas */
+/** Sets the star rating */
 export function setRating(value) {
   const stars = document.querySelectorAll('.star-rating__star');
   const input = document.getElementById('fb-rating');
@@ -30,11 +30,11 @@ export function setRating(value) {
     }
   });
 
-  // Limpia error de rating si existía
+  // Clears the rating error if it existed
   document.getElementById('fb-rating-error')?.classList.add('hidden');
 }
 
-/** Envía el formulario de feedback */
+/** Submits the feedback form */
 export function submitFeedback() {
   const mentoring = document.getElementById('fb-mentoring');
   const rating    = document.getElementById('fb-rating');
@@ -60,5 +60,5 @@ export function submitFeedback() {
 
   // TODO Sprint 4: POST /api/feedback
   closeModal('modal-feedback');
-  showToast('¡Feedback enviado! Gracias por tu retroalimentación.', 'success');
+  showToast('Feedback sent! Thank you for your feedback.', 'success');
 }

@@ -1,24 +1,24 @@
 /**
- * auth.js — Servicio de autenticación
+ * auth.js — Authentication service
  *
- * ¿Qué hace?
- * Maneja el flujo completo de autenticación contra el backend Express:
- * 1. Envía email + contraseña a POST /api/auth/login
- * 2. El backend valida con bcrypt y devuelve un JWT + perfil
- * 3. Traduce el rol del backend al formato del frontend
- * 4. Guarda token y perfil en sessionStorage
+ * What does it do?
+ * Handles the full authentication flow against the Express backend:
+ * 1. Sends email + password to POST /api/auth/login
+ * 2. The backend validates with bcrypt and returns a JWT + profile
+ * 3. Translates the backend role into the frontend format
+ * 4. Saves the token and profile in sessionStorage
  *
- * Se carga en login.html (antes de pages/login.js).
+ * Loaded in login.html (before pages/login.js).
  *
  * Kevin Mendoza | Frontend Developer
  */
 
-// ---- URL BASE DEL BACKEND ----
+// ---- BACKEND BASE URL ----
 const AUTH_API_URL = 'http://localhost:3000/api';
 
-// ---- MAPEO DE ROLES ----
-// El backend usa los nombres de la tabla roles; el frontend usa
-// las claves cortas de SIDEBAR_MENUS (sidebar.js)
+// ---- ROLE MAPPING ----
+// The backend uses the names from the roles table; the frontend uses
+// the short keys from SIDEBAR_MENUS (sidebar.js)
 const ROLE_MAP = {
   'Team Leader': 'TL',
   'Tutor': 'TUTOR',
@@ -26,12 +26,12 @@ const ROLE_MAP = {
 };
 
 /**
- * Inicia sesión contra el backend.
- * Llamada desde login.js cuando el usuario envía el formulario.
+ * Logs in against the backend.
+ * Called from login.js when the user submits the form.
  *
  * @param {string} email
  * @param {string} password
- * @returns {Promise<Object>} - Perfil del usuario guardado en sesión
+ * @returns {Promise<Object>} - User profile saved in session
  */
 export async function loginUser(email, password) {
   let response;
@@ -43,33 +43,33 @@ export async function loginUser(email, password) {
       body: JSON.stringify({ email, password }),
     });
   } catch {
-    // Error de red: backend caído o sin conexión
-    throw new Error('No se pudo conectar con el servidor. Verifica que el backend esté corriendo.');
+    // Network error: backend down or no connection
+    throw new Error('Could not connect to the server. Please check if the backend is running.');
   }
 
   const result = await response.json().catch(() => ({}));
 
   if (!response.ok) {
     if (response.status === 401) {
-      throw new Error('Correo o contraseña incorrectos.');
+      throw new Error('Email or password are incorrect.');
     }
-    throw new Error(result.message || 'Error al iniciar sesión. Intenta de nuevo.');
+    throw new Error(result.message || 'Error occurred while trying to log in. Please try again.');
   }
 
   const { token, user } = result.data;
 
-  // Traduce el perfil del backend al formato que usa el frontend
+  // Translates the backend profile into the shape used by the frontend
   const sessionUser = {
     id:       user.id,
-    nombre:   user.name,
-    apellido: user.lastname,
+    name:     user.name,
+    lastName: user.lastname,
     email:    user.email,
-    rol:      ROLE_MAP[user.role] || 'CODER',
+    role:     ROLE_MAP[user.role] || 'CODER',
     clan:     user.clanId,
   };
 
-  sessionStorage.setItem('tutorlink_token', token);
-  sessionStorage.setItem('tutorlink_user', JSON.stringify(sessionUser));
+  sessionStorage.setItem('tutorcode_token', token);
+  sessionStorage.setItem('tutorcode_user', JSON.stringify(sessionUser));
 
   return sessionUser;
 }

@@ -1,31 +1,26 @@
-/* ============================================================
-   layout.css — Header, Sidebar, Footer y estructura general
-   TutorLink | Kevin Mendoza | Frontend Developer
-   ============================================================ */
-
-/* ---- ESTRUCTURA PRINCIPAL ---- */
-/* El app-shell envuelve todo: sidebar + contenido principal */
+/* ---- MAIN STRUCTURE ---- */
+/* The app-shell wraps everything: sidebar + main content */
 .app-shell {
   display: flex;
   min-height: 100vh;
 }
 
-/* Área de contenido principal (todo lo que no es sidebar) */
+/* Main content area (everything that isn't the sidebar) */
 .main-wrapper {
   display: flex;
   flex-direction: column;
   flex: 1;
-  min-width: 0; /* Evita overflow en flex */
+  min-width: 0; /* Prevents overflow in flex */
   margin-left: var(--sidebar-width);
   transition: margin-left var(--transition-normal);
 }
 
-/* Cuando el sidebar está colapsado */
+/* When the sidebar is collapsed */
 .main-wrapper.sidebar-collapsed {
   margin-left: var(--sidebar-width-collapsed);
 }
 
-/* Área de contenido de página */
+/* Page content area */
 .page-content {
   flex: 1;
   padding: var(--space-6);
@@ -49,12 +44,12 @@
   z-index: 100;
 }
 
-/* Sidebar colapsado en desktop */
+/* Collapsed sidebar on desktop */
 .sidebar.collapsed {
   width: var(--sidebar-width-collapsed);
 }
 
-/* Logo y nombre del proyecto */
+/* Logo and project name */
 .sidebar__brand {
   display: flex;
   align-items: center;
@@ -87,13 +82,13 @@
   transition: opacity var(--transition-normal);
 }
 
-/* Oculta el texto cuando está colapsado */
+/* Hide the text when collapsed */
 .sidebar.collapsed .sidebar__brand-name {
   opacity: 0;
   pointer-events: none;
 }
 
-/* Perfil del usuario en el sidebar */
+/* User profile in the sidebar */
 .sidebar__user {
   display: flex;
   align-items: center;
@@ -142,7 +137,7 @@
   pointer-events: none;
 }
 
-/* Navegación del sidebar */
+/* Sidebar navigation */
 .sidebar__nav {
   flex: 1;
   padding: var(--space-4) var(--space-2);
@@ -150,7 +145,7 @@
   overflow-x: hidden;
 }
 
-/* Etiqueta de sección */
+/* Section label */
 .sidebar__section-label {
   font-size: var(--font-size-xs);
   font-weight: 600;
@@ -166,7 +161,7 @@
   opacity: 0;
 }
 
-/* Item de navegación */
+/* Navigation item */
 .sidebar__nav-item {
   display: flex;
   align-items: center;
@@ -191,7 +186,7 @@
   color: var(--color-text-white);
 }
 
-/* Item activo */
+/* Active item */
 .sidebar__nav-item.active {
   background-color: var(--color-primary);
   color: var(--color-text-white);
@@ -201,7 +196,7 @@
   background-color: var(--color-primary-dark);
 }
 
-/* Icono del item */
+/* Item icon */
 .sidebar__nav-icon {
   width: 20px;
   height: 20px;
@@ -211,7 +206,7 @@
   justify-content: center;
 }
 
-/* Texto del item — se oculta cuando colapsado */
+/* Item text — hidden when collapsed */
 .sidebar__nav-text {
   font-size: var(--font-size-sm);
   font-weight: 500;
@@ -225,7 +220,7 @@
   width: 0;
 }
 
-/* Botón de colapsar al fondo del sidebar */
+/* Collapse button at the bottom of the sidebar */
 .sidebar__footer {
   padding: var(--space-4);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -289,14 +284,14 @@
   box-shadow: var(--shadow-sm);
 }
 
-/* Lado izquierdo: título de la página */
+/* Left side: page title */
 .header__left {
   display: flex;
   align-items: center;
   gap: var(--space-4);
 }
 
-/* Botón menú para mobile */
+/* Menu button for mobile */
 .header__menu-btn {
   display: none;
   align-items: center;
@@ -321,14 +316,14 @@
   color: var(--color-text-primary);
 }
 
-/* Lado derecho: acciones y perfil */
+/* Right side: actions and profile */
 .header__right {
   display: flex;
   align-items: center;
   gap: var(--space-3);
 }
 
-/* Botón de notificaciones */
+/* Notifications button */
 .header__icon-btn {
   position: relative;
   display: flex;
@@ -349,7 +344,7 @@
   color: var(--color-primary);
 }
 
-/* Badge de notificación */
+/* Notification badge */
 .header__badge {
   position: absolute;
   top: 4px;
@@ -361,7 +356,7 @@
   border: 2px solid var(--color-surface);
 }
 
-/* Avatar en el header */
+/* Avatar in the header */
 .header__avatar {
   width: 36px;
   height: 36px;
@@ -383,7 +378,7 @@
 }
 
 /* ============================================================
-   PAGE HEADER (título de sección dentro del contenido)
+   PAGE HEADER (section title within the content)
    ============================================================ */
 .page-header {
   display: flex;
@@ -407,7 +402,7 @@
 }
 
 /* ============================================================
-   OVERLAY (para mobile cuando sidebar está abierto)
+   OVERLAY (for mobile when sidebar is open)
    ============================================================ */
 .sidebar-overlay {
   display: none;
@@ -425,7 +420,7 @@
    RESPONSIVE — Mobile
    ============================================================ */
 @media (max-width: 768px) {
-  /* En mobile, el sidebar se convierte en un panel deslizante */
+  /* On mobile, the sidebar becomes a sliding panel */
   .sidebar {
     transform: translateX(-100%);
     width: var(--sidebar-width);
@@ -433,18 +428,18 @@
     z-index: 100;
   }
 
-  /* Sidebar abierto en mobile */
+  /* Sidebar open on mobile */
   .sidebar.mobile-open {
     transform: translateX(0);
   }
 
-  /* El contenido ocupa todo el ancho en mobile */
+  /* Content takes up the full width on mobile */
   .main-wrapper,
   .main-wrapper.sidebar-collapsed {
     margin-left: 0;
   }
 
-  /* Mostrar botón hamburguesa */
+  /* Show hamburger button */
   .header__menu-btn {
     display: flex;
   }

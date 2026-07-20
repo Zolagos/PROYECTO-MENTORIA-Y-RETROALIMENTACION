@@ -1,27 +1,48 @@
-/**
- * observations.js — Interacciones de la página de Observaciones
- * Kevin Mendoza | Frontend Developer
- */
+import { loadObservations, getObservations } from '../services/observations.js';
+import { getObservationsTimeline } from '../app.js';
 
-export function initObservations() {
-  const btnNueva = document.getElementById('btn-nueva-obs');
+function renderTimeline() {
+  const container = document.getElementById('observations-timeline');
+  if (!container) return;
+  container.innerHTML = getObservationsTimeline();
+  applyFilters();
+}
+
+function applyFilters() {
+  const query = (document.getElementById('search-obs')?.value || '').toLowerCase();
+  const typeFilter = document.getElementById('filter-obs-type')?.value || '';
+
+  document.querySelectorAll('.timeline-item').forEach(item => {
+    const text = item.textContent.toLowerCase();
+    const type = item.dataset.type || '';
+    const matchesSearch = !query || text.includes(query);
+    const matchesType = !typeFilter || type === typeFilter;
+    item.style.display = matchesSearch && matchesType ? '' : 'none';
+  });
+}
+
+export async function initObservations() {
+  const btnNueva = document.getElementById('btn-new-observation');
   if (btnNueva) {
     btnNueva.addEventListener('click', () => openModal('modal-observation'));
   }
 
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session_id');
+  await loadObservations(sessionId ? { session_id: sessionId } : {});
+  renderTimeline();
+
   const searchInput = document.getElementById('search-obs');
   if (searchInput) {
-    searchInput.addEventListener('input', (e) => {
-      const query = e.target.value.toLowerCase();
-      document.querySelectorAll('.timeline-item').forEach(item => {
-        const text = item.textContent.toLowerCase();
-        item.style.display = text.includes(query) ? '' : 'none';
-      });
-    });
+    searchInput.addEventListener('input', applyFilters);
+  }
+
+  const typeSelect = document.getElementById('filter-obs-type');
+  if (typeSelect) {
+    typeSelect.addEventListener('change', applyFilters);
   }
 }
 
-/** Envía el formulario de nueva observación */
 export function submitObservation() {
   const target = document.getElementById('obs-target');
   const text   = document.getElementById('obs-text');
@@ -40,7 +61,6 @@ export function submitObservation() {
 
   if (!valid) return;
 
-  // TODO Sprint 4: POST /api/observaciones
   closeModal('modal-observation');
-  showToast('Observación guardada correctamente.', 'success');
+  showToast('Observation saved successfully.', 'success');
 }

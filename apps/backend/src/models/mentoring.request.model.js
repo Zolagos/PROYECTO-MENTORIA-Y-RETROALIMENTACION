@@ -43,3 +43,24 @@ export const createRequest = async ({ coder_id, topic, description }) => {
   );
   return rows[0];
 };
+
+export const updateMentoringRequest = async ({mentoring_id, mentoring_status }) => {
+  const { rows } = await pool.query(
+    `UPDATE mentoring_requests
+    SET state = $1
+    WHERE id = $2
+    RETURNING *`,
+    [mentoring_status, mentoring_id]
+  );
+  return rows[0];
+};
+
+export const deleteMentoring = async ({ mentoring_id }) => {
+  const { rows } = await pool.query(
+    `DELETE FROM mentoring_requests
+    WHERE id = $1
+    RETURNING *`,
+    [mentoring_id]
+  );
+  return rows[0];
+};
