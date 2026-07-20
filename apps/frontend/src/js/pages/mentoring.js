@@ -2,7 +2,7 @@ import {
   getVisibleMentoringItems, getSessionById,
   getTutors, getTutorById,
   createSession, updateSession, deleteSession,
-  changeRequestStatus, deleteRequestItem
+  changeRequestStatus, deleteRequestItem,
   loadSessions, loadTutors,
 } from '../services/mentoring.js'
 import { getMentoringCards } from '../app.js'
