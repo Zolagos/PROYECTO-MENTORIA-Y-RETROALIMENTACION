@@ -7,6 +7,7 @@ import {
   submitMentoring, toggleModalityField,
   openParticipantsModal, closeParticipantsModal,
   openStatusModal, closeStatusModal, confirmStatusChange,
+  respondMentoringRequest,
 } from './pages/mentoring.js'
 import { submitObservation } from './pages/observations.js'
 import { setRating, submitFeedback } from './pages/feedback.js'
