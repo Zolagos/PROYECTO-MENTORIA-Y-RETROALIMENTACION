@@ -60,3 +60,36 @@ INSERT INTO users (password_hash, name, lastname, email, role_id, clan_id) VALUE
      (SELECT id FROM roles WHERE name = 'Coder'),
      (SELECT id FROM clans WHERE name = '(2) Garabato'))
 ON CONFLICT (email) DO NOTHING;
+
+-- ---- MENTORING SESSIONS ----
+WITH inserted_sessions AS (
+    INSERT INTO mentoring_sessions (topic, description, mentorship_type, modality, session_type, room, meeting_link, start_time, end_time, status, tutor_id, created_by)
+    VALUES
+        ('Fundamentos de JavaScript', 'Sesión grupal sobre closures y prototipos', 'group', 'in person', 'closed', 'Sala 201', NULL,
+         '2025-01-15 14:00:00-05', '2025-01-15 16:00:00-05', 'completed',
+         (SELECT id FROM users WHERE email = 'ana.garcia@tutorlink.com'),
+         (SELECT id FROM users WHERE email = 'maria.torres@tutorlink.com')),
+
+        ('Resolución de dudas SQL', 'Sesión individual para resolver dudas sobre consultas avanzadas', 'individual', 'virtual', 'closed', NULL,
+         'https://meet.google.com/abc-defg-hij',
+         '2025-01-20 10:00:00-05', '2025-01-20 11:00:00-05', 'scheduled',
+         (SELECT id FROM users WHERE email = 'carlos.lopez@tutorlink.com'),
+         (SELECT id FROM users WHERE email = 'maria.torres@tutorlink.com')),
+
+        ('Pair Programming', 'Práctica de pair programming con rotación de roles', 'group', 'in person', 'open', 'Lab 305', NULL,
+         '2025-01-18 09:00:00-05', '2025-01-18 12:00:00-05', 'in_progress',
+         (SELECT id FROM users WHERE email = 'ana.garcia@tutorlink.com'),
+         (SELECT id FROM users WHERE email = 'maria.torres@tutorlink.com'))
+    RETURNING id, topic
+)
+INSERT INTO session_coders (session_id, coder_id)
+SELECT s.id, u.id
+FROM (VALUES
+    ('Fundamentos de JavaScript', 'kevin.mendoza@tutorlink.com'),
+    ('Fundamentos de JavaScript', 'juan.perez@tutorlink.com'),
+    ('Resolución de dudas SQL', 'laura.castro@tutorlink.com'),
+    ('Pair Programming', 'kevin.mendoza@tutorlink.com'),
+    ('Pair Programming', 'laura.castro@tutorlink.com')
+) AS v(topic, email)
+JOIN inserted_sessions s ON s.topic = v.topic
+JOIN users u ON u.email = v.email;
