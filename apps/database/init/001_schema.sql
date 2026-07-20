@@ -50,25 +50,64 @@ CREATE TABLE mentoring_sessions (
     session_type session_type NOT NULL DEFAULT 'closed',
     room VARCHAR(100),
     meeting_link VARCHAR(500),
-    start_time TIMESTAMPTZ,
-    end_time TIMESTAMPTZ,
-    status session_status DEFAULT 'scheduled',
-    tutor_id INT,
+    start_time TIMESTAMPTZ NOT NULL,
+    end_time TIMESTAMPTZ NOT NULL,
+    status session_status NOT NULL DEFAULT 'scheduled',
+    tutor_id INT NOT NULL,
+    clan_id INT NOT NULL,
     created_by INT NOT NULL,
     request_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (tutor_id) REFERENCES users(id) ON DELETE RESTRICT,
-    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT,
-    FOREIGN KEY (request_id) REFERENCES mentoring_requests(id) ON DELETE SET NULL
+
+    FOREIGN KEY (tutor_id)
+        REFERENCES users(id)
+        ON DELETE RESTRICT,
+
+    FOREIGN KEY (clan_id)
+        REFERENCES clans(id)
+        ON DELETE RESTRICT,
+
+    FOREIGN KEY (created_by)
+        REFERENCES users(id)
+        ON DELETE RESTRICT,
+
+    FOREIGN KEY (request_id)
+        REFERENCES mentoring_requests(id)
+        ON DELETE SET NULL,
+
+    CHECK (end_time > start_time),
+
+    CHECK (
+        (modality = 'virtual' AND meeting_link IS NOT NULL)
+        OR
+        (modality = 'in person' AND room IS NOT NULL)
+    )
 );
+
+CREATE INDEX idx_mentoring_sessions_clan_id
+ON mentoring_sessions(clan_id);
+
+CREATE INDEX idx_mentoring_sessions_tutor_id
+ON mentoring_sessions(tutor_id);
+
+CREATE INDEX idx_mentoring_sessions_start_time
+ON mentoring_sessions(start_time);
 
 CREATE TABLE session_coders (
     id SERIAL PRIMARY KEY,
     session_id INT NOT NULL,
     coder_id INT NOT NULL,
-    FOREIGN KEY (session_id) REFERENCES mentoring_sessions(id) ON DELETE CASCADE,
-    FOREIGN KEY (coder_id) REFERENCES users(id) ON DELETE RESTRICT
+
+    FOREIGN KEY (session_id)
+        REFERENCES mentoring_sessions(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (coder_id)
+        REFERENCES users(id)
+        ON DELETE RESTRICT,
+
+    UNIQUE (session_id, coder_id)
 );
 
 CREATE TABLE session_feedback (

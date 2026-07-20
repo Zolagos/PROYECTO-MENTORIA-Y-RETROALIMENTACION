@@ -11,25 +11,40 @@ export const findByRole = async (roleName) => {
     );
     return rows;
 };
-
 export const findByIds = async (ids) => {
-    const { rows } = await pool.query(
-        `SELECT id, clan_id
-        FROM users
-        WHERE id = ANY($1::int[])`,
-        [ids]
-    );
-    return rows;
+  const { rows } = await pool.query(
+    `SELECT
+       u.id,
+       u.status,
+       u.clan_id,
+       r.name AS role
+     FROM users u
+     JOIN roles r ON r.id = u.role_id
+     WHERE u.id = ANY($1::int[])
+     ORDER BY u.id`,
+    [ids]
+  );
+
+  return rows;
 };
+
 
 export const findById = async (id) => {
   const { rows } = await pool.query(
-    `SELECT u.id, u.name, u.lastname, u.email, r.name AS role, u.clan_id
+    `SELECT
+       u.id,
+       u.name,
+       u.lastname,
+       u.email,
+       u.status,
+       u.clan_id,
+       r.name AS role
      FROM users u
      JOIN roles r ON u.role_id = r.id
      WHERE u.id = $1`,
     [id]
   );
+
   return rows[0] ?? null;
 };
 

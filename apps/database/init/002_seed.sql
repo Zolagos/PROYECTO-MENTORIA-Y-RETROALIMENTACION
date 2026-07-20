@@ -31,32 +31,69 @@ ON CONFLICT (name) DO NOTHING;
 
 -- ---- USUARIOS DE PRUEBA ----
 -- Password123! → $2b$10$rmDt/8GII2/GMwRupPiJz.xnG.TFiGQrozHi6P.fXKsb3e9acryDK
+INSERT INTO users (
+    password_hash,
+    name,
+    lastname,
+    email,
+    role_id,
+    clan_id
+) VALUES
+    -- Team Leader de Magdalena
+    (
+        '$2b$10$rmDt/8GII2/GMwRupPiJz.xnG.TFiGQrozHi6P.fXKsb3e9acryDK',
+        'María',
+        'Torres',
+        'maria.torres@tutorlink.com',
+        (SELECT id FROM roles WHERE name = 'Team Leader'),
+        (SELECT id FROM clans WHERE name = '(1) Magdalena')
+    ),
 
-INSERT INTO users (password_hash, name, lastname, email, role_id, clan_id) VALUES
-    -- Team Leader
-    ('$2b$10$rmDt/8GII2/GMwRupPiJz.xnG.TFiGQrozHi6P.fXKsb3e9acryDK',
-     'María', 'Torres', 'maria.torres@tutorlink.com',
-     (SELECT id FROM roles WHERE name = 'Team Leader'), NULL),
+    -- Tutor de Magdalena
+    (
+        '$2b$10$rmDt/8GII2/GMwRupPiJz.xnG.TFiGQrozHi6P.fXKsb3e9acryDK',
+        'Ana',
+        'García',
+        'ana.garcia@tutorlink.com',
+        (SELECT id FROM roles WHERE name = 'Tutor'),
+        (SELECT id FROM clans WHERE name = '(1) Magdalena')
+    ),
 
-    -- Tutores
-    ('$2b$10$rmDt/8GII2/GMwRupPiJz.xnG.TFiGQrozHi6P.fXKsb3e9acryDK',
-     'Ana', 'García', 'ana.garcia@tutorlink.com',
-     (SELECT id FROM roles WHERE name = 'Tutor'), NULL),
-    ('$2b$10$rmDt/8GII2/GMwRupPiJz.xnG.TFiGQrozHi6P.fXKsb3e9acryDK',
-     'Carlos', 'López', 'carlos.lopez@tutorlink.com',
-     (SELECT id FROM roles WHERE name = 'Tutor'), NULL),
+    -- Tutor de Garabato
+    (
+        '$2b$10$rmDt/8GII2/GMwRupPiJz.xnG.TFiGQrozHi6P.fXKsb3e9acryDK',
+        'Carlos',
+        'López',
+        'carlos.lopez@tutorlink.com',
+        (SELECT id FROM roles WHERE name = 'Tutor'),
+        (SELECT id FROM clans WHERE name = '(2) Garabato')
+    ),
 
-    -- Coders
-    ('$2b$10$rmDt/8GII2/GMwRupPiJz.xnG.TFiGQrozHi6P.fXKsb3e9acryDK',
-     'Kevin', 'Mendoza', 'kevin.mendoza@tutorlink.com',
-     (SELECT id FROM roles WHERE name = 'Coder'),
-     (SELECT id FROM clans WHERE name = '(1) Magdalena')),
-    ('$2b$10$rmDt/8GII2/GMwRupPiJz.xnG.TFiGQrozHi6P.fXKsb3e9acryDK',
-     'Juan', 'Pérez', 'juan.perez@tutorlink.com',
-     (SELECT id FROM roles WHERE name = 'Coder'),
-     (SELECT id FROM clans WHERE name = '(1) Magdalena')),
-    ('$2b$10$rmDt/8GII2/GMwRupPiJz.xnG.TFiGQrozHi6P.fXKsb3e9acryDK',
-     'Laura', 'Castro', 'laura.castro@tutorlink.com',
-     (SELECT id FROM roles WHERE name = 'Coder'),
-     (SELECT id FROM clans WHERE name = '(2) Garabato'))
+    -- Coders de Magdalena
+    (
+        '$2b$10$rmDt/8GII2/GMwRupPiJz.xnG.TFiGQrozHi6P.fXKsb3e9acryDK',
+        'Kevin',
+        'Mendoza',
+        'kevin.mendoza@tutorlink.com',
+        (SELECT id FROM roles WHERE name = 'Coder'),
+        (SELECT id FROM clans WHERE name = '(1) Magdalena')
+    ),
+    (
+        '$2b$10$rmDt/8GII2/GMwRupPiJz.xnG.TFiGQrozHi6P.fXKsb3e9acryDK',
+        'Juan',
+        'Pérez',
+        'juan.perez@tutorlink.com',
+        (SELECT id FROM roles WHERE name = 'Coder'),
+        (SELECT id FROM clans WHERE name = '(1) Magdalena')
+    ),
+
+    -- Coder de Garabato
+    (
+        '$2b$10$rmDt/8GII2/GMwRupPiJz.xnG.TFiGQrozHi6P.fXKsb3e9acryDK',
+        'Laura',
+        'Castro',
+        'laura.castro@tutorlink.com',
+        (SELECT id FROM roles WHERE name = 'Coder'),
+        (SELECT id FROM clans WHERE name = '(2) Garabato')
+    )
 ON CONFLICT (email) DO NOTHING;
