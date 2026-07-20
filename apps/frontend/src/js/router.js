@@ -13,7 +13,7 @@ export function navigateTo(path) {
 
 export function handleRoute() {
   const path = window.location.pathname;
-  const isAuth = !!(getSessionUser() && sessionStorage.getItem('tutorlink_token'));
+  const isAuth = !!(getSessionUser() && sessionStorage.getItem('tutorcode_token'));
 
   if (!isAuth && path !== '/login') {
     if (routes['/login']) {
@@ -45,14 +45,14 @@ export function handleRoute() {
 
   if (route) {
     if (pageTitle) pageTitle.textContent = route.title;
-    document.title = `TutorLink — ${route.title}`;
+    document.title = `TutorCode — ${route.title}`;
     pageContent.innerHTML = route.render();
     updateSidebarActive(path);
     initPageScript(path);
   } else {
     const notFound = render404();
-    if (pageTitle) pageTitle.textContent = 'Página no encontrada';
-    document.title = 'TutorLink — 404';
+    if (pageTitle) pageTitle.textContent = 'Page not found';
+    document.title = 'TutorCode — 404';
     pageContent.innerHTML = notFound;
   }
 }
@@ -94,12 +94,12 @@ export function render404() {
         <line x1="12" y1="8" x2="12" y2="12"/>
         <line x1="12" y1="16" x2="12.01" y2="16"/>
       </svg>
-      <h2 class="empty-state__title">Página no encontrada</h2>
+      <h2 class="empty-state__title">Page not found</h2>
       <p class="empty-state__description">
-        La ruta que buscas no existe en TutorLink.
+        The route you are looking for does not exist in TutorCode.
       </p>
       <button class="btn btn-primary" onclick="navigateTo('/dashboard')">
-        Ir al Dashboard
+        Go to Dashboard
       </button>
     </div>
   `;

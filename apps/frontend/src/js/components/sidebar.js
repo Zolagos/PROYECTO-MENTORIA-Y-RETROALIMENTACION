@@ -1,69 +1,69 @@
 const SIDEBAR_MENUS = {
   CODER: [
     {
-      section: 'Principal',
+      section: 'Main',
       items: [
         { icon: 'home',     label: 'Dashboard',      route: '/dashboard' },
-        { icon: 'calendar', label: 'Mis Mentorías',  route: '/mentoring' },
+        { icon: 'calendar', label: 'My Mentorships', route: '/mentoring' },
         { icon: 'message',  label: 'Feedback',       route: '/feedback' },
       ]
     }
   ],
   TUTOR: [
     {
-      section: 'Principal',
+      section: 'Main',
       items: [
         { icon: 'home',     label: 'Dashboard',        route: '/dashboard' },
-        { icon: 'calendar', label: 'Mentorías',        route: '/mentoring' },
-        { icon: 'users',    label: 'Mis Coders',       route: '/my-coders' },
-        { icon: 'edit',     label: 'Observaciones',    route: '/observations' },
+        { icon: 'calendar', label: 'Mentorships',      route: '/mentoring' },
+        { icon: 'users',    label: 'My Coders',        route: '/my-coders' },
+        { icon: 'edit',     label: 'Observations',     route: '/observations' },
       ]
     }
   ],
   TL: [
     {
-      section: 'Principal',
+      section: 'Main',
       items: [
         { icon: 'home',      label: 'Dashboard',        route: '/dashboard' },
       ]
     },
     {
-      section: 'Gestión',
+      section: 'Management',
       items: [
-        { icon: 'calendar',  label: 'Mentorías',        route: '/mentoring' },
-        { icon: 'users',     label: 'Usuarios',         route: '/users' },
-        { icon: 'edit',      label: 'Observaciones',    route: '/observations' },
+        { icon: 'calendar',  label: 'Mentorships',      route: '/mentoring' },
+        { icon: 'users',     label: 'Users',            route: '/users' },
+        { icon: 'edit',      label: 'Observations',     route: '/observations' },
         { icon: 'message',   label: 'Feedback',         route: '/feedback' },
       ]
     },
     {
-      section: 'Reportes',
+      section: 'Reports',
       items: [
-        { icon: 'bar-chart', label: 'Métricas',         route: '/metrics' },
+        { icon: 'bar-chart', label: 'Metrics',          route: '/metrics' },
       ]
     }
   ],
   ADMIN: [
     {
-      section: 'Principal',
+      section: 'Main',
       items: [
         { icon: 'home',      label: 'Dashboard',        route: '/dashboard' },
       ]
     },
     {
-      section: 'Gestión',
+      section: 'Management',
       items: [
-        { icon: 'calendar',  label: 'Mentorías',        route: '/mentoring' },
-        { icon: 'users',     label: 'Usuarios',         route: '/users' },
-        { icon: 'edit',      label: 'Observaciones',    route: '/observations' },
+        { icon: 'calendar',  label: 'Mentorships',      route: '/mentoring' },
+        { icon: 'users',     label: 'Users',            route: '/users' },
+        { icon: 'edit',      label: 'Observations',     route: '/observations' },
         { icon: 'message',   label: 'Feedback',         route: '/feedback' },
       ]
     },
     {
       section: 'Admin',
       items: [
-        { icon: 'settings',  label: 'Configuración',    route: '/settings' },
-        { icon: 'bar-chart', label: 'Métricas',         route: '/metrics' },
+        { icon: 'settings',  label: 'Settings',         route: '/settings' },
+        { icon: 'bar-chart', label: 'Metrics',          route: '/metrics' },
       ]
     }
   ]
@@ -124,10 +124,10 @@ export function buildSidebar(role, user) {
         class="sidebar__nav-item"
         onclick="handleLogout()"
         role="menuitem"
-        title="Cerrar sesión"
+        title="Log out"
       >
         <span class="sidebar__nav-icon">${getIcon('logout')}</span>
-        <span class="sidebar__nav-text">Cerrar Sesión</span>
+        <span class="sidebar__nav-text">Log Out</span>
       </button>
     </li>
   `;
@@ -136,12 +136,12 @@ export function buildSidebar(role, user) {
   navEl.innerHTML = html;
 
   if (user) {
-    const initials = `${user.nombre?.[0] || ''}${user.apellido?.[0] || ''}`.toUpperCase() || '?';
+    const initials = `${user.name?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() || '?';
     const nameEl   = document.getElementById('sidebar-user-name');
     const roleEl   = document.getElementById('sidebar-user-role');
     const avatarEl = document.getElementById('sidebar-avatar');
 
-    if (nameEl)   nameEl.textContent   = `${user.nombre || ''} ${user.apellido || ''}`.trim();
+    if (nameEl)   nameEl.textContent   = `${user.name || ''} ${user.lastName || ''}`.trim();
     if (roleEl)   roleEl.textContent   = role;
     if (avatarEl) avatarEl.textContent = initials;
   }
@@ -180,7 +180,7 @@ export function initSidebarCollapse() {
 }
 
 export function handleLogout() {
-  sessionStorage.removeItem('tutorlink_user');
-  sessionStorage.removeItem('tutorlink_token');
+  sessionStorage.removeItem('tutorcode_user');
+  sessionStorage.removeItem('tutorcode_token');
   window.navigateTo('/login');
 }

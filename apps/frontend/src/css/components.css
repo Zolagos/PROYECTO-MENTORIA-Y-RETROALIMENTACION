@@ -1,12 +1,7 @@
 /* ============================================================
-   components.css — Botones, Cards, Badges, Tables, Forms, Modales
-   TutorLink | Kevin Mendoza | Frontend Developer
+   BUTTONS
    ============================================================ */
-
-/* ============================================================
-   BOTONES
-   ============================================================ */
-/* Clase base — todos los botones comparten esto */
+/* Base class — all buttons share this */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -30,12 +25,12 @@
   min-height: 40px;
 }
 
-/* Evita que el botón se achique con click accidental */
+/* Prevents the button from shrinking with an accidental click */
 .btn:active {
   transform: scale(0.98);
 }
 
-/* ---- Variantes ---- */
+/* ---- Variants ---- */
 .btn-primary {
   background-color: var(--color-primary);
   color: var(--color-text-white);
@@ -91,7 +86,7 @@
   color: var(--color-text-primary);
 }
 
-/* ---- Tamaños ---- */
+/* ---- Sizes ---- */
 .btn-sm {
   padding: var(--space-1) var(--space-3);
   font-size: var(--font-size-xs);
@@ -108,7 +103,7 @@
   width: 100%;
 }
 
-/* Botón deshabilitado */
+/* Disabled button */
 .btn:disabled,
 .btn[disabled] {
   opacity: 0.5;
@@ -116,7 +111,7 @@
   transform: none;
 }
 
-/* Botón con ícono solo (cuadrado) */
+/* Icon-only button (square) */
 .btn-icon {
   width: 40px;
   height: 40px;
@@ -188,7 +183,7 @@
   background-color: var(--color-bg);
 }
 
-/* ---- Stat Card (para métricas en dashboard) ---- */
+/* ---- Stat Card (for dashboard metrics) ---- */
 .stat-card {
   background-color: var(--color-surface);
   border-radius: var(--radius-lg);
@@ -248,7 +243,7 @@
 .stat-card__change--down  { color: var(--color-accent-red); }
 
 /* ============================================================
-   BADGES / ETIQUETAS DE ESTADO
+   BADGES / STATUS LABELS
    ============================================================ */
 .badge {
   display: inline-flex;
@@ -261,7 +256,7 @@
   white-space: nowrap;
 }
 
-/* Punto de estado */
+/* Status dot */
 .badge::before {
   content: '';
   width: 6px;
@@ -271,42 +266,40 @@
 }
 
 .badge--active,
-.badge--completada {
+.badge--completed {
   background-color: rgba(0, 196, 140, 0.12);
   color: var(--color-accent-green);
 }
 
-.badge--pending,
-.badge--pendiente {
+.badge--pending {
   background-color: rgba(255, 179, 0, 0.12);
   color: var(--color-accent-yellow);
 }
 
-.badge--cancelled,
-.badge--cancelada {
+.badge--cancelled {
   background-color: rgba(229, 57, 53, 0.12);
   color: var(--color-accent-red);
 }
 
 .badge--info,
-.badge--programada {
+.badge--scheduled {
   background-color: var(--color-primary-light);
   color: var(--color-primary);
 }
 
 .badge--warning,
-.badge--en-progreso {
+.badge--in-progress {
   background-color: rgba(255, 107, 53, 0.12);
   color: var(--color-accent-orange);
 }
 
-/* Badges de rol */
+/* Role badges */
 .badge--role-tl     { background-color: rgba(24, 119, 242, 0.12); color: var(--color-primary); }
 .badge--role-tutor  { background-color: rgba(0, 196, 140, 0.12); color: var(--color-accent-green); }
 .badge--role-coder  { background-color: rgba(255, 107, 53, 0.12); color: var(--color-accent-orange); }
 
 /* ============================================================
-   TABLAS
+   TABLES
    ============================================================ */
 .table-container {
   overflow-x: auto;
@@ -352,7 +345,7 @@
   background-color: var(--color-bg);
 }
 
-/* Celda con avatar + nombre */
+/* Cell with avatar + name */
 .table__user {
   display: flex;
   align-items: center;
@@ -374,7 +367,7 @@
 }
 
 /* ============================================================
-   FORMULARIOS
+   FORMS
    ============================================================ */
 .form-group {
   display: flex;
@@ -389,7 +382,7 @@
   color: var(--color-text-primary);
 }
 
-/* Indicador de campo requerido */
+/* Required field indicator */
 .form-label--required::after {
   content: ' *';
   color: var(--color-accent-red);
@@ -422,7 +415,7 @@
   box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.12);
 }
 
-/* Estado de error en formulario */
+/* Form error state */
 .form-input--error,
 .form-select--error,
 .form-textarea--error {
@@ -453,7 +446,7 @@
   min-height: 100px;
 }
 
-/* Grid de formulario (2 columnas en desktop) */
+/* Form grid (2 columns on desktop) */
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -467,7 +460,7 @@
 }
 
 /* ============================================================
-   MODALES
+   MODALS
    ============================================================ */
 .modal-overlay {
   position: fixed;
@@ -592,7 +585,7 @@
 }
 
 /* ============================================================
-   EMPTY STATE (cuando no hay datos)
+   EMPTY STATE (when there's no data)
    ============================================================ */
 .empty-state {
   display: flex;
@@ -655,7 +648,7 @@
 }
 
 /* ============================================================
-   GRID DE DASHBOARD
+   DASHBOARD GRID
    ============================================================ */
 .stats-grid {
   display: grid;

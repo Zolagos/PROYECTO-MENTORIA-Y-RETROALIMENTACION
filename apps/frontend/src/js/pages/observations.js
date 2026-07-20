@@ -1,10 +1,10 @@
 /**
- * observations.js — Interacciones de la página de Observaciones
+ * observations.js — Observations page interactions
  * Kevin Mendoza | Frontend Developer
  */
 
 export function initObservations() {
-  const btnNueva = document.getElementById('btn-nueva-obs');
+  const btnNueva = document.getElementById('btn-new-observation');
   if (btnNueva) {
     btnNueva.addEventListener('click', () => openModal('modal-observation'));
   }
@@ -21,7 +21,7 @@ export function initObservations() {
   }
 }
 
-/** Envía el formulario de nueva observación */
+/** Submits the new observation form */
 export function submitObservation() {
   const target = document.getElementById('obs-target');
   const text   = document.getElementById('obs-text');
@@ -40,7 +40,7 @@ export function submitObservation() {
 
   if (!valid) return;
 
-  // TODO Sprint 4: POST /api/observaciones
+  // TODO Sprint 4: POST /api/observations
   closeModal('modal-observation');
-  showToast('Observación guardada correctamente.', 'success');
+  showToast('Observation saved successfully.', 'success');
 }

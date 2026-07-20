@@ -7,8 +7,8 @@ import { getMentoringCards } from '../app.js'
 import { openModal, closeModal, showToast } from '../utils.js'
 
 export function initMentoring() {
-  // Botón "Nueva Mentoría" — abre el modal en modo crear
-  const btnNueva = document.getElementById('btn-nueva-mentoria');
+  // "New Mentorship" button — opens the modal in create mode
+  const btnNueva = document.getElementById('btn-new-mentoring');
   if (btnNueva) {
     btnNueva.addEventListener('click', () => {
       resetMentoringForm();
@@ -16,7 +16,7 @@ export function initMentoring() {
     });
   }
 
-  // Toggle de vista grid / lista
+  // Grid / list view toggle
   const btnGrid = document.getElementById('view-grid');
   const btnList = document.getElementById('view-list');
   const container = document.getElementById('mentoring-container');
@@ -43,43 +43,43 @@ export function initMentoring() {
     });
   }
 
-  // Búsqueda y filtros en vivo
+  // Live search and filters
   const searchInput = document.getElementById('search-mentoring');
-  const filterEstado = document.getElementById('filter-estado');
-  const filterModalidad = document.getElementById('filter-modalidad');
+  const filterStatus = document.getElementById('filter-status');
+  const filterModality = document.getElementById('filter-modality');
 
   if (searchInput) searchInput.addEventListener('input', applyMentoringFilters);
-  if (filterEstado) filterEstado.addEventListener('change', applyMentoringFilters);
-  if (filterModalidad) filterModalidad.addEventListener('change', applyMentoringFilters);
+  if (filterStatus) filterStatus.addEventListener('change', applyMentoringFilters);
+  if (filterModality) filterModality.addEventListener('change', applyMentoringFilters);
 }
 
-/** Vuelve a pintar las cards respetando búsqueda y filtros activos */
+/** Repaints the cards respecting the active search and filters */
 export function refreshMentoringCards() {
   applyMentoringFilters();
 }
 
-/** Filtra las mentorías por búsqueda, estado y modalidad */
+/** Filters the mentorships by search, status and modality */
 export function applyMentoringFilters() {
   const container = document.getElementById('mentoring-container');
   if (!container) return;
 
   const query = (document.getElementById('search-mentoring')?.value || '').toLowerCase();
-  const estado = document.getElementById('filter-estado')?.value || '';
-  const modalidad = document.getElementById('filter-modalidad')?.value || '';
+  const status = document.getElementById('filter-status')?.value || '';
+  const modality = document.getElementById('filter-modality')?.value || '';
 
   const filtered = getSessions().filter(m => {
     const matchesQuery = !query || m.topic.toLowerCase().includes(query);
-    const matchesEstado = !estado || m.status === estado;
-    const matchesModalidad = !modalidad || m.modality === modalidad;
-    return matchesQuery && matchesEstado && matchesModalidad;
+    const matchesStatus = !status || m.status === status;
+    const matchesModality = !modality || m.modality === modality;
+    return matchesQuery && matchesStatus && matchesModality;
   });
 
   container.innerHTML = getMentoringCards(filtered);
 }
 
-/** Alterna el menú de acciones de una card */
+/** Toggles the actions menu for a card */
 export function toggleActionMenu(btn, id) {
-  // Cierra cualquier menú abierto
+  // Closes any open menu
   document.querySelectorAll('.action-menu__dropdown').forEach(d => d.remove());
 
   const dropdown = document.createElement('div');
@@ -87,21 +87,21 @@ export function toggleActionMenu(btn, id) {
   dropdown.innerHTML = `
     <button class="action-menu__item" onclick="editMentoring(${id})">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-      Editar
+      Edit
     </button>
     <button class="action-menu__item" onclick="changeMentoringStatus(${id})">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-      Cambiar estado
+      Change status
     </button>
     <button class="action-menu__item action-menu__item--danger" onclick="deleteMentoring(${id})">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-      Eliminar
+      Delete
     </button>
   `;
 
   btn.parentElement.appendChild(dropdown);
 
-  // Cierra al hacer click fuera
+  // Closes when clicking outside
   setTimeout(() => {
     document.addEventListener('click', function close(e) {
       if (!dropdown.contains(e.target) && e.target !== btn) {
@@ -112,7 +112,7 @@ export function toggleActionMenu(btn, id) {
   }, 0);
 }
 
-/** Abre el modal en modo edición con los datos de la mentoría */
+/** Opens the modal in edit mode with the mentorship's data */
 export function editMentoring(id) {
   const mentoring = getSessionById(id);
   if (!mentoring) return;
@@ -125,60 +125,60 @@ export function editMentoring(id) {
   document.getElementById('m-modality').value = mentoring.modality;
   toggleModalityField();
   document.getElementById('m-location').value =
-    mentoring.modality === 'virtual' ? (mentoring.link || '') : (mentoring.sala || '');
-  document.getElementById('m-type').value = mentoring.type || 'abierta';
+    mentoring.modality === 'virtual' ? (mentoring.link || '') : (mentoring.room || '');
+  document.getElementById('m-type').value = mentoring.type || 'open';
   document.getElementById('m-desc').value = mentoring.desc || '';
 
-  // Modo edición: cambia título y texto del botón
-  document.getElementById('modal-mentoring-title').textContent = 'Editar Mentoría';
-  document.getElementById('m-submit-btn').textContent = 'Guardar Cambios';
+  // Edit mode: changes title and button text
+  document.getElementById('modal-mentoring-title').textContent = 'Edit Mentorship';
+  document.getElementById('m-submit-btn').textContent = 'Save Changes';
 
   openModal('modal-mentoring');
 }
 
-/** Avanza el estado: programada → en-progreso → completada */
+/** Advances the status: scheduled → in-progress → completed */
 export function changeMentoringStatus(id) {
   const mentoring = getSessionById(id);
   if (!mentoring) return;
 
-  const next = { 'programada': 'en-progreso', 'en-progreso': 'completada' };
+  const next = { 'scheduled': 'in-progress', 'in-progress': 'completed' };
 
   if (!next[mentoring.status]) {
-    showToast('Esta mentoría ya está finalizada.', 'info');
+    showToast('This mentorship is already finished.', 'info');
     return;
   }
 
   mentoring.status = next[mentoring.status];
   updateSession(mentoring);
   refreshMentoringCards();
-  showToast(`Mentoría ahora en estado: ${mentoring.status}.`, 'success');
+  showToast(`Mentorship now in status: ${mentoring.status}.`, 'success');
 }
 
-/** Elimina una mentoría previa confirmación */
+/** Deletes a mentorship after confirmation */
 export function deleteMentoring(id) {
   const mentoring = getSessionById(id);
   if (!mentoring) return;
 
-  if (!confirm(`¿Eliminar la mentoría "${mentoring.topic}"?`)) return;
+  if (!confirm(`Delete the mentorship "${mentoring.topic}"?`)) return;
 
   deleteSession(id);
   refreshMentoringCards();
-  showToast('Mentoría eliminada.', 'success');
+  showToast('Mentorship deleted.', 'success');
 }
 
-/** Deja el formulario del modal en modo crear */
+/** Leaves the modal form in create mode */
 function resetMentoringForm() {
   const form = document.getElementById('form-mentoring');
   if (!form) return;
 
   form.reset();
   document.getElementById('m-id').value = '';
-  document.getElementById('modal-mentoring-title').textContent = 'Nueva Mentoría';
-  document.getElementById('m-submit-btn').textContent = 'Crear Mentoría';
+  document.getElementById('modal-mentoring-title').textContent = 'New Mentorship';
+  document.getElementById('m-submit-btn').textContent = 'Create Mentorship';
   clearMentoringErrors();
 }
 
-/** Limpia las marcas de error del formulario */
+/** Clears the form's error marks */
 function clearMentoringErrors() {
   document.getElementById('m-topic')?.classList.remove('form-input--error');
   document.getElementById('m-tutor')?.classList.remove('form-select--error');
@@ -188,7 +188,7 @@ function clearMentoringErrors() {
   document.getElementById('m-date-error')?.classList.add('hidden');
 }
 
-/** Alterna el campo enlace/sala según modalidad */
+/** Toggles the link/room field based on modality */
 export function toggleModalityField() {
   const modality = document.getElementById('m-modality')?.value;
   const label = document.getElementById('m-location-label');
@@ -196,15 +196,15 @@ export function toggleModalityField() {
   if (!label || !input) return;
 
   if (modality === 'virtual') {
-    label.textContent = 'Enlace de videoconferencia';
-    input.placeholder = 'meet.google.com/... o zoom.us/...';
-  } else if (modality === 'presencial') {
-    label.textContent = 'Sala física';
-    input.placeholder = 'Ej: Sala A-101';
+    label.textContent = 'Video conference link';
+    input.placeholder = 'meet.google.com/... or zoom.us/...';
+  } else if (modality === 'in-person') {
+    label.textContent = 'Physical room';
+    input.placeholder = 'E.g: Room A-101';
   }
 }
 
-/** Envía el formulario de crear/editar mentoría */
+/** Submits the create/edit mentorship form */
 export function submitMentoring() {
   clearMentoringErrors();
 
@@ -235,16 +235,16 @@ export function submitMentoring() {
   if (!valid) return;
 
   if (!modality?.value) {
-    showToast('Selecciona la modalidad.', 'error');
+    showToast('Select the modality.', 'error');
     return;
   }
 
-  // La ubicación depende de la modalidad (regla de US-04)
+  // The location depends on the modality (US-04 rule)
   if (!location?.value.trim()) {
     showToast(
       modality.value === 'virtual'
-        ? 'El enlace de videoconferencia es obligatorio.'
-        : 'La sala física es obligatoria.',
+        ? 'The video conference link is required.'
+        : 'The physical room is required.',
       'error'
     );
     return;
@@ -262,17 +262,17 @@ export function submitMentoring() {
     time: time?.value || '',
     modality: modality.value,
     link: modality.value === 'virtual' ? location.value.trim() : '',
-    sala: modality.value === 'presencial' ? location.value.trim() : '',
-    type: document.getElementById('m-type')?.value || 'abierta',
+    room: modality.value === 'in-person' ? location.value.trim() : '',
+    type: document.getElementById('m-type')?.value || 'open',
   };
 
   if (id) {
     mentoring.id = id;
     updateSession(mentoring);
-    showToast('Mentoría actualizada correctamente.', 'success');
+    showToast('Mentorship updated successfully.', 'success');
   } else {
     createSession(mentoring);
-    showToast('Mentoría creada correctamente.', 'success');
+    showToast('Mentorship created successfully.', 'success');
   }
 
   closeModal('modal-mentoring');

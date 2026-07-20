@@ -1,18 +1,16 @@
 /* ============================================================
-   responsive.css — Ajustes responsive finales
-   TutorLink | Kevin Mendoza | Frontend Developer
 
-   Breakpoints usados:
-   - 1200px: desktop grande
-   - 1024px: desktop normal / tablet landscape
+   Breakpoints used:
+   - 1200px: large desktop
+   - 1024px: normal desktop / tablet landscape
    - 768px:  tablet portrait
-   - 640px:  móvil grande
-   - 480px:  móvil normal
-   - 360px:  móvil pequeño
+   - 640px:  large mobile
+   - 480px:  normal mobile
+   - 360px:  small mobile
    ============================================================ */
 
 /* ============================================================
-   DESKTOP GRANDE (> 1200px)
+   LARGE DESKTOP (> 1200px)
    ============================================================ */
 @media (min-width: 1200px) {
   .stats-grid {
@@ -25,7 +23,7 @@
 }
 
 /* ============================================================
-   TABLET LANDSCAPE / DESKTOP PEQUEÑO (≤ 1024px)
+   TABLET LANDSCAPE / SMALL DESKTOP (≤ 1024px)
    ============================================================ */
 @media (max-width: 1024px) {
   .content-grid {
@@ -40,13 +38,13 @@
     grid-template-columns: repeat(2, 1fr);
   }
 
-  /* Login: panel de branding más pequeño */
+  /* Login: smaller branding panel */
   .login-brand {
     padding: var(--space-8);
   }
 
   .login-brand__features {
-    display: none; /* Oculta la lista de features en pantallas medianas */
+    display: none; /* Hide the feature list on medium screens */
   }
 }
 
@@ -54,7 +52,7 @@
    TABLET PORTRAIT (≤ 768px)
    ============================================================ */
 @media (max-width: 768px) {
-  /* Login: solo muestra el formulario */
+  /* Login: show only the form */
   .login-page {
     grid-template-columns: 1fr;
   }
@@ -69,7 +67,7 @@
     justify-content: center;
   }
 
-  /* App: sidebar se convierte en drawer */
+  /* App: sidebar becomes a drawer */
   .sidebar {
     transform: translateX(-100%);
     width: var(--sidebar-width);
@@ -92,17 +90,17 @@
     display: flex;
   }
 
-  /* Stats: 2 columnas en tablet */
+  /* Stats: 2 columns on tablet */
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  /* Mentorías: 1 columna */
+  /* Mentorships: 1 column */
   .mentoring-grid {
     grid-template-columns: 1fr;
   }
 
-  /* Filtros: se apilan */
+  /* Filters: stack */
   .filters-bar {
     flex-direction: column;
     align-items: stretch;
@@ -120,7 +118,7 @@
     align-self: flex-end;
   }
 
-  /* Page header: se apila */
+  /* Page header: stacks */
   .page-header {
     flex-direction: column;
     align-items: flex-start;
@@ -140,12 +138,12 @@
     font-size: var(--font-size-xl);
   }
 
-  /* Card info grid: 1 columna */
+  /* Card info grid: 1 column */
   .mentoring-detail-card__info {
     grid-template-columns: 1fr;
   }
 
-  /* Tabla: scroll horizontal */
+  /* Table: horizontal scroll */
   .table-container {
     border-radius: var(--radius-md);
   }
@@ -156,17 +154,17 @@
     font-size: var(--font-size-xs);
   }
 
-  /* Timeline: menos padding lateral */
+  /* Timeline: less side padding */
   .timeline {
     padding-left: var(--space-6);
   }
 
-  /* Form grid: 1 columna */
+  /* Form grid: 1 column */
   .form-grid {
     grid-template-columns: 1fr;
   }
 
-  /* Modal: pantalla completa en mobile */
+  /* Modal: full screen on mobile */
   .modal-overlay {
     padding: 0;
     align-items: flex-end;
@@ -179,7 +177,7 @@
     width: 100%;
   }
 
-  /* Header: sin padding lateral grande */
+  /* Header: no large side padding */
   .header {
     padding: 0 var(--space-4);
   }
@@ -190,15 +188,15 @@
 }
 
 /* ============================================================
-   MÓVIL GRANDE (≤ 640px)
+   LARGE MOBILE (≤ 640px)
    ============================================================ */
 @media (max-width: 640px) {
-  /* Stats: 1 columna en móvil */
+  /* Stats: 1 column on mobile */
   .stats-grid {
     grid-template-columns: 1fr;
   }
 
-  /* Stat card horizontal en móvil para ahorrar espacio */
+  /* Horizontal stat card on mobile to save space */
   .stat-card {
     padding: var(--space-4);
   }
@@ -207,20 +205,20 @@
     font-size: var(--font-size-2xl);
   }
 
-  /* Ocultar texto de algunas columnas de tabla */
+  /* Hide text from some table columns */
   .table .hide-mobile {
     display: none;
   }
 
-  /* Login: menos padding */
+  /* Login: less padding */
   .login-form-panel {
     padding: var(--space-6) var(--space-4);
   }
 
-  /* Header: ocultar texto del título en pantallas pequeñas */
+  /* Header: hide title text on small screens */
   .header__page-title {
     font-size: var(--font-size-lg);
-    /* Limita longitud con ellipsis si el título es largo */
+    /* Limit length with ellipsis if the title is long */
     max-width: 180px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -234,7 +232,7 @@
     gap: var(--space-2);
   }
 
-  /* Mentoría card bottom */
+  /* Mentoring card bottom */
   .mentoring-detail-card__bottom {
     flex-direction: column;
     align-items: flex-start;
@@ -248,11 +246,11 @@
 }
 
 /* ============================================================
-   MÓVIL PEQUEÑO (≤ 480px)
+   SMALL MOBILE (≤ 480px)
    ============================================================ */
 @media (max-width: 480px) {
   :root {
-    /* Reduce un poco la tipografía base */
+    /* Slightly reduce the base typography */
     font-size: 15px;
   }
 
@@ -260,7 +258,7 @@
     padding: var(--space-3);
   }
 
-  /* Welcome banner: más compacto */
+  /* Welcome banner: more compact */
   .welcome-banner {
     padding: var(--space-4);
   }
@@ -273,7 +271,7 @@
     font-size: var(--font-size-xs);
   }
 
-  /* Modales: full screen */
+  /* Modals: full screen */
   .modal {
     border-radius: 0;
     max-height: 100vh;
@@ -285,7 +283,7 @@
     padding: 0;
   }
 
-  /* Botones del modal footer */
+  /* Modal footer buttons */
   .modal__footer {
     flex-direction: column-reverse;
     gap: var(--space-2);
@@ -296,7 +294,7 @@
     justify-content: center;
   }
 
-  /* Timeline: compacto */
+  /* Timeline: compact */
   .timeline {
     padding-left: var(--space-5);
   }
@@ -311,14 +309,14 @@
     height: 14px;
   }
 
-  /* Ocultar badge de notificación del header en móvil muy pequeño */
+  /* Hide header notification badge on very small mobile */
   .header__right > .header__icon-btn:first-child {
     display: none;
   }
 }
 
 /* ============================================================
-   MÓVIL MUY PEQUEÑO (≤ 360px)
+   VERY SMALL MOBILE (≤ 360px)
    ============================================================ */
 @media (max-width: 360px) {
   .stat-card {
@@ -336,7 +334,7 @@
 }
 
 /* ============================================================
-   PRINT (para imprimir reportes / documentación)
+   PRINT (for printing reports / documentation)
    ============================================================ */
 @media print {
   .sidebar,

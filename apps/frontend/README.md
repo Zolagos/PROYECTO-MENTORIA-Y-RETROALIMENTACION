@@ -1,87 +1,87 @@
-# TutorLink — Frontend
+# TutorCode — Frontend
 
-> **Proyecto Integrador | RIWI Academy | Ruta Básica 2026**  
-> Plataforma de gestión de mentorías que conecta Coders, Tutores y Team Leaders.
+> **Integrative Project | RIWI Academy | Basic Track 2026**
+> Mentoring management platform connecting Coders, Tutors and Team Leaders.
 
 ---
 
-## Desarrollador Frontend
+## Frontend Developer
 
-| Campo | Detalle |
+| Field | Detail |
 |-------|---------|
-| Nombre | Kevin Mendoza |
-| Rol | Frontend Developer |
+| Name | Kevin Mendoza |
+| Role | Frontend Developer |
 | Branch | `Kevin-Mendoza` |
-| Repositorio | [PROYECTO-MENTORIA-Y-RETROALIMENTACION](https://github.com/Zolagos/PROYECTO-MENTORIA-Y-RETROALIMENTACION) |
+| Repository | [PROYECTO-MENTORIA-Y-RETROALIMENTACION](https://github.com/Zolagos/PROYECTO-MENTORIA-Y-RETROALIMENTACION) |
 
 ---
 
-## Stack Tecnológico
+## Tech Stack
 
-| Tecnología | Versión | Uso |
+| Technology | Version | Use |
 |------------|---------|-----|
-| HTML5 | — | Estructura semántica y accesible |
-| CSS3 | — | Variables, Flexbox, Grid, animaciones |
-| JavaScript Vanilla | ES2020+ | Lógica SPA, validaciones, DOM |
-| Git / GitHub | — | Control de versiones con GitFlow |
+| HTML5 | — | Semantic, accessible structure |
+| CSS3 | — | Variables, Flexbox, Grid, animations |
+| Vanilla JavaScript | ES2020+ | SPA logic, validation, DOM |
+| Git / GitHub | — | Version control with GitFlow |
 
-> **Sin frameworks.** Sin React, Angular, Vue ni jQuery. Requisito del proyecto.
+> **No frameworks.** No React, Angular, Vue or jQuery. Project requirement.
 
 ---
 
-## Cómo ejecutar
+## How to run
 
 ```bash
-# 1. Clonar el repositorio
+# 1. Clone the repository
 git clone https://github.com/Zolagos/PROYECTO-MENTORIA-Y-RETROALIMENTACION.git
 
-# 2. Entrar a la carpeta del frontend
+# 2. Enter the frontend folder
 cd PROYECTO-MENTORIA-Y-RETROALIMENTACION
 
-# 3. Abrir con Live Server (VS Code) o doble click en index.html
+# 3. Open with Live Server (VS Code) or double-click index.html
 ```
 
-> No requiere npm, node ni instalación de dependencias. HTML/CSS/JS puro.
+> Requires no npm, node, or dependency installation. Pure HTML/CSS/JS.
 
 ---
 
-## Estructura del Proyecto
+## Project Structure
 
 ```
-├── index.html                  → Entry point (redirige al login)
+├── index.html                  → Entry point (redirects to login)
 │
 ├── pages/
-│   ├── login.html              → Pantalla de autenticación
-│   └── app.html                → Shell SPA (contiene sidebar + header)
+│   ├── login.html              → Authentication screen
+│   └── app.html                → SPA shell (contains sidebar + header)
 │
 ├── css/
-│   ├── main.css                → Variables CSS, reset, tipografía
-│   ├── layout.css              → Header, sidebar, estructura general
-│   ├── components.css          → Botones, cards, badges, tablas, modales
-│   ├── animations.css          → Transiciones y animaciones
+│   ├── main.css                → CSS variables, reset, typography
+│   ├── layout.css              → Header, sidebar, general structure
+│   ├── components.css          → Buttons, cards, badges, tables, modals
+│   ├── animations.css          → Transitions and animations
 │   ├── responsive.css          → Media queries (mobile first)
 │   └── pages/
-│       ├── login.css           → Estilos de la pantalla de login
-│       ├── dashboard.css       → Estilos del dashboard y métricas
-│       ├── mentoring.css       → Estilos de la página de mentorías
-│       └── observations.css    → Estilos de observaciones y feedback
+│       ├── login.css           → Login screen styles
+│       ├── dashboard.css       → Dashboard and metrics styles
+│       ├── mentoring.css       → Mentoring page styles
+│       └── observations.css    → Observations and feedback styles
 │
 ├── js/
-│   ├── utils.js                → Modales, toasts, debounce, fechas
-│   ├── router.js               → Enrutador SPA basado en hash
-│   ├── app.js                  → Inicialización y renders de vistas
+│   ├── utils.js                → Modals, toasts, debounce, dates
+│   ├── router.js                → Hash-based SPA router
+│   ├── app.js                  → View initialization and renders
 │   ├── components/
-│   │   ├── sidebar.js          → Sidebar dinámico por rol de usuario
-│   │   └── header.js           → Header con menú de usuario
+│   │   ├── sidebar.js          → Sidebar dynamic by user role
+│   │   └── header.js           → Header with user menu
 │   ├── pages/
-│   │   ├── login.js            → Validación y lógica del login
-│   │   ├── dashboard.js        → Interacciones del dashboard
-│   │   ├── mentoring.js        → Filtros, modales, acciones de mentorías
-│   │   ├── observations.js     → Lógica de observaciones
-│   │   └── feedback.js         → Calificación por estrellas y feedback
+│   │   ├── login.js            → Login validation and logic
+│   │   ├── dashboard.js        → Dashboard interactions
+│   │   ├── mentoring.js        → Mentoring filters, modals, actions
+│   │   ├── observations.js     → Observations logic
+│   │   └── feedback.js         → Star rating and feedback
 │   └── services/
-│       ├── api.js              → Capa de servicios REST (preparada para Sprint 4)
-│       └── auth.js             → Flujo de autenticación Firebase (preparado)
+│       ├── api.js              → REST service layer (ready for Sprint 4)
+│       └── auth.js             → Firebase authentication flow (prepared)
 │
 └── assets/
     ├── icons/
@@ -90,184 +90,184 @@ cd PROYECTO-MENTORIA-Y-RETROALIMENTACION
 
 ---
 
-## Arquitectura de la SPA
+## SPA Architecture
 
-El frontend usa navegación **SPA (Single Page Application)** basada en hash:
+The frontend uses **SPA (Single Page Application)** navigation based on hash:
 
 ```
 URL: pages/app.html#/dashboard
               ↓
          router.js
               ↓
-    Lee el hash: '/dashboard'
+    Reads the hash: '/dashboard'
               ↓
-    Llama renderDashboard()
+    Calls renderDashboard()
               ↓
-    Inyecta HTML en #page-content
+    Injects HTML into #page-content
               ↓
-    Llama initDashboard() (event listeners)
+    Calls initDashboard() (event listeners)
 ```
 
-**¿Por qué hash-based?**  
-No requiere servidor. Funciona con `file://` y con GitHub Pages sin configuración adicional.
+**Why hash-based?**
+It requires no server. Works with `file://` and with GitHub Pages with no extra configuration.
 
 ---
 
-## Roles y Dashboards
+## Roles and Dashboards
 
-| Rol | Dashboard | Acceso a |
+| Role | Dashboard | Access to |
 |-----|-----------|----------|
-| CODER | Dashboard Coder | Mis mentorías, Feedback |
-| TUTOR | Dashboard Tutor | Mentorías, Mis Coders, Observaciones |
-| TL | Dashboard TL | Todo + Métricas + Usuarios |
-| ADMIN | Dashboard Admin | Acceso completo + Configuración |
+| CODER | Coder Dashboard | My mentorships, Feedback |
+| TUTOR | Tutor Dashboard | Mentorships, My Coders, Observations |
+| TL | TL Dashboard | Everything + Metrics + Users |
+| ADMIN | Admin Dashboard | Full access + Settings |
 
-El sidebar se construye **dinámicamente** según el rol. Esto significa que un Coder nunca ve opciones de TL, y viceversa.
+The sidebar is built **dynamically** based on role. This means a Coder never sees TL options, and vice versa.
 
 ---
 
-## Flujo de Autenticación (Sprint 4)
+## Authentication Flow (Sprint 4)
 
 ```
-Usuario ingresa email + password
+User enters email + password
          ↓
    Firebase Authentication
-   (valida credenciales)
+   (validates credentials)
          ↓
-   Devuelve ID Token
+   Returns ID Token
          ↓
-   Backend Express
-   (Firebase Admin SDK verifica token)
+   Express Backend
+   (Firebase Admin SDK verifies token)
          ↓
-   PostgreSQL: busca usuario por firebase_uid
+   PostgreSQL: looks up user by firebase_uid
          ↓
-   ¿Usuario activo? → SÍ → Devuelve perfil (id, nombre, rol, clan)
-                   → NO → Acceso denegado
+   Active user? → YES → Returns profile (id, name, role, clan)
+                → NO → Access denied
          ↓
-   Frontend guarda perfil en sessionStorage
+   Frontend saves profile to sessionStorage
          ↓
-   Redirige al dashboard según rol
+   Redirects to dashboard based on role
 ```
 
-**Archivos involucrados:**
-- `js/pages/login.js` → captura y valida el formulario
-- `js/services/auth.js` → llama a Firebase + backend
+**Files involved:**
+- `js/pages/login.js` → captures and validates the form
+- `js/services/auth.js` → calls Firebase + backend
 - `js/services/api.js` → `fetchAPI('/auth/verify', ...)`
 
 ---
 
-## Sistema de Diseño
+## Design System
 
-### Paleta de colores
+### Color palette
 
 ```css
---color-primary:       #1877F2   /* Azul principal */
---color-primary-dark:  #0f5fcf   /* Azul hover */
---color-accent-green:  #00C48C   /* Éxito / activo */
---color-accent-orange: #FF6B35   /* Pendiente / alerta */
---color-accent-red:    #E53935   /* Error / cancelado */
---color-sidebar-bg:    #18191A   /* Sidebar oscuro */
---color-bg:            #F0F2F5   /* Fondo general */
+--color-primary:       #1877F2   /* Primary blue */
+--color-primary-dark:  #0f5fcf   /* Hover blue */
+--color-accent-green:  #00C48C   /* Success / active */
+--color-accent-orange: #FF6B35   /* Pending / alert */
+--color-accent-red:    #E53935   /* Error / cancelled */
+--color-sidebar-bg:    #18191A   /* Dark sidebar */
+--color-bg:            #F0F2F5   /* General background */
 ```
 
-### Tipografía
-- Fuente: `Segoe UI` / `system-ui` (sin carga externa)
-- Escala: xs(12) → sm(14) → base(16) → lg(18) → xl(20) → 2xl(24) → 3xl(30)
+### Typography
+- Font: `Segoe UI` / `system-ui` (no external loading)
+- Scale: xs(12) → sm(14) → base(16) → lg(18) → xl(20) → 2xl(24) → 3xl(30)
 
-### Espaciado
-Sistema de 4px: `--space-1` (4px) hasta `--space-12` (48px)
-
----
-
-## Decisiones Técnicas
-
-### ¿Por qué Variables CSS en lugar de SASS?
-Variables CSS son nativas del navegador. No necesitan compilación, son más simples de mantener y cualquier persona del equipo puede entenderlas sin conocer SASS.
-
-### ¿Por qué SPA con hash en vez de páginas separadas?
-El requisito técnico del proyecto exige navegación SPA. El hash permite cambiar la vista sin recargar la página, y funciona sin servidor backend.
-
-### ¿Por qué SVG inline en lugar de íconos de librería?
-No dependemos de CDN ni librerías externas (Font Awesome, etc.). El proyecto funciona offline y el bundle es más ligero.
-
-### ¿Por qué centralizar los fetch en `api.js`?
-Si el equipo de backend cambia una ruta (ej: `/api/mentorias` → `/api/v2/mentorias`), solo se cambia en un lugar. No hay que buscar en 10 archivos.
-
-### ¿Por qué sessionStorage y no localStorage?
-sessionStorage se borra automáticamente al cerrar la pestaña. Más seguro para tokens de autenticación en equipos compartidos.
+### Spacing
+4px system: `--space-1` (4px) up to `--space-12` (48px)
 
 ---
 
-## Evidencia GitFlow
+## Technical Decisions
 
-| Commit | Mensaje | Sprint |
+### Why CSS Variables instead of SASS?
+CSS Variables are native to the browser. They need no compilation, are simpler to maintain, and anyone on the team can understand them without knowing SASS.
+
+### Why SPA with hash instead of separate pages?
+The project's technical requirement demands SPA navigation. The hash lets the view change without reloading the page, and it works with no backend server.
+
+### Why inline SVG instead of an icon library?
+We don't depend on a CDN or external libraries (Font Awesome, etc.). The project works offline and the bundle is lighter.
+
+### Why centralize the fetches in `api.js`?
+If the backend team changes a route (e.g: `/api/mentoring` → `/api/v2/mentoring`), it's changed in one place only. No need to search through 10 files.
+
+### Why sessionStorage and not localStorage?
+sessionStorage clears automatically when the tab closes. Safer for authentication tokens on shared computers.
+
+---
+
+## GitFlow Evidence
+
+| Commit | Message | Sprint |
 |--------|---------|--------|
 | `3bb5528` | feat: Initialize frontend structure | Sprint 1 |
 | `1d0305f` | feat: Build visual pages and interactions | Sprint 2 & 3 |
-| *(próximo)* | feat: Polish UI, animations and docs | Sprint 5 |
+| *(next)* | feat: Polish UI, animations and docs | Sprint 5 |
 
-**Estrategia:**
-- Branch de trabajo: `Kevin-Mendoza`
-- Nunca se trabajó directamente en `main`
-- Pull Request hacia `main` al finalizar
+**Strategy:**
+- Working branch: `Kevin-Mendoza`
+- Never worked directly on `main`
+- Pull Request to `main` when finished
 
 ---
 
-## Testing Manual
+## Manual Testing
 
 ### Login
-- [x] Email vacío → muestra error
-- [x] Email formato inválido → muestra error
-- [x] Contraseña < 6 chars → muestra error
-- [x] Toggle mostrar/ocultar contraseña
-- [x] Spinner durante el submit
-- [x] Redirige a `app.html` con credenciales válidas
+- [x] Empty email → shows error
+- [x] Invalid email format → shows error
+- [x] Password < 6 chars → shows error
+- [x] Show/hide password toggle
+- [x] Spinner during submit
+- [x] Redirects to `app.html` with valid credentials
 
 ### Sidebar
-- [x] Rol TL ve: Dashboard, Mentorías, Usuarios, Observaciones, Feedback, Métricas
-- [x] Rol CODER ve: Dashboard, Mis Mentorías, Feedback
-- [x] Rol TUTOR ve: Dashboard, Mentorías, Mis Coders, Observaciones
-- [x] Colapsar/expandir en desktop
-- [x] Drawer en mobile con overlay
+- [x] TL role sees: Dashboard, Mentorships, Users, Observations, Feedback, Metrics
+- [x] CODER role sees: Dashboard, My Mentorships, Feedback
+- [x] TUTOR role sees: Dashboard, Mentorships, My Coders, Observations
+- [x] Collapse/expand on desktop
+- [x] Drawer on mobile with overlay
 
-### Mentorías
-- [x] Cards se renderizan con datos de muestra
-- [x] Búsqueda filtra en tiempo real
-- [x] Toggle entre vista grilla y lista
-- [x] Menú de acciones (3 puntos) por card
-- [x] Modal "Nueva Mentoría" se abre y valida campos
+### Mentorships
+- [x] Cards render with sample data
+- [x] Search filters in real time
+- [x] Toggle between grid and list view
+- [x] Actions menu (3 dots) per card
+- [x] "New Mentorship" modal opens and validates fields
 
-### Observaciones
-- [x] Timeline se renderiza
-- [x] Lista de coders en sidebar
-- [x] Modal "Nueva Observación" valida campos requeridos
+### Observations
+- [x] Timeline renders
+- [x] Coder list in sidebar
+- [x] "New Observation" modal validates required fields
 
 ### Feedback
-- [x] Estrellas de calificación interactivas
-- [x] Modal "Dar Feedback" valida rating y comentario
-- [x] Toast de confirmación al enviar
+- [x] Interactive star rating
+- [x] "Give Feedback" modal validates rating and comment
+- [x] Confirmation toast on submit
 
 ### Responsive
-- [x] Login: solo formulario en mobile
-- [x] Sidebar: drawer en mobile, colapsable en desktop
+- [x] Login: form only on mobile
+- [x] Sidebar: drawer on mobile, collapsible on desktop
 - [x] Stats grid: 4 cols → 2 cols → 1 col
-- [x] Modales: bottom sheet en mobile
+- [x] Modals: bottom sheet on mobile
 
 ---
 
-## Pendiente (conectar con backend)
+## Pending (connect with backend)
 
-Cuando el equipo de backend tenga los endpoints listos:
+When the backend team has the endpoints ready:
 
-1. **Autenticación:** descomentar código en `js/services/auth.js` y `js/pages/login.js`
-2. **Mentorías:** reemplazar datos de muestra en `getMentoringCards()` por `await mentoringService.getAll()`
-3. **Observaciones:** reemplazar `getObservationsTimeline()` por `await observationsService.getAll()`
-4. **Feedback:** reemplazar datos de muestra por `await feedbackService.getAll()`
-5. **Dashboard stats:** conectar contadores con `await usersService.getAll()` y filtros
+1. **Authentication:** uncomment the code in `js/services/auth.js` and `js/pages/login.js`
+2. **Mentorships:** replace the sample data in `getMentoringCards()` with `await mentoringService.getAll()`
+3. **Observations:** replace `getObservationsTimeline()` with `await observationsService.getAll()`
+4. **Feedback:** replace the sample data with `await feedbackService.getAll()`
+5. **Dashboard stats:** connect the counters with `await usersService.getAll()` and filters
 
-Todos los servicios están en `js/services/api.js` con sus endpoints documentados.
+All services are in `js/services/api.js` with their endpoints documented.
 
 ---
 
-*TutorLink — Proyecto Integrador RIWI 2026*  
-*"Porque el siguiente nivel no se alcanza solo, se construye en equipo."*
+*TutorCode — RIWI Integrative Project 2026*
+*"Because the next level isn't reached alone, it's built as a team."*
