@@ -675,11 +675,15 @@ export function getMentoringCards(list) {
           </div>
         </div>
       </div>
-      <div class="mentoring-detail-card__bottom">
+      <div class="mentoring-detail-card__bottom" style="gap:var(--space-2)">
+        <button class="btn btn-sm btn-secondary" onclick="openStatusModal(${m.id})" style="flex:1">Status</button>
         ${m.status === 'completed'
-          ? `<button class="btn btn-sm btn-secondary" onclick="navigateTo('/feedback')">View feedback</button>`
-          : m.status === 'scheduled'
-          ? `<button class="btn btn-sm btn-primary" onclick="alert('Join the mentorship')">Join</button>`
+          ? `
+            <button class="btn btn-sm btn-secondary" onclick="navigateTo('/feedback')" style="flex:1">Feedback</button>
+            <button class="btn btn-sm btn-secondary" onclick="navigateTo('/observations')" style="flex:1">Observations</button>
+          `
+          : m.status === 'in-progress'
+          ? `<button class="btn btn-sm btn-secondary" onclick="navigateTo('/observations')" style="flex:1">Observations</button>`
           : ''
         }
       </div>

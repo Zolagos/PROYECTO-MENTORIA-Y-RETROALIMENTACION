@@ -103,10 +103,6 @@ export function toggleActionMenu(btn, id) {
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
       Edit
     </button>
-    <button class="action-menu__item" onclick="changeMentoringStatus(${id})">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-      Change status
-    </button>
     <button class="action-menu__item action-menu__item--danger" onclick="deleteMentoring(${id})">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
       Delete
@@ -150,22 +146,85 @@ export function editMentoring(id) {
   openModal('modal-mentoring');
 }
 
-/** Advances the status: scheduled → in-progress → completed */
-export function changeMentoringStatus(id) {
-  const mentoring = getSessionById(id);
-  if (!mentoring) return;
+/** Opens a modal to choose a new status for the session */
+export function openStatusModal(id) {
+  const session = getSessionById(id);
+  if (!session) return;
 
-  const next = { 'scheduled': 'in-progress', 'in-progress': 'completed' };
+  const existing = document.getElementById('modal-status');
+  if (existing) existing.remove();
 
-  if (!next[mentoring.status]) {
-    showToast('This mentorship is already finished.', 'info');
-    return;
-  }
+  const options = {
+    'scheduled': [
+      { label: 'In Progress', value: 'in-progress' },
+      { label: 'Cancelled', value: 'cancelled' },
+    ],
+    'in-progress': [
+      { label: 'Completed', value: 'completed' },
+      { label: 'Cancelled', value: 'cancelled' },
+    ],
+    'completed': [],
+    'cancelled': [
+      { label: 'Reactivate (Scheduled)', value: 'scheduled' },
+    ],
+  };
 
-  mentoring.status = next[mentoring.status];
-  updateSession(mentoring);
+  const available = options[session.status] || [];
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay active';
+  overlay.id = 'modal-status';
+  overlay.style.display = 'flex';
+  overlay.innerHTML = `
+    <div class="modal modal--sm">
+      <div class="modal__header">
+        <h2 class="modal__title">Change status</h2>
+        <button class="modal__close" onclick="closeStatusModal()" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <p style="font-size:var(--font-size-sm);color:var(--color-text-secondary);margin:0 0 var(--space-3);">
+          ${session.topic} · <span class="badge badge--${session.status}">${session.status}</span>
+        </p>
+        ${available.length === 0
+          ? '<p class="text-muted">No further status changes available.</p>'
+          : `<div style="display:flex;flex-direction:column;gap:var(--space-2);">
+               ${available.map(opt => `
+                 <button class="btn btn-primary" onclick="confirmStatusChange(${id}, '${opt.value}')" style="width:100%">
+                   ${opt.label}
+                 </button>
+               `).join('')}
+             </div>`
+        }
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+
+  const escHandler = (e) => {
+    if (e.key === 'Escape') { closeStatusModal(); document.removeEventListener('keydown', escHandler); }
+  };
+  document.addEventListener('keydown', escHandler);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeStatusModal(); });
+}
+
+export function closeStatusModal() {
+  const overlay = document.getElementById('modal-status');
+  if (overlay) { overlay.remove(); document.body.style.overflow = ''; }
+}
+
+export function confirmStatusChange(id, newStatus) {
+  const session = getSessionById(id);
+  if (!session) return;
+
+  session.status = newStatus;
+  updateSession(session);
   refreshMentoringCards();
-  showToast(`Mentorship now in status: ${mentoring.status}.`, 'success');
+  closeStatusModal();
+  showToast(`Status changed to "${newStatus}".`, 'success');
 }
 
 /** Opens a unified modal showing the tutor first, then participants */
