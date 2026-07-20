@@ -1,26 +1,26 @@
 /**
- * utils.js — Funciones utilitarias globales de TutorCode
+ * utils.js — TutorCode global utility functions
  *
- * ¿Qué contiene?
- * - openModal / closeModal: controlan los modales
- * - showToast: notificaciones flotantes (éxito, error, info)
- * - formatDate: formatea fechas legibles
- * - debounce: optimiza búsquedas en tiempo real
+ * What does it contain?
+ * - openModal / closeModal: control the modals
+ * - showToast: floating notifications (success, error, info)
+ * - formatDate: formats readable dates
+ * - debounce: optimizes real-time searches
  *
- * ¿Por qué separado?
- * Estas funciones las usan TODAS las páginas. Tenerlas en un
- * archivo propio evita duplicar código y facilita el mantenimiento.
+ * Why separate?
+ * These functions are used by ALL pages. Keeping them in their
+ * own file avoids duplicating code and makes maintenance easier.
  *
  * Kevin Mendoza | Frontend Developer
  */
 
 // ============================================================
-// MODALES
+// MODALS
 // ============================================================
 
 /**
- * openModal — Abre un modal por su ID.
- * @param {string} modalId - ID del elemento .modal-overlay
+ * openModal — Opens a modal by its ID.
+ * @param {string} modalId - ID of the .modal-overlay element
  */
 export function openModal(modalId) {
   const overlay = document.getElementById(modalId);
@@ -29,24 +29,24 @@ export function openModal(modalId) {
   overlay.classList.add('active');
   document.body.style.overflow = 'hidden';
 
-  // Foco en el primer elemento interactivo (accesibilidad)
+  // Focus on the first interactive element (accessibility)
   setTimeout(() => {
     const firstFocusable = overlay.querySelector('input, select, textarea, button:not(.modal__close)');
     if (firstFocusable) firstFocusable.focus();
   }, 100);
 
-  // Cerrar con Escape
+  // Close with Escape
   document.addEventListener('keydown', handleEscapeKey);
 
-  // Focus trap: mantiene el foco dentro del modal con Tab
+  // Focus trap: keeps focus within the modal when using Tab
   overlay.addEventListener('keydown', handleFocusTrap);
 
-  // Cerrar al hacer click en el fondo oscuro
+  // Close when clicking the dark background
   overlay.addEventListener('click', handleOverlayClick);
 }
 
 /**
- * closeModal — Cierra un modal por su ID.
+ * closeModal — Closes a modal by its ID.
  * @param {string} modalId
  */
 export function closeModal(modalId) {
@@ -56,7 +56,7 @@ export function closeModal(modalId) {
   overlay.classList.remove('active');
   document.body.style.overflow = '';
 
-  // Limpia errores del formulario
+  // Clears form errors
   overlay.querySelectorAll('.form-input--error, .form-select--error, .form-textarea--error').forEach(el => {
     el.classList.remove('form-input--error', 'form-select--error', 'form-textarea--error');
     el.removeAttribute('aria-invalid');
@@ -69,8 +69,8 @@ export function closeModal(modalId) {
 }
 
 /**
- * handleFocusTrap — Mantiene el foco dentro del modal al usar Tab.
- * Accesibilidad: el usuario de teclado no puede salir del modal accidentalmente.
+ * handleFocusTrap — Keeps focus within the modal when using Tab.
+ * Accessibility: a keyboard user can't accidentally leave the modal.
  */
 function handleFocusTrap(e) {
   if (e.key !== 'Tab') return;
@@ -85,13 +85,13 @@ function handleFocusTrap(e) {
   const last  = focusable[focusable.length - 1];
 
   if (e.shiftKey) {
-    // Shift+Tab: si está en el primero, salta al último
+    // Shift+Tab: if on the first element, jump to the last
     if (document.activeElement === first) {
       e.preventDefault();
       last.focus();
     }
   } else {
-    // Tab: si está en el último, salta al primero
+    // Tab: if on the last element, jump to the first
     if (document.activeElement === last) {
       e.preventDefault();
       first.focus();
@@ -99,7 +99,7 @@ function handleFocusTrap(e) {
   }
 }
 
-/** Cierra el modal activo al presionar Escape */
+/** Closes the active modal when pressing Escape */
 function handleEscapeKey(e) {
   if (e.key === 'Escape') {
     const activeModal = document.querySelector('.modal-overlay.active');
@@ -107,29 +107,29 @@ function handleEscapeKey(e) {
   }
 }
 
-/** Cierra el modal al hacer click en el fondo oscuro */
+/** Closes the modal when clicking the dark background */
 function handleOverlayClick(e) {
-  // Solo cierra si el click fue en el overlay, no en el modal en sí
+  // Only closes if the click was on the overlay, not the modal itself
   if (e.target.classList.contains('modal-overlay')) {
     closeModal(e.target.id);
   }
 }
 
 // ============================================================
-// TOAST (notificaciones flotantes)
+// TOAST (floating notifications)
 // ============================================================
 
-// Contenedor de toasts — se crea una sola vez
+// Toast container — created only once
 let toastContainer = null;
 
 /**
- * Muestra una notificación flotante temporal.
- * @param {string} message - Texto del toast
- * @param {'success'|'error'|'warning'|'info'} type - Tipo de toast
- * @param {number} duration - Duración en ms (default: 4000)
+ * Shows a temporary floating notification.
+ * @param {string} message - Toast text
+ * @param {'success'|'error'|'warning'|'info'} type - Toast type
+ * @param {number} duration - Duration in ms (default: 4000)
  */
 export function showToast(message, type = 'info', duration = 4000) {
-  // Crea el contenedor si no existe
+  // Creates the container if it doesn't exist
   if (!toastContainer) {
     toastContainer = document.createElement('div');
     toastContainer.id = 'toast-container';
@@ -148,16 +148,16 @@ export function showToast(message, type = 'info', duration = 4000) {
     document.body.appendChild(toastContainer);
   }
 
-  // Configuración visual por tipo
+  // Visual configuration per type
   const config = {
-    success: { bg: '#00C48C', icon: '✓', label: 'Éxito' },
+    success: { bg: '#00C48C', icon: '✓', label: 'Success' },
     error:   { bg: '#E53935', icon: '✕', label: 'Error' },
-    warning: { bg: '#FFB300', icon: '⚠', label: 'Advertencia' },
-    info:    { bg: '#1877F2', icon: 'ℹ', label: 'Información' },
+    warning: { bg: '#FFB300', icon: '⚠', label: 'Warning' },
+    info:    { bg: '#1877F2', icon: 'ℹ', label: 'Info' },
   };
   const { bg, icon, label } = config[type] || config.info;
 
-  // Crea el toast
+  // Creates the toast
   const toast = document.createElement('div');
   toast.setAttribute('role', 'alert');
   toast.setAttribute('aria-label', `${label}: ${message}`);
@@ -188,19 +188,19 @@ export function showToast(message, type = 'info', duration = 4000) {
       background:none; border:none; cursor:pointer;
       color: #9EA3AD; font-size: 16px; padding: 0;
       line-height: 1; flex-shrink: 0;
-    " aria-label="Cerrar notificación">×</button>
+    " aria-label="Close notification">×</button>
   `;
 
   toastContainer.appendChild(toast);
 
-  // Auto-elimina después del tiempo definido
+  // Auto-removes after the defined time
   setTimeout(() => {
     toast.style.animation = 'slideOutRight 250ms ease forwards';
     setTimeout(() => toast.remove(), 250);
   }, duration);
 }
 
-// Animaciones del toast (inyectadas una sola vez)
+// Toast animations (injected only once)
 if (!document.getElementById('toast-styles')) {
   const style = document.createElement('style');
   style.id = 'toast-styles';
@@ -218,48 +218,48 @@ if (!document.getElementById('toast-styles')) {
 }
 
 // ============================================================
-// UTILIDADES DE FECHA
+// DATE UTILITIES
 // ============================================================
 
 /**
- * Formatea una fecha ISO a texto legible en español.
- * @param {string} isoDate - Fecha en formato ISO (ej: "2026-07-15")
- * @returns {string} - Ej: "15 de julio de 2026"
+ * Formats an ISO date into readable English text.
+ * @param {string} isoDate - Date in ISO format (e.g: "2026-07-15")
+ * @returns {string} - E.g: "July 15, 2026"
  */
 export function formatDate(isoDate) {
   if (!isoDate) return '—';
-  const date = new Date(isoDate + 'T00:00:00'); // evita desfase de timezone
-  return date.toLocaleDateString('es-CO', {
+  const date = new Date(isoDate + 'T00:00:00'); // avoids timezone offset
+  return date.toLocaleDateString('en-US', {
     day: 'numeric', month: 'long', year: 'numeric'
   });
 }
 
 /**
- * Devuelve "hace X minutos/horas/días" a partir de una fecha.
+ * Returns "X minutes/hours/days ago" from a date.
  * @param {string} isoDate
  * @returns {string}
  */
 export function timeAgo(isoDate) {
   const now  = new Date();
   const then = new Date(isoDate);
-  const diff = Math.floor((now - then) / 1000); // segundos
+  const diff = Math.floor((now - then) / 1000); // seconds
 
-  if (diff < 60)   return 'Hace un momento';
-  if (diff < 3600) return `Hace ${Math.floor(diff / 60)} min`;
-  if (diff < 86400)return `Hace ${Math.floor(diff / 3600)} h`;
-  return `Hace ${Math.floor(diff / 86400)} días`;
+  if (diff < 60)   return 'Just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
+  if (diff < 86400)return `${Math.floor(diff / 3600)} h ago`;
+  return `${Math.floor(diff / 86400)} days ago`;
 }
 
 // ============================================================
-// DEBOUNCE (evita hacer búsquedas en cada keystroke)
+// DEBOUNCE (avoids searching on every keystroke)
 // ============================================================
 
 /**
- * Retrasa la ejecución de una función hasta que el usuario
- * deje de escribir por 'delay' milisegundos.
+ * Delays a function's execution until the user stops
+ * typing for 'delay' milliseconds.
  *
- * @param {Function} fn - Función a ejecutar
- * @param {number} delay - Espera en ms (default: 300)
+ * @param {Function} fn - Function to execute
+ * @param {number} delay - Wait time in ms (default: 300)
  * @returns {Function}
  */
 export function debounce(fn, delay = 300) {

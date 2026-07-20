@@ -1,50 +1,50 @@
 /**
- * mentoring.js — Servicio de datos de Mentorías
+ * mentoring.js — Mentoring data service
  *
- * ¿Qué hace?
- * Maneja el CRUD de mentorías (crear, listar, editar, eliminar).
- * Por ahora persiste en localStorage con los mismos datos de muestra
- * del diseño, para que la vista funcione de punta a punta sin backend.
+ * What does it do?
+ * Handles mentorship CRUD (create, list, edit, delete).
+ * For now it persists to localStorage with the same sample data
+ * from the design, so the view works end-to-end without a backend.
  *
- * ¿Por qué así?
- * Las mentorías usan la MISMA estructura que las cards de app.js
- * (topic, desc, tutor, date, time, modality, link/sala, status, coders),
- * así la vista no cambia. Sprint 4: cada función se reemplaza por su
- * fetch al backend manteniendo la misma firma.
+ * Why this way?
+ * Mentorships use the SAME structure as the cards in app.js
+ * (topic, desc, tutor, date, time, modality, link/room, status, coders),
+ * so the view doesn't change. Sprint 4: each function is replaced by its
+ * backend fetch while keeping the same signature.
  */
 
-// ---- CLAVE DE ALMACENAMIENTO ----
+// ---- STORAGE KEY ----
 const MENTORING_STORAGE_KEY = 'tutorcode_mentoring';
 
-// ---- TUTORES DISPONIBLES ----
-// Sprint 4: vendrán de GET /api/users?role=tutor
+// ---- AVAILABLE TUTORS ----
+// Sprint 4: will come from GET /api/users?role=tutor
 const TUTORS = [
   { id: 1, name: 'Ana García' },
   { id: 2, name: 'Carlos López' },
   { id: 3, name: 'María Torres' },
 ];
 
-// ---- DATOS DE MUESTRA ----
-// date en formato ISO (YYYY-MM-DD) y time en 24h (HH:MM) para que
-// funcionen directo en los inputs del modal; la card los muestra
-// formateados con formatDate() de utils.js
+// ---- SAMPLE DATA ----
+// date in ISO format (YYYY-MM-DD) and time in 24h (HH:MM) so they
+// work directly in the modal inputs; the card shows them
+// formatted with formatDate() from utils.js
 const MENTORING_SAMPLE = [
-  { id:1, topic:'JavaScript Avanzado', desc:'Closures, promesas y async/await en profundidad.', tutorId:1, tutor:'Ana García', date:'2026-07-15', time:'10:00', modality:'virtual', link:'meet.google.com/abc', sala:'', type:'abierta', status:'programada', coders:['KM','JP','LC'] },
-  { id:2, topic:'Bases de Datos SQL', desc:'Normalización hasta 3FN, joins y consultas complejas.', tutorId:2, tutor:'Carlos López', date:'2026-07-16', time:'14:00', modality:'presencial', link:'', sala:'Sala A-101', type:'cerrada', status:'completada', coders:['MR','SV'] },
-  { id:3, topic:'Git y GitHub Flow', desc:'Ramas, pull requests y resolución de conflictos.', tutorId:3, tutor:'María Torres', date:'2026-07-17', time:'09:00', modality:'virtual', link:'zoom.us/j/123', sala:'', type:'abierta', status:'en-progreso', coders:['DG','RP','KM','AB'] },
+  { id:1, topic:'Advanced JavaScript', desc:'Closures, promises and async/await in depth.', tutorId:1, tutor:'Ana García', date:'2026-07-15', time:'10:00', modality:'virtual', link:'meet.google.com/abc', room:'', type:'open', status:'scheduled', coders:['KM','JP','LC'] },
+  { id:2, topic:'SQL Databases', desc:'Normalization up to 3NF, joins and complex queries.', tutorId:2, tutor:'Carlos López', date:'2026-07-16', time:'14:00', modality:'in-person', link:'', room:'Room A-101', type:'closed', status:'completed', coders:['MR','SV'] },
+  { id:3, topic:'Git and GitHub Flow', desc:'Branches, pull requests and conflict resolution.', tutorId:3, tutor:'María Torres', date:'2026-07-17', time:'09:00', modality:'virtual', link:'zoom.us/j/123', room:'', type:'open', status:'in-progress', coders:['DG','RP','KM','AB'] },
 ];
 
-/** Devuelve los tutores disponibles para el select del modal */
+/** Returns the available tutors for the modal select */
 export function getTutors() {
   return TUTORS;
 }
 
-/** Busca un tutor por id */
+/** Finds a tutor by id */
 export function getTutorById(id) {
   return TUTORS.find(t => t.id === Number(id)) || null;
 }
 
-/** Devuelve todas las mentorías (siembra los datos de muestra la primera vez) */
+/** Returns all mentorships (seeds the sample data the first time) */
 export function getSessions() {
   const data = localStorage.getItem(MENTORING_STORAGE_KEY);
   if (data) return JSON.parse(data);
@@ -53,29 +53,29 @@ export function getSessions() {
   return MENTORING_SAMPLE;
 }
 
-/** Busca una mentoría por id */
+/** Finds a mentorship by id */
 export function getSessionById(id) {
   return getSessions().find(m => m.id === Number(id)) || null;
 }
 
-/** Guarda la lista completa en localStorage */
+/** Saves the full list to localStorage */
 function saveSessions(sessions) {
   localStorage.setItem(MENTORING_STORAGE_KEY, JSON.stringify(sessions));
 }
 
-/** Crea una mentoría nueva */
+/** Creates a new mentorship */
 export function createSession(mentoring) {
   const sessions = getSessions();
 
   mentoring.id = Date.now();
-  mentoring.status = mentoring.status || 'schedulled';
+  mentoring.status = mentoring.status || 'scheduled';
   mentoring.coders = mentoring.coders || [];
 
   sessions.push(mentoring);
   saveSessions(sessions);
 }
 
-/** Actualiza una mentoría existente (conserva los campos no editados) */
+/** Updates an existing mentorship (keeps unedited fields) */
 export function updateSession(mentoring) {
   const sessions = getSessions().map(m =>
     m.id === mentoring.id ? { ...m, ...mentoring } : m
@@ -83,7 +83,7 @@ export function updateSession(mentoring) {
   saveSessions(sessions);
 }
 
-/** Elimina una mentoría por id */
+/** Deletes a mentorship by id */
 export function deleteSession(id) {
   const sessions = getSessions().filter(m => m.id !== Number(id));
   saveSessions(sessions);

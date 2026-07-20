@@ -1,4 +1,4 @@
-/* Página de login ocupa pantalla completa */
+/* Login page takes up the full screen */
 .login-page {
   min-height: 100vh;
   display: grid;
@@ -6,7 +6,7 @@
   background-color: var(--color-bg);
 }
 
-/* ---- Panel izquierdo: branding / imagen ---- */
+/* ---- Left panel: branding / image ---- */
 .login-brand {
   background: linear-gradient(135deg, #1877F2 0%, #0f5fcf 50%, #18191A 100%);
   display: flex;
@@ -18,7 +18,7 @@
   overflow: hidden;
 }
 
-/* Círculos decorativos de fondo */
+/* Decorative background circles */
 .login-brand::before {
   content: '';
   position: absolute;
@@ -112,7 +112,7 @@
   flex-shrink: 0;
 }
 
-/* ---- Panel derecho: formulario ---- */
+/* ---- Right panel: form ---- */
 .login-form-panel {
   display: flex;
   flex-direction: column;
@@ -145,27 +145,27 @@
   color: var(--color-text-secondary);
 }
 
-/* Formulario */
+/* Form */
 .login-form {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
 }
 
-/* Input especial para login — más grande */
+/* Special login input — larger */
 .login-form .form-input {
   min-height: 48px;
   font-size: var(--font-size-base);
 }
 
-/* Botón de submit */
+/* Submit button */
 .login-form .btn-primary {
   min-height: 48px;
   font-size: var(--font-size-base);
   margin-top: var(--space-2);
 }
 
-/* Link olvidé mi contraseña */
+/* Forgot password link */
 .login-form__forgot {
   text-align: right;
   margin-top: calc(-1 * var(--space-2));
@@ -181,7 +181,7 @@
   text-decoration: underline;
 }
 
-/* Footer del formulario */
+/* Form footer */
 .login-form__footer {
   margin-top: var(--space-6);
   text-align: center;
@@ -206,7 +206,7 @@
     grid-template-columns: 1fr;
   }
 
-  /* Oculta el panel de branding en mobile */
+  /* Hide the branding panel on mobile */
   .login-brand {
     display: none;
   }

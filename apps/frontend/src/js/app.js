@@ -5,25 +5,25 @@ import { getTutors, getSessions, getSessionById, createSession, updateSession, d
 import { formatDate } from './utils.js';
 
 export function initApp(user) {
-  registerAllRoutes(user.rol);
-  buildSidebar(user.rol, user);
+  registerAllRoutes(user.role);
+  buildSidebar(user.role, user);
   initHeader(user);
   initSidebarCollapse();
 }
 
 /**
- * Registra todas las rutas de la aplicación.
- * Cada ruta apunta a una función de render importada de js/pages/.
- * @param {string} role - Rol del usuario activo
+ * Registers all the application routes.
+ * Each route points to a render function imported from js/pages/.
+ * @param {string} role - Active user's role
  */
 function registerAllRoutes(role) {
-  // Rutas comunes para todos los roles
+  // Common routes for all roles
   registerRoute('/dashboard',    'Dashboard',      renderDashboard);
   registerRoute('/mentoring',    'Mentoring sessions',      renderMentoring);
   registerRoute('/feedback',     'Feedback',       renderFeedback);
   registerRoute('/observations', 'Observations',  renderObservations);
 
-  // Rutas según rol
+  // Role-based routes
   if (role === 'TUTOR' || role === 'TL' || role === 'ADMIN') {
     registerRoute('/my-coders', 'My Coders', renderMyCoders);
   }
@@ -38,16 +38,16 @@ function registerAllRoutes(role) {
   }
 }
 
-// ---- FUNCIONES RENDER PLACEHOLDER ----
-// Estas funciones devuelven el HTML de cada página.
-// Sprint 2: serán reemplazadas por HTML completo con diseño.
-// Por ahora solo muestran que la ruta funciona.
+// ---- PLACEHOLDER RENDER FUNCTIONS ----
+// These functions return the HTML for each page.
+// Sprint 2: will be replaced with complete, designed HTML.
+// For now they just show that the route works.
 
 export function renderDashboard() {
   const user = getSessionUser();
-  const role = user?.rol || 'CODER';
+  const role = user?.role || 'CODER';
 
-  // Dashboard diferente según rol
+  // Different dashboard depending on role
   if (role === 'TL' || role === 'ADMIN') return renderDashboardTL(user);
   if (role === 'TUTOR') return renderDashboardTutor(user);
   return renderDashboardCoder(user);
@@ -57,7 +57,7 @@ function renderDashboardCoder(user) {
   return `
     <div class="welcome-banner">
       <div class="welcome-banner__content">
-        <h2 class="welcome-banner__greeting">¡Hola, ${user?.nombre || 'Coder'}! 👋</h2>
+        <h2 class="welcome-banner__greeting">Hello, ${user?.name || 'Coder'}! 👋</h2>
         <p class="welcome-banner__subtitle">Welcome to TutorCode. Here you can manage your mentoring sessions.</p>
       </div>
     </div>
@@ -110,7 +110,7 @@ function renderDashboardTutor(user) {
   return `
     <div class="welcome-banner">
       <div class="welcome-banner__content">
-        <h2 class="welcome-banner__greeting">¡Hola, ${user?.nombre || 'Tutor'}! 👋</h2>
+        <h2 class="welcome-banner__greeting">Hello, ${user?.name || 'Tutor'}! 👋</h2>
         <p class="welcome-banner__subtitle">Manage your mentoring sessions and track your coders' progress.</p>
       </div>
     </div>
@@ -161,7 +161,7 @@ function renderDashboardTL(user) {
   return `
     <div class="welcome-banner">
       <div class="welcome-banner__content">
-        <h2 class="welcome-banner__greeting">Hello, ${user?.nombre || 'Team Leader'}! 👋</h2>
+        <h2 class="welcome-banner__greeting">Hello, ${user?.name || 'Team Leader'}! 👋</h2>
         <p class="welcome-banner__subtitle">Monitor your team's progress and program metrics.</p>
       </div>
     </div>
@@ -229,45 +229,45 @@ function renderDashboardTL(user) {
   `;
 }
 
-// ---- PÁGINAS PLACEHOLDER (Sprint 2 las desarrolla completas) ----
+// ---- PLACEHOLDER PAGES (fully developed in Sprint 2) ----
 
 export function renderMentoring() {
   const user = getSessionUser();
-  const canCreate = user && (user.rol === 'TL' || user.rol === 'TUTOR' || user.rol === 'ADMIN');
+  const canCreate = user && (user.role === 'TL' || user.role === 'TUTOR' || user.role === 'ADMIN');
   return `
     <div class="page-header">
       <div>
-        <h2 class="page-header__title">Mentorías</h2>
+        <h2 class="page-header__title">Mentorships</h2>
         <p class="page-header__subtitle">Manage all mentorships in the program.</p>
       </div>
-      ${canCreate ? `<button class="btn btn-primary" id="btn-nueva-mentoria">
+      ${canCreate ? `<button class="btn btn-primary" id="btn-new-mentoring">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Nueva Mentoría
+        New Mentorship
       </button>` : ''}
     </div>
     <div class="filters-bar">
       <div class="search-bar">
         <svg class="search-bar__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="search" class="search-bar__input" id="search-mentoring" placeholder="Buscar mentoría..." aria-label="Buscar mentoría" />
+        <input type="search" class="search-bar__input" id="search-mentoring" placeholder="Search mentorship..." aria-label="Search mentorship" />
       </div>
-      <select class="filters-bar__select" id="filter-estado" aria-label="Filtrar por estado">
-        <option value="">Todos los estados</option>
-        <option value="programada">Programada</option>
-        <option value="en-progreso">En progreso</option>
-        <option value="completada">Completada</option>
-        <option value="cancelada">Cancelada</option>
+      <select class="filters-bar__select" id="filter-status" aria-label="Filter by status">
+        <option value="">All statuses</option>
+        <option value="scheduled">Scheduled</option>
+        <option value="in-progress">In Progress</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
       </select>
-      <select class="filters-bar__select" id="filter-modalidad" aria-label="Filtrar por modalidad">
-        <option value="">Toda modalidad</option>
+      <select class="filters-bar__select" id="filter-modality" aria-label="Filter by modality">
+        <option value="">All modalities</option>
         <option value="virtual">Virtual</option>
-        <option value="presencial">Presencial</option>
+        <option value="in-person">In-person</option>
       </select>
       <div class="filters-bar__spacer"></div>
-      <div class="view-toggle" role="group" aria-label="Cambiar vista">
-        <button class="view-toggle__btn active" id="view-grid" aria-label="Vista en grilla" aria-pressed="true">
+      <div class="view-toggle" role="group" aria-label="Change view">
+        <button class="view-toggle__btn active" id="view-grid" aria-label="Grid view" aria-pressed="true">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
         </button>
-        <button class="view-toggle__btn" id="view-list" aria-label="Vista en lista" aria-pressed="false">
+        <button class="view-toggle__btn" id="view-list" aria-label="List view" aria-pressed="false">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
         </button>
       </div>
@@ -281,14 +281,14 @@ export function renderMentoring() {
 
 export function renderObservations() {
   const user = getSessionUser();
-  const canAdd = user && (user.rol === 'TL' || user.rol === 'TUTOR' || user.rol === 'ADMIN');
+  const canAdd = user && (user.role === 'TL' || user.role === 'TUTOR' || user.role === 'ADMIN');
   return `
     <div class="page-header">
       <div>
         <h2 class="page-header__title">Observations</h2>
         <p class="page-header__subtitle">Record of the progress of the coders.</p>
       </div>
-      ${canAdd ? `<button class="btn btn-primary" id="btn-nueva-obs">
+      ${canAdd ? `<button class="btn btn-primary" id="btn-new-observation">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         New Observation
       </button>` : ''}
@@ -300,10 +300,10 @@ export function renderObservations() {
             <svg class="search-bar__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input type="search" class="search-bar__input" id="search-obs" placeholder="Search coder..." aria-label="Search observation" />
           </div>
-          <select class="filters-bar__select" aria-label="Filtrar por tipo">
-            <option value="">Todos los tipos</option>
-            <option value="positiva">Positiva</option>
-            <option value="mejora">A mejorar</option>
+          <select class="filters-bar__select" aria-label="Filter by type">
+            <option value="">All types</option>
+            <option value="positive">Positive</option>
+            <option value="improvement">To improve</option>
           </select>
         </div>
         <div class="timeline" id="observations-timeline">
@@ -312,7 +312,7 @@ export function renderObservations() {
       </div>
       <div>
         <div class="card">
-          <div class="card__header"><h3 class="card__title">Coders seguidos</h3></div>
+          <div class="card__header"><h3 class="card__title">Tracked Coders</h3></div>
           <div class="card__body" style="padding:var(--space-3);">${getCodersList()}</div>
         </div>
       </div>
@@ -323,14 +323,14 @@ export function renderObservations() {
 
 export function renderFeedback() {
   const user = getSessionUser();
-  const isCoder = user && user.rol === 'CODER';
+  const isCoder = user && user.role === 'CODER';
   return `
     <div class="page-header">
       <div>
         <h2 class="page-header__title">Feedback</h2>
         <p class="page-header__subtitle">Feedback from coders about the mentorships sessions.</p>
       </div>
-      ${isCoder ? `<button class="btn btn-primary" id="btn-nuevo-feedback">
+      ${isCoder ? `<button class="btn btn-primary" id="btn-new-feedback">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Give Feedback
       </button>` : ''}
@@ -405,13 +405,13 @@ export function renderUsers() {
       </select>
       <select class="filters-bar__select" aria-label="Filter by status">
         <option value="">All</option>
-        <option value="activo">Active</option>
-        <option value="inactivo">Inactive</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
       </select>
     </div>
     <div class="card">
       <div class="table-container">
-        <table class="table" aria-label="Tabla de usuarios">
+        <table class="table" aria-label="Users table">
           <thead>
             <tr>
               <th scope="col">User</th>
@@ -598,15 +598,15 @@ export function renderSettings() {
           <div style="display:flex;flex-direction:column;gap:var(--space-4);">
             <div class="flex justify-between items-center">
               <span style="font-size:var(--font-size-sm);">Backend API</span>
-              <span class="badge badge--pending">Sin conectar</span>
+              <span class="badge badge--pending">Not connected</span>
             </div>
             <div class="flex justify-between items-center">
-              <span style="font-size:var(--font-size-sm);">Base de datos</span>
-              <span class="badge badge--pending">Sin conectar</span>
+              <span style="font-size:var(--font-size-sm);">Database</span>
+              <span class="badge badge--pending">Not connected</span>
             </div>
             <div class="flex justify-between items-center">
               <span style="font-size:var(--font-size-sm);">Firebase Auth</span>
-              <span class="badge badge--pending">Sin conectar</span>
+              <span class="badge badge--pending">Not connected</span>
             </div>
           </div>
         </div>
@@ -616,15 +616,15 @@ export function renderSettings() {
 }
 
 // ============================================================
-// HELPERS — Generadores de HTML para cada sección
-// Sprint 4: estas funciones usarán datos reales del backend
+// HELPERS — HTML generators for each section
+// Sprint 4: these functions will use real data from the backend
 // ============================================================
 
 /**
- * Genera las cards de mentorías.
- * Los datos vienen del servicio (js/services/mentoring.js).
- * Sprint 4: el servicio hará fetch al backend con las mismas firmas.
- * @param {Array} [list] - Lista ya filtrada; si no se pasa, se cargan todas.
+ * Generates the mentorship cards.
+ * The data comes from the service (js/services/mentoring.js).
+ * Sprint 4: the service will fetch from the backend with the same signatures.
+ * @param {Array} [list] - Already-filtered list; if not passed, all are loaded.
  */
 export function getMentoringCards(list) {
   const sample = list || getSessions();
@@ -639,14 +639,14 @@ export function getMentoringCards(list) {
   }
 
   return sample.map(m => `
-    <article class="mentoring-detail-card" aria-label="Mentoría: ${m.topic}">
+    <article class="mentoring-detail-card" aria-label="Mentorship: ${m.topic}">
       <div class="mentoring-detail-card__top">
         <div class="mentoring-detail-card__header">
           <h3 class="mentoring-detail-card__topic">${m.topic}</h3>
           <div class="flex gap-2 items-center">
             <span class="badge badge--${m.status}">${m.status}</span>
             <div class="action-menu">
-              <button class="action-menu__trigger" aria-label="Acciones para ${m.topic}" aria-haspopup="true"
+              <button class="action-menu__trigger" aria-label="Actions for ${m.topic}" aria-haspopup="true"
                 onclick="toggleActionMenu(this, ${m.id})">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
               </button>
@@ -665,7 +665,7 @@ export function getMentoringCards(list) {
           </div>
           <div class="mentoring-detail-card__info-item">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            <span class="mentoring-type mentoring-type--${m.modality}">${m.modality === 'virtual' ? '🔗 Virtual' : '📍 Presencial'}</span>
+            <span class="mentoring-type mentoring-type--${m.modality}">${m.modality === 'virtual' ? '🔗 Virtual' : '📍 In-person'}</span>
           </div>
           <div class="mentoring-detail-card__info-item">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
@@ -674,14 +674,14 @@ export function getMentoringCards(list) {
         </div>
       </div>
       <div class="mentoring-detail-card__bottom">
-        <div class="participant-avatars" aria-label="Participantes">
+        <div class="participant-avatars" aria-label="Participants">
           ${m.coders.slice(0,3).map(c => `<div class="participant-avatars__item" title="${c}">${c}</div>`).join('')}
           ${m.coders.length > 3 ? `<div class="participant-avatars__item participant-avatars__item--more">+${m.coders.length - 3}</div>` : ''}
         </div>
         ${m.status === 'completed'
           ? `<button class="btn btn-sm btn-secondary" onclick="navigateTo('/feedback')">View feedback</button>`
           : m.status === 'scheduled'
-          ? `<button class="btn btn-sm btn-primary" onclick="alert('Unirse a la mentoría')">Join</button>`
+          ? `<button class="btn btn-sm btn-primary" onclick="alert('Join the mentorship')">Join</button>`
           : `<span class="text-sm text-muted">In progress</span>`
         }
       </div>
@@ -689,7 +689,7 @@ export function getMentoringCards(list) {
   `).join('');
 }
 
-/** Genera el modal de crear/editar mentoría */
+/** Generates the create/edit mentorship modal */
 function getModalMentoring(canCreate) {
   if (!canCreate) return '';
   return `
@@ -697,13 +697,13 @@ function getModalMentoring(canCreate) {
       <div class="modal modal--lg">
         <div class="modal__header">
           <h2 class="modal__title" id="modal-mentoring-title">New Mentorship</h2>
-          <button class="modal__close" onclick="closeModal('modal-mentoring')" aria-label="Cerrar modal">
+          <button class="modal__close" onclick="closeModal('modal-mentoring')" aria-label="Close modal">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
         <div class="modal__body">
           <form id="form-mentoring" novalidate>
-            <!-- id oculto: vacío = crear, con valor = editar -->
+            <!-- hidden id: empty = create, with value = edit -->
             <input type="hidden" id="m-id" value="" />
             <div class="form-grid">
               <div class="form-group">
@@ -729,11 +729,11 @@ function getModalMentoring(canCreate) {
                 <input type="time" id="m-time" class="form-input" required />
               </div>
               <div class="form-group">
-                <label for="m-modality" class="form-label form-label--required">Modalidad</label>
+                <label for="m-modality" class="form-label form-label--required">Modality</label>
                 <select id="m-modality" class="form-select" required onchange="toggleModalityField()">
                   <option value="">Select...</option>
                   <option value="virtual">Virtual</option>
-                  <option value="presencial">Presential</option>
+                  <option value="in-person">In-person</option>
                 </select>
               </div>
               <div class="form-group" id="m-location-group">
@@ -743,8 +743,8 @@ function getModalMentoring(canCreate) {
               <div class="form-group">
                 <label for="m-type" class="form-label">Type</label>
                 <select id="m-type" class="form-select">
-                  <option value="abierta">Open (all clans)</option>
-                  <option value="cerrada">Closed (same clan)</option>
+                  <option value="open">Open (all clans)</option>
+                  <option value="closed">Closed (same clan)</option>
                 </select>
               </div>
             </div>
@@ -763,12 +763,12 @@ function getModalMentoring(canCreate) {
   `;
 }
 
-/** Genera el timeline de observaciones de muestra */
+/** Generates the sample observations timeline */
 function getObservationsTimeline() {
   const sample = [
-    { type:'blue', author:'María Torres (TL)', initials:'MT', date:'10 Jul 2026', target:'Kevin Mendoza', text:'Excelente progreso en JavaScript. Kevin demuestra comprensión sólida de closures y es capaz de explicarlos con ejemplos propios.' },
-    { type:'green', author:'Carlos López (Tutor)', initials:'CL', date:'8 Jul 2026', target:'Kevin Mendoza', text:'Participación activa en la mentoría de bases de datos. Se recomienda reforzar el concepto de normalización.' },
-    { type:'orange', author:'María Torres (TL)', initials:'MT', date:'5 Jul 2026', target:'Juan Pérez', text:'Se solicita al coder mayor compromiso con los horarios establecidos. Esta es la segunda vez que llega tarde a la mentoría.' },
+    { type:'blue', author:'María Torres (TL)', initials:'MT', date:'10 Jul 2026', target:'Kevin Mendoza', text:'Excellent progress in JavaScript. Kevin shows a solid understanding of closures and can explain them with his own examples.' },
+    { type:'green', author:'Carlos López (Tutor)', initials:'CL', date:'8 Jul 2026', target:'Kevin Mendoza', text:'Active participation in the database mentoring session. Recommended to reinforce the concept of normalization.' },
+    { type:'orange', author:'María Torres (TL)', initials:'MT', date:'5 Jul 2026', target:'Juan Pérez', text:'The coder is asked to show greater commitment to the set schedule. This is the second time they have arrived late to the mentoring session.' },
   ];
 
   return sample.map(o => `
@@ -782,7 +782,7 @@ function getObservationsTimeline() {
               <div class="timeline-item__date">${o.date}</div>
             </div>
           </div>
-          <button class="btn btn-ghost btn-sm btn-icon" aria-label="Editar observación">
+          <button class="btn btn-ghost btn-sm btn-icon" aria-label="Edit observation">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
         </div>
@@ -796,7 +796,7 @@ function getObservationsTimeline() {
   `).join('');
 }
 
-/** Genera la lista de coders en el sidebar de observaciones */
+/** Generates the coder list in the observations sidebar */
 function getCodersList() {
   const coders = [
     { name:'Kevin Mendoza', clan:'Alpha', obs: 2 },
@@ -819,7 +819,7 @@ function getCodersList() {
   `).join('');
 }
 
-/** Modal de nueva observación */
+/** New observation modal */
 function getModalObservation(canAdd) {
   if (!canAdd) return '';
   return `
@@ -846,9 +846,9 @@ function getModalObservation(canAdd) {
             <div class="form-group">
               <label for="obs-type" class="form-label">Type</label>
               <select id="obs-type" class="form-select">
-                <option value="positiva">✅ Positive</option>
-                <option value="mejora">⚠️ To improve</option>
-                <option value="critica">🔴 Critical</option>
+                <option value="positive">✅ Positive</option>
+                <option value="improvement">⚠️ To improve</option>
+                <option value="critical">🔴 Critical</option>
               </select>
             </div>
             <div class="form-group">
@@ -859,15 +859,15 @@ function getModalObservation(canAdd) {
           </form>
         </div>
         <div class="modal__footer">
-          <button class="btn btn-ghost" onclick="closeModal('modal-observation')">Cancelar</button>
-          <button class="btn btn-primary" onclick="submitObservation()">Guardar</button>
+          <button class="btn btn-ghost" onclick="closeModal('modal-observation')">Cancel</button>
+          <button class="btn btn-primary" onclick="submitObservation()">Save</button>
         </div>
       </div>
     </div>
   `;
 }
 
-/** Modal de feedback del coder */
+/** Coder feedback modal */
 function getModalFeedback(isCoder) {
   if (!isCoder) return '';
   return `
@@ -875,7 +875,7 @@ function getModalFeedback(isCoder) {
       <div class="modal">
         <div class="modal__header">
           <h2 class="modal__title" id="modal-fb-title">Provide Feedback</h2>
-          <button class="modal__close" onclick="closeModal('modal-feedback')" aria-label="Cerrar">
+          <button class="modal__close" onclick="closeModal('modal-feedback')" aria-label="Close">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>

@@ -1,13 +1,13 @@
 /**
- * dashboard.js — Interacciones del Dashboard
- * Sprint 3: lógica de navegación rápida y accesos directos
- * Sprint 4: carga de datos reales del backend
+ * dashboard.js — Dashboard interactions
+ * Sprint 3: quick navigation logic and shortcuts
+ * Sprint 4: loading real data from the backend
  *
  * Kevin Mendoza | Frontend Developer
  */
 
 export function initDashboard() {
-  // Sprint 4: aquí se llamará al backend para cargar las stats reales
-  // Ejemplo: fetchDashboardStats().then(data => renderStats(data));
-  console.log('Dashboard inicializado — datos reales en Sprint 4');
+  // Sprint 4: the backend will be called here to load the real stats
+  // Example: fetchDashboardStats().then(data => renderStats(data));
+  console.log('Dashboard initialized — real data in Sprint 4');
 }

@@ -39,7 +39,7 @@
   opacity: 0.85;
 }
 
-/* ---- Sección de próxima mentoría ---- */
+/* ---- Next mentoring section ---- */
 .next-mentoring {
   background-color: var(--color-surface);
   border-radius: var(--radius-lg);
@@ -95,7 +95,7 @@
   flex-wrap: wrap;
 }
 
-/* ---- Lista de actividad reciente ---- */
+/* ---- Recent activity list ---- */
 .activity-list {
   display: flex;
   flex-direction: column;
@@ -142,7 +142,7 @@
   margin-top: var(--space-1);
 }
 
-/* ---- Mentoring Card (lista de mentorías) ---- */
+/* ---- Mentoring Card (mentoring list) ---- */
 .mentoring-card {
   background-color: var(--color-surface);
   border-radius: var(--radius-lg);
@@ -205,7 +205,7 @@
   border-top: 1px solid var(--color-border);
 }
 
-/* Grid de cards */
+/* Card grid */
 .mentoring-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));

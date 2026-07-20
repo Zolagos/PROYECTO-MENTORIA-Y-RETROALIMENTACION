@@ -1,6 +1,6 @@
 
 
-/* Timeline de observaciones */
+/* Observations timeline */
 .timeline {
   position: relative;
   padding-left: var(--space-8);
@@ -104,7 +104,7 @@
   font-weight: 500;
 }
 
-/* Rating de estrellas (para feedback) */
+/* Star rating (for feedback) */
 .star-rating {
   display: flex;
   gap: var(--space-1);

@@ -1,47 +1,47 @@
 /**
- * api.js — Capa de servicios para comunicarse con el backend
+ * api.js — Service layer for communicating with the backend
  *
- * ¿Qué hace?
- * Centraliza TODAS las llamadas fetch al backend Express.
- * Cada función corresponde a un endpoint de la API.
+ * What does it do?
+ * Centralizes ALL fetch calls to the Express backend.
+ * Each function corresponds to an API endpoint.
  *
- * ¿Por qué centralizar?
- * Si el backend cambia una ruta, solo cambiamos aquí —
- * no en cada página. Un solo lugar de verdad.
+ * Why centralize?
+ * If the backend changes a route, we only change it here —
+ * not on every page. A single source of truth.
  *
- * ¿Cómo funciona?
- * 1. La función arma la petición (método, headers, body)
- * 2. Llama a fetchAPI() que maneja errores globalmente
- * 3. Devuelve los datos o lanza un error descriptivo
+ * How does it work?
+ * 1. The function builds the request (method, headers, body)
+ * 2. It calls fetchAPI() which handles errors globally
+ * 3. It returns the data or throws a descriptive error
  *
- * ESTADO ACTUAL: Sprint 4 — conectar cuando el backend esté listo.
- * Cada función tiene un TODO con el endpoint esperado.
+ * CURRENT STATE: Sprint 4 — connect when the backend is ready.
+ * Each function has a TODO with the expected endpoint.
  *
  * Kevin Mendoza | Frontend Developer
  */
 
 import { navigateTo } from '../router.js';
 
-// ---- URL BASE DEL BACKEND ----
-// TODO Sprint 4: cambiar a la URL real del servidor de tu equipo
+// ---- BACKEND BASE URL ----
+// TODO Sprint 4: change to your team's real server URL
 const API_BASE_URL = 'http://localhost:3000/api';
 
 // ============================================================
-// FUNCIÓN BASE DE FETCH
+// BASE FETCH FUNCTION
 // ============================================================
 
 /**
- * Función base que envuelve fetch con manejo de errores.
- * Todas las demás funciones la usan internamente.
+ * Base function that wraps fetch with error handling.
+ * All other functions use it internally.
  *
- * @param {string} endpoint - Ruta relativa (ej: '/mentoring')
- * @param {Object} options - Opciones de fetch (method, body, etc.)
- * @returns {Promise<any>} - Datos de la respuesta JSON
+ * @param {string} endpoint - Relative path (e.g: '/mentoring')
+ * @param {Object} options - Fetch options (method, body, etc.)
+ * @returns {Promise<any>} - JSON response data
  */
 
 export async function fetchAPI(endpoint, options = {}) {
-  // Obtiene el token de Firebase del sessionStorage
-  // Sprint 4: esto vendrá de Firebase Auth directamente
+  // Gets the Firebase token from sessionStorage
+  // Sprint 4: this will come directly from Firebase Auth
   const token = sessionStorage.getItem('tutorcode_token');
 
   const defaultHeaders = {
@@ -58,7 +58,7 @@ export async function fetchAPI(endpoint, options = {}) {
       },
     });
 
-    // Sesión vencida o token inválido: limpiar y volver al login
+    // Expired session or invalid token: clear and return to login
     if (response.status === 401) {
       sessionStorage.removeItem('tutorcode_user');
       sessionStorage.removeItem('tutorcode_token');
@@ -66,19 +66,19 @@ export async function fetchAPI(endpoint, options = {}) {
       throw new Error('Your session has expired. Please log in again.');
     }
 
-    // Si el servidor responde con error HTTP (400, 404, 500...)
+    // If the server responds with an HTTP error (400, 404, 500...)
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
     }
 
-    // Si la respuesta es 204 No Content (ej: DELETE exitoso)
+    // If the response is 204 No Content (e.g: successful DELETE)
     if (response.status === 204) return null;
 
     return await response.json();
 
   } catch (error) {
-    // Error de red (sin conexión, CORS, etc.)
+    // Network error (no connection, CORS, etc.)
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
       throw new Error('Could not connect to the server. Please verify that the backend is running.');
     }
@@ -87,34 +87,34 @@ export async function fetchAPI(endpoint, options = {}) {
 }
 
 // ============================================================
-// SERVICIOS DE AUTENTICACIÓN
+// AUTHENTICATION SERVICES
 // ============================================================
 
 export const authService = {
   /**
-   * Inicia sesión con Firebase y valida contra el backend.
-   * TODO Sprint 4: integrar Firebase Auth SDK
+   * Logs in with Firebase and validates against the backend.
+   * TODO Sprint 4: integrate the Firebase Auth SDK
    *
    * @param {string} email
    * @param {string} password
    * @returns {Promise<{user, token}>}
    */
   async login(email, password) {
-    // Paso 1: Autenticar con Firebase (devuelve ID Token)
+    // Step 1: Authenticate with Firebase (returns an ID Token)
     // const firebaseResult = await firebase.auth().signInWithEmailAndPassword(email, password);
     // const idToken = await firebaseResult.user.getIdToken();
 
-    // Paso 2: Validar token contra el backend y obtener perfil
+    // Step 2: Validate the token against the backend and get the profile
     // return await fetchAPI('/auth/verify', {
     //   method: 'POST',
     //   body: JSON.stringify({ idToken }),
     // });
 
-    throw new Error('TODO: Implementar en Sprint 4 con Firebase Auth real.');
+    throw new Error('TODO: Implement in Sprint 4 with real Firebase Auth.');
   },
 
   /**
-   * Cierra sesión del usuario.
+   * Logs the user out.
    */
   async logout() {
     // TODO Sprint 4: firebase.auth().signOut()
@@ -125,13 +125,13 @@ export const authService = {
 };
 
 // ============================================================
-// SERVICIOS DE MENTORÍAS
+// MENTORING SERVICES
 // ============================================================
 
 export const mentoringService = {
   /**
-   * Obtiene todas las mentorías (filtradas según el rol).
-   * TODO Sprint 4: GET /api/mentorias
+   * Gets all mentorships (filtered by role).
+   * TODO Sprint 4: GET /api/mentoring
    */
   async getAll(filters = {}) {
     const params = new URLSearchParams(filters).toString();
@@ -139,16 +139,16 @@ export const mentoringService = {
   },
 
   /**
-   * Obtiene una mentoría por ID.
-   * TODO Sprint 4: GET /api/mentorias/:id
+   * Gets a mentorship by ID.
+   * TODO Sprint 4: GET /api/mentoring/:id
    */
   async getById(id) {
     return await fetchAPI(`/mentoring/${id}`);
   },
 
   /**
-   * Crea una nueva mentoría.
-   * TODO Sprint 4: POST /api/mentorias
+   * Creates a new mentorship.
+   * TODO Sprint 4: POST /api/mentoring
    * @param {Object} data - { topic, tutorId, date, time, modality, location, description, type }
    */
   async create(data) {
@@ -159,8 +159,8 @@ export const mentoringService = {
   },
 
   /**
-   * Actualiza una mentoría.
-   * TODO Sprint 4: PUT /api/mentorias/:id
+   * Updates a mentorship.
+   * TODO Sprint 4: PUT /api/mentoring/:id
    */
   async update(id, data) {
     return await fetchAPI(`/mentoring/${id}`, {
@@ -170,19 +170,19 @@ export const mentoringService = {
   },
 
   /**
-   * Cambia el estado de una mentoría.
-   * TODO Sprint 4: PATCH /api/mentorias/:id/estado
+   * Changes a mentorship's status.
+   * TODO Sprint 4: PATCH /api/mentoring/:id/status
    */
   async changeStatus(id, status) {
     return await fetchAPI(`/mentoring/${id}/status`, {
       method: 'PATCH',
-      body: JSON.stringify({ estado: status }),
+      body: JSON.stringify({ status }),
     });
   },
 
   /**
-   * Elimina una mentoría.
-   * TODO Sprint 4: DELETE /api/mentorias/:id
+   * Deletes a mentorship.
+   * TODO Sprint 4: DELETE /api/mentoring/:id
    */
   async delete(id) {
     return await fetchAPI(`/mentoring/${id}`, { method: 'DELETE' });
@@ -190,13 +190,13 @@ export const mentoringService = {
 };
 
 // ============================================================
-// SERVICIOS DE OBSERVACIONES
+// OBSERVATIONS SERVICES
 // ============================================================
 
 export const observationsService = {
   /**
-   * Obtiene todas las observaciones.
-   * TODO Sprint 4: GET /api/observaciones
+   * Gets all observations.
+   * TODO Sprint 4: GET /api/observations
    */
   async getAll(filters = {}) {
     const params = new URLSearchParams(filters).toString();
@@ -204,8 +204,8 @@ export const observationsService = {
   },
 
   /**
-   * Crea una nueva observación.
-   * TODO Sprint 4: POST /api/observaciones
+   * Creates a new observation.
+   * TODO Sprint 4: POST /api/observations
    * @param {Object} data - { targetUserId, type, text }
    */
   async create(data) {
@@ -216,8 +216,8 @@ export const observationsService = {
   },
 
   /**
-   * Actualiza una observación.
-   * TODO Sprint 4: PUT /api/observaciones/:id
+   * Updates an observation.
+   * TODO Sprint 4: PUT /api/observations/:id
    */
   async update(id, data) {
     return await fetchAPI(`/observations/${id}`, {
@@ -227,8 +227,8 @@ export const observationsService = {
   },
 
   /**
-   * Elimina una observación.
-   * TODO Sprint 4: DELETE /api/observaciones/:id
+   * Deletes an observation.
+   * TODO Sprint 4: DELETE /api/observations/:id
    */
   async delete(id) {
     return await fetchAPI(`/observations/${id}`, { method: 'DELETE' });
@@ -236,12 +236,12 @@ export const observationsService = {
 };
 
 // ============================================================
-// SERVICIOS DE FEEDBACK
+// FEEDBACK SERVICES
 // ============================================================
 
 export const feedbackService = {
   /**
-   * Obtiene todos los feedbacks.
+   * Gets all feedback.
    * TODO Sprint 4: GET /api/feedback
    */
   async getAll() {
@@ -249,7 +249,7 @@ export const feedbackService = {
   },
 
   /**
-   * Crea un nuevo feedback.
+   * Creates a new feedback entry.
    * TODO Sprint 4: POST /api/feedback
    * @param {Object} data - { mentoringId, rating, comment }
    */
@@ -262,13 +262,13 @@ export const feedbackService = {
 };
 
 // ============================================================
-// SERVICIOS DE USUARIOS
+// USER SERVICES
 // ============================================================
 
 export const usersService = {
   /**
-   * Obtiene todos los usuarios (solo TL/ADMIN).
-   * TODO Sprint 4: GET /api/usuarios
+   * Gets all users (TL/ADMIN only).
+   * TODO Sprint 4: GET /api/users
    */
   async getAll(filters = {}) {
     const params = new URLSearchParams(filters).toString();
@@ -276,8 +276,8 @@ export const usersService = {
   },
 
   /**
-   * Obtiene el perfil del usuario autenticado.
-   * TODO Sprint 4: GET /api/usuarios/me
+   * Gets the authenticated user's profile.
+   * TODO Sprint 4: GET /api/users/me
    */
   async getProfile() {
     return await fetchAPI('/users/me');

@@ -49,7 +49,7 @@ export function renderLogin() {
       <section class="login-form-panel">
         <div class="login-form-wrapper">
           <header class="login-form__header">
-            <h2 class="login-form__title">¡Welcome back!</h2>
+            <h2 class="login-form__title">Welcome back!</h2>
             <p class="login-form__description">
               Enter your credentials to access the platform.
             </p>
@@ -64,7 +64,7 @@ export function renderLogin() {
             <span id="login-alert-text">Incorrect credentials. Please try again.</span>
           </div>
 
-          <form id="login-form" class="login-form" novalidate aria-label="Formulario de inicio de sesión">
+          <form id="login-form" class="login-form" novalidate aria-label="Sign in form">
             <div class="form-group">
               <label for="login-email" class="form-label form-label--required">Email</label>
               <input
@@ -170,7 +170,7 @@ function setLoadingState(loading) {
   const spinner = document.getElementById('login-spinner');
   if (!btn) return;
   btn.disabled = loading;
-  if (btnText) btnText.textContent = loading ? 'Iniciando sesión...' : 'Iniciar Sesión';
+  if (btnText) btnText.textContent = loading ? 'Logging in...' : 'Sign In';
   if (spinner) spinner.classList.toggle('hidden', !loading);
 }
 
