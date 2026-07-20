@@ -27,7 +27,9 @@ export async function initObservations() {
     btnNueva.addEventListener('click', () => openModal('modal-observation'));
   }
 
-  await loadObservations();
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session_id');
+  await loadObservations(sessionId ? { session_id: sessionId } : {});
   renderTimeline();
 
   const searchInput = document.getElementById('search-obs');

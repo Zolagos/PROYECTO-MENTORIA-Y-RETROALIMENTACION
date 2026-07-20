@@ -32,8 +32,8 @@ export function getObservations() {
   return observationsCache;
 }
 
-export async function loadObservations() {
-  const res = await observationsService.getAll();
+export async function loadObservations(filters = {}) {
+  const res = await observationsService.getAll(filters);
   observationsCache = (res.data || []).map(transformObservation);
   return observationsCache;
 }
