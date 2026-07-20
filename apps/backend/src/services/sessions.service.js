@@ -2,6 +2,10 @@ import ApiError from '../utils/ApiError.js';
 import * as sessionsRepository from '../repositories/sessions.repository.js';
 import * as usersRepository from '../repositories/users.repository.js';
 
+export const findAll = async (filter) => {
+    return sessionsRepository.findAll(filter);
+};
+
 export const assignParticipants = async ({sessionId, tutorId, coderIds}) => {
     const session = await sessionsRepository.findById(sessionId);
   if (!session) throw new ApiError('Session not found', 404);
