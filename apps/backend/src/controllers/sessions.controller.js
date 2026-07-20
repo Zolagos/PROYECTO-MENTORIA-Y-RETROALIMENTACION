@@ -2,7 +2,6 @@ import asyncHandler from '../utils/asyncHandler.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import ApiError from '../utils/ApiError.js';
 import * as sessionsService from '../services/sessions.service.js';
-
 export const listSessions = asyncHandler(async (req, res) => {
   const sessions = await sessionsService.listSessions(req.user);
 
@@ -12,7 +11,6 @@ export const listSessions = asyncHandler(async (req, res) => {
     'Sessions retrieved'
   );
 });
-
 export const getSession = asyncHandler(async (req, res) => {
   const sessionId = Number(req.params.id);
 
@@ -31,9 +29,25 @@ export const getSession = asyncHandler(async (req, res) => {
     'Session retrieved'
   );
 });
+export const updateSession = asyncHandler(async (req, res) => {
+  const sessionId = Number(req.params.id);
 
+  if (!Number.isInteger(sessionId) || sessionId <= 0) {
+    throw new ApiError('Invalid session id', 400);
+  }
 
+  const session = await sessionsService.updateSession({
+    sessionId,
+    sessionData: req.body,
+    actor: req.user,
+  });
 
+  return ApiResponse.success(
+    res,
+    session,
+    'Session updated'
+  );
+});
 export const createSession = asyncHandler(async (req, res) => {
   const session = await sessionsService.createSession({
     sessionData: req.body,
@@ -42,7 +56,6 @@ export const createSession = asyncHandler(async (req, res) => {
 
   return ApiResponse.created(res, session);
 });
-
 export const assignParticipants = asyncHandler(
   async (req, res) => {
     const sessionId = Number(req.params.id);

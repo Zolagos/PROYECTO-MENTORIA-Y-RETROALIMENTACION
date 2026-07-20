@@ -6,7 +6,31 @@ import * as usersRepository from '../repositories/users.repository.js';
 const MENTORSHIP_TYPES = ['group', 'individual'];
 const MODALITIES = ['virtual', 'in person'];
 const SESSION_TYPES = ['open', 'closed'];
+const ALLOWED_UPDATE_FIELDS = new Set([
+  'topic',
+  'description',
+  'mentorship_type',
+  'modality',
+  'session_type',
+  'room',
+  'meeting_link',
+  'start_time',
+  'end_time',
+  'tutor_id',
+]);
 
+const PROTECTED_UPDATE_FIELDS = new Set([
+  'id',
+  'status',
+  'clan_id',
+  'clanId',
+  'created_by',
+  'createdBy',
+  'request_id',
+  'requestId',
+  'created_at',
+  'updated_at',
+]);
 const requireNonEmptyString = (value, fieldName) => {
   if (typeof value !== 'string' || value.trim().length === 0) {
     throw new ApiError(
@@ -292,6 +316,267 @@ export const createSession = async ({ sessionData, actor }) => {
     tutorId: tutor.id,
     clanId: actorClanId,
     createdBy: actorId,
+  });
+};
+
+export const updateSession = async ({
+  sessionId,
+  sessionData,
+  actor,
+}) => {
+  const {
+    actorId,
+    actorClanId,
+    actorRole,
+  } = getActorContext(actor);
+
+  if (
+    actorRole !== ROLES.TEAM_LEADER &&
+    actorRole !== ROLES.TUTOR
+  ) {
+    throw new ApiError(
+      'Only Team Leaders and Tutors can update sessions',
+      403
+    );
+  }
+
+  if (
+    !sessionData ||
+    typeof sessionData !== 'object' ||
+    Array.isArray(sessionData)
+  ) {
+    throw new ApiError('Request body must be an object', 400);
+  }
+
+  const receivedFields = Object.keys(sessionData);
+
+  if (receivedFields.length === 0) {
+    throw new ApiError(
+      'At least one field must be provided',
+      400
+    );
+  }
+
+  const protectedField = receivedFields.find((field) =>
+    PROTECTED_UPDATE_FIELDS.has(field)
+  );
+
+  if (protectedField) {
+    throw new ApiError(
+      `${protectedField} cannot be updated through this endpoint`,
+      400
+    );
+  }
+
+  const unknownField = receivedFields.find(
+    (field) => !ALLOWED_UPDATE_FIELDS.has(field)
+  );
+
+  if (unknownField) {
+    throw new ApiError(
+      `Unknown or unsupported field: ${unknownField}`,
+      400
+    );
+  }
+
+  const session = await sessionsRepository.findById(sessionId);
+
+  if (!session) {
+    throw new ApiError('Session not found', 404);
+  }
+
+  if (Number(session.clan_id) !== actorClanId) {
+    throw new ApiError(
+      'The session belongs to another clan',
+      403
+    );
+  }
+
+  if (session.status !== 'scheduled') {
+    throw new ApiError(
+      'Only scheduled sessions can be updated',
+      409
+    );
+  }
+
+  if (
+    actorRole === ROLES.TUTOR &&
+    Number(session.tutor_id) !== actorId
+  ) {
+    throw new ApiError(
+      'Tutors can only update their own sessions',
+      403
+    );
+  }
+
+  const hasField = (field) =>
+    Object.hasOwn(sessionData, field);
+
+  const topic = hasField('topic')
+    ? requireNonEmptyString(sessionData.topic, 'topic')
+    : session.topic;
+
+  let description = session.description;
+
+  if (hasField('description')) {
+    if (
+      sessionData.description !== null &&
+      typeof sessionData.description !== 'string'
+    ) {
+      throw new ApiError(
+        'description must be a string or null',
+        400
+      );
+    }
+
+    description =
+      sessionData.description?.trim() || null;
+  }
+
+  const mentorshipType = hasField('mentorship_type')
+    ? sessionData.mentorship_type
+    : session.mentorship_type;
+
+  if (!MENTORSHIP_TYPES.includes(mentorshipType)) {
+    throw new ApiError(
+      'mentorship_type must be group or individual',
+      400
+    );
+  }
+
+  const modality = hasField('modality')
+    ? sessionData.modality
+    : session.modality;
+
+  if (!MODALITIES.includes(modality)) {
+    throw new ApiError(
+      'modality must be virtual or in person',
+      400
+    );
+  }
+
+  const sessionType = hasField('session_type')
+    ? sessionData.session_type
+    : session.session_type;
+
+  if (!SESSION_TYPES.includes(sessionType)) {
+    throw new ApiError(
+      'session_type must be open or closed',
+      400
+    );
+  }
+
+  const startTime = hasField('start_time')
+    ? new Date(sessionData.start_time)
+    : new Date(session.start_time);
+
+  const endTime = hasField('end_time')
+    ? new Date(sessionData.end_time)
+    : new Date(session.end_time);
+
+  if (Number.isNaN(startTime.getTime())) {
+    throw new ApiError(
+      'start_time must be a valid date',
+      400
+    );
+  }
+
+  if (Number.isNaN(endTime.getTime())) {
+    throw new ApiError(
+      'end_time must be a valid date',
+      400
+    );
+  }
+
+  if (endTime <= startTime) {
+    throw new ApiError(
+      'end_time must be later than start_time',
+      400
+    );
+  }
+
+  let room = hasField('room')
+    ? sessionData.room
+    : session.room;
+
+  let meetingLink = hasField('meeting_link')
+    ? sessionData.meeting_link
+    : session.meeting_link;
+
+  if (modality === 'virtual') {
+    meetingLink = requireNonEmptyString(
+      meetingLink,
+      'meeting_link'
+    );
+
+    room = null;
+  }
+
+  if (modality === 'in person') {
+    room = requireNonEmptyString(room, 'room');
+    meetingLink = null;
+  }
+
+  const tutorId = hasField('tutor_id')
+    ? Number(sessionData.tutor_id)
+    : Number(session.tutor_id);
+
+  if (!Number.isInteger(tutorId) || tutorId <= 0) {
+    throw new ApiError(
+      'tutor_id must be a positive integer',
+      400
+    );
+  }
+
+  if (
+    actorRole === ROLES.TUTOR &&
+    tutorId !== actorId
+  ) {
+    throw new ApiError(
+      'Tutors cannot reassign sessions to another Tutor',
+      403
+    );
+  }
+
+  const tutor = await usersRepository.findById(tutorId);
+
+  if (!tutor) {
+    throw new ApiError('Tutor not found', 404);
+  }
+
+  if (tutor.role !== ROLES.TUTOR) {
+    throw new ApiError(
+      'The selected user does not have the Tutor role',
+      400
+    );
+  }
+
+  if (!tutor.status) {
+    throw new ApiError(
+      'The selected Tutor is inactive',
+      409
+    );
+  }
+
+  if (Number(tutor.clan_id) !== actorClanId) {
+    throw new ApiError(
+      'The Tutor must belong to the same clan',
+      403
+    );
+  }
+
+  return sessionsRepository.update({
+    sessionId,
+    topic,
+    description,
+    mentorshipType,
+    modality,
+    sessionType,
+    room,
+    meetingLink,
+    startTime,
+    endTime,
+    tutorId,
   });
 };
 

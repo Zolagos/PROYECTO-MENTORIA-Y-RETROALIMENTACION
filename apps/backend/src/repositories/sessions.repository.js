@@ -1,5 +1,4 @@
 import pool from '../config/database.js';
-
 export const findById = async (id) => {
     const { rows } = await pool.query(
         'SELECT * FROM mentoring_sessions WHERE id = $1',
@@ -7,7 +6,6 @@ export const findById = async (id) => {
     );
     return rows[0] ?? null;
 };
-
 export const findByClan = async (clanId) => {
   const { rows } = await pool.query(
     `SELECT
@@ -28,7 +26,6 @@ export const findByClan = async (clanId) => {
 
   return rows;
 };
-
 export const findByTutor = async ({ tutorId, clanId }) => {
   const { rows } = await pool.query(
     `SELECT
@@ -50,7 +47,6 @@ export const findByTutor = async ({ tutorId, clanId }) => {
 
   return rows;
 };
-
 export const findForCoder = async ({ coderId, clanId }) => {
   const { rows } = await pool.query(
     `SELECT
@@ -80,7 +76,6 @@ export const findForCoder = async ({ coderId, clanId }) => {
 
   return rows;
 };
-
 export const findDetailById = async (id) => {
   const { rows } = await pool.query(
     `SELECT
@@ -119,7 +114,6 @@ export const findDetailById = async (id) => {
 
   return rows[0] ?? null;
 };
-
 export const isCoderAssigned = async ({
   sessionId,
   coderId,
@@ -134,7 +128,6 @@ export const isCoderAssigned = async ({
 
   return rowCount > 0;
 };
-
 export const create = async ({
   topic,
   description,
@@ -199,7 +192,52 @@ export const create = async ({
 
   return rows[0];
 };
+export const update = async ({
+  sessionId,
+  topic,
+  description,
+  mentorshipType,
+  modality,
+  sessionType,
+  room,
+  meetingLink,
+  startTime,
+  endTime,
+  tutorId,
+}) => {
+  const { rows } = await pool.query(
+    `UPDATE mentoring_sessions
+     SET
+       topic = $1,
+       description = $2,
+       mentorship_type = $3,
+       modality = $4,
+       session_type = $5,
+       room = $6,
+       meeting_link = $7,
+       start_time = $8,
+       end_time = $9,
+       tutor_id = $10,
+       updated_at = CURRENT_TIMESTAMP
+     WHERE id = $11
+     RETURNING *`,
+    [
+      topic,
+      description,
+      mentorshipType,
+      modality,
+      sessionType,
+      room,
+      meetingLink,
+      startTime,
+      endTime,
+      tutorId,
+      sessionId,
+    ]
+  );
 
+  return rows[0] ?? null;
+};
 export const assignParticipants = async ({
   sessionId,
   coderIds,

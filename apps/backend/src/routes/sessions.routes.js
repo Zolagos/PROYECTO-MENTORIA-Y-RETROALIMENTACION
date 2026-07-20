@@ -6,14 +6,12 @@ import {
   listSessions,
   getSession,
   createSession,
+  updateSession,
   assignParticipants,
 } from '../controllers/sessions.controller.js';
 import { ROLES } from '../config/roles.js';
-
 const router = Router();
-
 router.use(authMiddleware, attachDbUser);
-
 router.get(
   '/',
   requireRole(
@@ -23,7 +21,6 @@ router.get(
   ),
   listSessions
 );
-
 router.get(
   '/:id',
   requireRole(
@@ -33,17 +30,19 @@ router.get(
   ),
   getSession
 );
-
 router.post(
   '/',
   requireRole(ROLES.TEAM_LEADER, ROLES.TUTOR),
   createSession
 );
-
+router.patch(
+  '/:id',
+  requireRole(ROLES.TEAM_LEADER, ROLES.TUTOR),
+  updateSession
+);
 router.post(
   '/:id/participants',
   requireRole(ROLES.TEAM_LEADER, ROLES.TUTOR),
   assignParticipants
 );
-
 export default router;
