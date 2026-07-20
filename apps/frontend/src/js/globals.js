@@ -24,6 +24,7 @@ window.showToast = showToast
 window.toggleActionMenu = toggleActionMenu
 window.editMentoring = editMentoring
 window.deleteMentoring = deleteMentoring
+window.respondMentoringRequest = respondMentoringRequest
 window.submitMentoring = submitMentoring
 window.toggleModalityField = toggleModalityField
 window.openParticipantsModal = openParticipantsModal

@@ -9,7 +9,7 @@ export const listMentoringRequests = asyncHandler(async (req, res) => {
 
   if (req.user.role === ROLES.CODER) {
     coder_id = req.user.id;
-  } else if (req.user.role === ROLES.TEAM_LEADER) {
+  } else if (req.user.role === ROLES.TEAM_LEADER || req.user.role === ROLES.TUTOR) {
     coder_id = coder_id ? Number(coder_id) : undefined;
   } else {
     throw new ApiError('Access denied', 403);
@@ -21,7 +21,11 @@ export const listMentoringRequests = asyncHandler(async (req, res) => {
 });
 
 export const getMentoringRequest = asyncHandler(async (req, res) => {
-  if (req.user.role !== ROLES.CODER && req.user.role !== ROLES.TEAM_LEADER) {
+  if (
+    req.user.role !== ROLES.CODER &&
+    req.user.role !== ROLES.TEAM_LEADER &&
+    req.user.role !== ROLES.TUTOR
+  ) {
     throw new ApiError('Access denied', 403);
   }
 
@@ -72,4 +76,28 @@ export const createMentoringRequest = asyncHandler(async (req, res) => {
   }
 
   return ApiResponse.created(res, mentoringRequest);
+});
+
+export const updateMentoringStatus = asyncHandler(async (req, res) => {
+  if (req.user.role !== ROLES.TEAM_LEADER && req.user.role !== ROLES.TUTOR)
+    throw new ApiError('Access denied', 403);
+  
+  const mentoring_id = req.params.id;
+  const { mentoring_status } = req.body;
+
+  if (!mentoring_status || typeof mentoring_status !== 'string' || mentoring_status.trim().length === 0) {
+    throw new ApiError('mentoring_status is required and must be a non-empty string', 400);
+  }
+
+  const updatedRequest = await mentoringRequestModel.updateMentoringRequest({ mentoring_id,mentoring_status });
+  return ApiResponse.success(res, updatedRequest);
+});
+
+export const deleteMentoring = asyncHandler(async (req, res) => {
+  if (req.user.role !== ROLES.TEAM_LEADER)
+    throw new ApiError('Access denied', 403);
+
+  const mentoring_id = req.params.id;
+  const deletedRequest = await mentoringRequestModel.deleteMentoring({ mentoring_id });
+  return ApiResponse.success(res, deletedRequest);
 });

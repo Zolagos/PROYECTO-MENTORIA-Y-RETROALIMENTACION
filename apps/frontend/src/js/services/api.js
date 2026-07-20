@@ -130,62 +130,66 @@ export const authService = {
 
 export const mentoringService = {
   /**
-   * Gets all mentorships (filtered by role).
-   * TODO Sprint 4: GET /api/mentoring
+   * Gets all mentoring requests (filtered/scoped by role server-side).
    */
   async getAll(filters = {}) {
+    const options = {
+      method: 'GET',
+    }
     const params = new URLSearchParams(filters).toString();
-    return await fetchAPI(`/mentoring${params ? '?' + params : ''}`);
+    return await fetchAPI(`/mentoring-requests${params ? '?' + params : ''}`, options);
+
   },
 
   /**
-   * Gets a mentorship by ID.
-   * TODO Sprint 4: GET /api/mentoring/:id
+   * Gets a mentoring request by ID.
    */
   async getById(id) {
-    return await fetchAPI(`/mentoring/${id}`);
+    return await fetchAPI(`/mentoring-requests/${id}`);
   },
 
   /**
-   * Creates a new mentorship.
-   * TODO Sprint 4: POST /api/mentoring
-   * @param {Object} data - { topic, tutorId, date, time, modality, location, description, type }
+   * Creates a new mentoring request (Coder only).
+   * @param {Object} data - { topic, description }
    */
   async create(data) {
-    return await fetchAPI('/mentoring', {
+    return await fetchAPI('/mentoring-requests', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   },
 
   /**
-   * Updates a mentorship.
-   * TODO Sprint 4: PUT /api/mentoring/:id
+   * Changes a mentoring request's status (accept/deny). TL and Tutor only.
+   * @param {number} id
+   * @param {'accepted'|'denied'} state
    */
-  async update(id, data) {
-    return await fetchAPI(`/mentoring/${id}`, {
+  async changeStatus(id, state) {
+    return await fetchAPI(`/mentoring-requests/${id}/status`, {
       method: 'PUT',
-      body: JSON.stringify(data),
+      body: JSON.stringify({ mentoring_status: state }),
     });
   },
 
   /**
-   * Changes a mentorship's status.
-   * TODO Sprint 4: PATCH /api/mentoring/:id/status
-   */
-  async changeStatus(id, status) {
-    return await fetchAPI(`/mentoring/${id}/status`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status }),
-    });
-  },
-
-  /**
-   * Deletes a mentorship.
-   * TODO Sprint 4: DELETE /api/mentoring/:id
+   * Deletes a mentoring request. TL only.
    */
   async delete(id) {
-    return await fetchAPI(`/mentoring/${id}`, { method: 'DELETE' });
+    return await fetchAPI(`/mentoring-requests/${id}`, { method: 'DELETE' });
+  },
+};
+
+// ============================================================
+// SESSIONS SERVICES
+// ============================================================
+
+export const sessionsService = {
+  /**
+   * Gets all scheduled mentoring sessions (filtered/scoped by role server-side).
+   */
+  async getAll(filters = {}) {
+    const params = new URLSearchParams(filters).toString();
+    return await fetchAPI(`/sessions${params ? '?' + params : ''}`);
   },
 };
 
