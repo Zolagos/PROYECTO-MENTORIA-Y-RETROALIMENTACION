@@ -4,19 +4,20 @@ let sessionsCache = [];
 let tutorsCache = [];
 
 function transformSession(raw) {
+  const st = raw.start_time || '';
   return {
     id: raw.id,
     topic: raw.topic,
     desc: raw.description,
     tutorId: raw.tutor_id,
     tutor: `${raw.tutor_name || ''} ${raw.tutor_lastname || ''}`.trim(),
-    date: raw.session_date ? raw.session_date.split('T')[0] : '',
-    time: raw.start_time ? raw.start_time.substring(0, 5) : '',
+    date: st ? st.split('T')[0] : '',
+    time: st ? (st.split('T')[1] || '').substring(0, 5) : '',
     modality: raw.modality,
     link: raw.link || '',
     room: raw.room || '',
     type: raw.session_type,
-    status: raw.status,
+    status: (raw.status || '').replace(/_/g, '-'),
     coders: (raw.coders || []).map(c => `${(c.name || '')[0]}${(c.lastname || '')[0]}`),
   };
 }
