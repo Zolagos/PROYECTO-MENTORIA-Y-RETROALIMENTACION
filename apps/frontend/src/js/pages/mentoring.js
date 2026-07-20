@@ -3,15 +3,15 @@ import {
   getTutors, getTutorById,
   createSession, updateSession, deleteSession,
   changeRequestStatus, deleteRequestItem,
-  loadSessions, loadTutors,
+  loadTutors,
 } from '../services/mentoring.js'
 import { getMentoringCards } from '../app.js'
 import { getSessionUser } from '../components/header.js'
 import { openModal, closeModal, showToast } from '../utils.js'
 
 export async function initMentoring() {
-  // 1. Fetch sessions and tutors from the API in parallel
-  await Promise.all([loadSessions(), loadTutors()]);
+  // 1. Fetch the available tutors from the API
+  await loadTutors();
 
   // 2. Populate the tutor select in the modal
   const tutorSelect = document.getElementById('m-tutor');
