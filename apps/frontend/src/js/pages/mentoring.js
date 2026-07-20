@@ -168,6 +168,68 @@ export function changeMentoringStatus(id) {
   showToast(`Mentorship now in status: ${mentoring.status}.`, 'success');
 }
 
+/** Opens a modal listing participants (name + role) for a session */
+export function openParticipantsModal(id) {
+  const session = getSessionById(id);
+  if (!session || !session.codersDetail.length) return;
+
+  const existing = document.getElementById('modal-participants');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay active';
+  overlay.id = 'modal-participants';
+  overlay.style.display = 'flex';
+  overlay.innerHTML = `
+    <div class="modal modal--sm">
+      <div class="modal__header">
+        <h2 class="modal__title">Participants</h2>
+        <button class="modal__close" onclick="closeParticipantsModal()" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        ${session.codersDetail.length === 0
+          ? '<p class="text-muted">No participants assigned.</p>'
+          : `<ul style="list-style:none;padding:0;margin:0;">
+               ${session.codersDetail.map(c => `
+                 <li style="display:flex;justify-content:space-between;align-items:center;padding:var(--space-2) 0;border-bottom:1px solid var(--color-border);">
+                   <span>${c.name} ${c.lastname}</span>
+                   <span class="badge badge--role-${c.role.toLowerCase().replace(/\s+/g, '-')}">${c.role}</span>
+                 </li>
+               `).join('')}
+             </ul>`
+        }
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+
+  const escHandler = (e) => {
+    if (e.key === 'Escape') {
+      closeParticipantsModal();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      closeParticipantsModal();
+    }
+  });
+}
+
+export function closeParticipantsModal() {
+  const overlay = document.getElementById('modal-participants');
+  if (overlay) {
+    overlay.remove();
+    document.body.style.overflow = '';
+  }
+}
+
 /** Deletes a mentorship after confirmation */
 export function deleteMentoring(id) {
   const mentoring = getSessionById(id);

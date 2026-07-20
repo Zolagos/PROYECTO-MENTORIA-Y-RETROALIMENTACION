@@ -19,6 +19,7 @@ function transformSession(raw) {
     type: raw.session_type,
     status: (raw.status || '').replace(/_/g, '-'),
     coders: (raw.coders || []).map(c => `${(c.name || '')[0]}${(c.lastname || '')[0]}`),
+    codersDetail: raw.coders || [],
   };
 }
 

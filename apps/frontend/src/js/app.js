@@ -669,22 +669,18 @@ export function getMentoringCards(list) {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             <span class="mentoring-type mentoring-type--${m.modality}">${m.modality === 'virtual' ? '🔗 Virtual' : '📍 In-person'}</span>
           </div>
-          <div class="mentoring-detail-card__info-item">
+          <div class="mentoring-detail-card__info-item" onclick="openParticipantsModal(${m.id})" style="cursor:pointer">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-            <span>${m.coders.length} participante${m.coders.length !== 1 ? 's' : ''}</span>
+            <span style="text-decoration:underline dotted">${m.coders.length} participante${m.coders.length !== 1 ? 's' : ''}</span>
           </div>
         </div>
       </div>
       <div class="mentoring-detail-card__bottom">
-        <div class="participant-avatars" aria-label="Participants">
-          ${m.coders.slice(0,3).map(c => `<div class="participant-avatars__item" title="${c}">${c}</div>`).join('')}
-          ${m.coders.length > 3 ? `<div class="participant-avatars__item participant-avatars__item--more">+${m.coders.length - 3}</div>` : ''}
-        </div>
         ${m.status === 'completed'
           ? `<button class="btn btn-sm btn-secondary" onclick="navigateTo('/feedback')">View feedback</button>`
           : m.status === 'scheduled'
           ? `<button class="btn btn-sm btn-primary" onclick="alert('Join the mentorship')">Join</button>`
-          : `<span class="text-sm text-muted">In progress</span>`
+          : ''
         }
       </div>
     </article>
