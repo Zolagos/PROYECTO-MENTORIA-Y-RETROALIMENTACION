@@ -20,6 +20,9 @@ function transformSession(raw) {
     status: (raw.status || '').replace(/_/g, '-'),
     coders: (raw.coders || []).map(c => `${(c.name || '')[0]}${(c.lastname || '')[0]}`),
     codersDetail: raw.coders || [],
+    tutorDetail: raw.tutor_name
+      ? { name: raw.tutor_name, lastname: raw.tutor_lastname || '', role: 'Tutor' }
+      : null,
   };
 }
 

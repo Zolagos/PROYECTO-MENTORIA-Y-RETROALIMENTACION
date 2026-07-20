@@ -230,6 +230,50 @@ export function closeParticipantsModal() {
   }
 }
 
+/** Opens a modal showing the tutor name and role */
+export function openTutorModal(id) {
+  const session = getSessionById(id);
+  if (!session || !session.tutorDetail) return;
+
+  const existing = document.getElementById('modal-tutor');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay active';
+  overlay.id = 'modal-tutor';
+  overlay.style.display = 'flex';
+  overlay.innerHTML = `
+    <div class="modal modal--sm">
+      <div class="modal__header">
+        <h2 class="modal__title">Tutor</h2>
+        <button class="modal__close" onclick="closeTutorModal()" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:var(--space-2) 0;">
+          <span style="font-size:var(--font-size-lg);font-weight:600;">${session.tutorDetail.name} ${session.tutorDetail.lastname}</span>
+          <span class="badge badge--role-tutor">${session.tutorDetail.role}</span>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+
+  const escHandler = (e) => {
+    if (e.key === 'Escape') { closeTutorModal(); document.removeEventListener('keydown', escHandler); }
+  };
+  document.addEventListener('keydown', escHandler);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeTutorModal(); });
+}
+
+export function closeTutorModal() {
+  const overlay = document.getElementById('modal-tutor');
+  if (overlay) { overlay.remove(); document.body.style.overflow = ''; }
+}
+
 /** Deletes a mentorship after confirmation */
 export function deleteMentoring(id) {
   const mentoring = getSessionById(id);
