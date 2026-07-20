@@ -210,7 +210,7 @@ export const observationsService = {
    */
   async getAll(filters = {}) {
     const params = new URLSearchParams(filters).toString();
-    return await fetchAPI(`/observation${params ? '?' + params : ''}`);
+    return await fetchAPI(`/observations${params ? '?' + params : ''}`);
   },
 
   /**

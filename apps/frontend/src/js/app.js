@@ -2,6 +2,7 @@ import { registerRoute, navigateTo } from './router.js';
 import { getSessionUser, initHeader } from './components/header.js';
 import { buildSidebar, initSidebarCollapse } from './components/sidebar.js';
 import { getSessions } from './services/mentoring.js';
+import { getObservations } from './services/observations.js';
 import { formatDate } from './utils.js';
 
 export function initApp(user) {
@@ -295,28 +296,20 @@ export function renderObservations() {
         New Observation
       </button>` : ''}
     </div>
-    <div class="content-grid">
+    <div>
       <div>
         <div class="filters-bar" style="margin-bottom:var(--space-5);">
           <div class="search-bar">
             <svg class="search-bar__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="search" class="search-bar__input" id="search-obs" placeholder="Search coder..." aria-label="Search observation" />
+            <input type="search" class="search-bar__input" id="search-obs" placeholder="Search observation..." aria-label="Search observation" />
           </div>
-          <select class="filters-bar__select" aria-label="Filter by type">
+          <select class="filters-bar__select" id="filter-obs-type" aria-label="Filter by type">
             <option value="">All types</option>
-            <option value="positive">Positive</option>
-            <option value="improvement">To improve</option>
+            <option value="coder">Coder</option>
+            <option value="tutor">Tutor</option>
           </select>
         </div>
-        <div class="timeline" id="observations-timeline">
-          ${getObservationsTimeline()}
-        </div>
-      </div>
-      <div>
-        <div class="card">
-          <div class="card__header"><h3 class="card__title">Tracked Coders</h3></div>
-          <div class="card__body" style="padding:var(--space-3);">${getCodersList()}</div>
-        </div>
+        <div class="timeline" id="observations-timeline"></div>
       </div>
     </div>
     ${getModalObservation(canAdd)}
@@ -764,60 +757,41 @@ function getModalMentoring(canCreate) {
   `;
 }
 
-/** Generates the sample observations timeline */
-function getObservationsTimeline() {
-  const sample = [
-    { type:'blue', author:'María Torres (TL)', initials:'MT', date:'10 Jul 2026', target:'Kevin Mendoza', text:'Excellent progress in JavaScript. Kevin shows a solid understanding of closures and can explain them with his own examples.' },
-    { type:'green', author:'Carlos López (Tutor)', initials:'CL', date:'8 Jul 2026', target:'Kevin Mendoza', text:'Active participation in the database mentoring session. Recommended to reinforce the concept of normalization.' },
-    { type:'orange', author:'María Torres (TL)', initials:'MT', date:'5 Jul 2026', target:'Juan Pérez', text:'The coder is asked to show greater commitment to the set schedule. This is the second time they have arrived late to the mentoring session.' },
-  ];
+/** Generates the observations timeline */
+export function getObservationsTimeline(list) {
+  const items = list || getObservations();
+  if (!items.length) {
+    return '<p style="text-align:center;color:var(--color-text-muted);padding:var(--space-10) 0;">No observations found.</p>';
+  }
 
-  return sample.map(o => `
-    <div class="timeline-item timeline-item--${o.type}">
+  return items.map(o => {
+    const typeClass = o.type === 'tutor' ? 'timeline-item--orange' : 'timeline-item--green';
+    return `
+    <div class="timeline-item ${typeClass}" data-type="${o.type}">
       <div class="timeline-item__card">
         <div class="timeline-item__header">
           <div class="timeline-item__author">
             <div class="timeline-item__avatar">${o.initials}</div>
             <div>
-              <div class="timeline-item__author-name">${o.author}</div>
+              <div class="timeline-item__author-name">${o.observer}</div>
               <div class="timeline-item__date">${o.date}</div>
             </div>
           </div>
-          <button class="btn btn-ghost btn-sm btn-icon" aria-label="Edit observation">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
+          <span class="badge badge--obs-${o.type}">${o.type === 'tutor' ? 'Tutor' : 'Coder'}</span>
         </div>
-        <p class="timeline-item__text">${o.text}</p>
-        <span class="timeline-item__target">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          ${o.target}
-        </span>
-      </div>
-    </div>
-  `).join('');
-}
-
-/** Generates the coder list in the observations sidebar */
-function getCodersList() {
-  const coders = [
-    { name:'Kevin Mendoza', clan:'Alpha', obs: 2 },
-    { name:'Juan Pérez', clan:'Beta', obs: 1 },
-    { name:'Laura Castro', clan:'Alpha', obs: 3 },
-  ];
-  return coders.map(c => `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--space-3);border-radius:var(--radius-md);cursor:pointer;transition:background-color 150ms;"
-      onmouseenter="this.style.backgroundColor='var(--color-bg)'"
-      onmouseleave="this.style.backgroundColor='transparent'">
-      <div style="display:flex;align-items:center;gap:var(--space-2);">
-        <div class="table__user-avatar">${c.name.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
-        <div>
-          <div style="font-size:var(--font-size-sm);font-weight:600;">${c.name}</div>
-          <div style="font-size:var(--font-size-xs);color:var(--color-text-muted);">Clan ${c.clan}</div>
+        <p class="timeline-item__text">${o.observation}</p>
+        ${o.recommendation ? `<div class="timeline-item__extra"><strong>Recommendation:</strong> ${o.recommendation}</div>` : ''}
+        ${o.technicalNotes ? `<div class="timeline-item__extra"><strong>Technical notes:</strong> ${o.technicalNotes}</div>` : ''}
+        <div class="timeline-item__meta">
+          <span class="timeline-item__target">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            ${o.target}
+          </span>
+          <span class="timeline-item__session">${o.sessionTopic}</span>
         </div>
       </div>
-      <span class="badge badge--info">${c.obs}</span>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 /** New observation modal */
