@@ -8,6 +8,133 @@ export const findById = async (id) => {
     return rows[0] ?? null;
 };
 
+export const findByClan = async (clanId) => {
+  const { rows } = await pool.query(
+    `SELECT
+       s.*,
+       t.name AS tutor_name,
+       t.lastname AS tutor_lastname,
+       (
+         SELECT COUNT(*)::int
+         FROM session_coders sc
+         WHERE sc.session_id = s.id
+       ) AS participant_count
+     FROM mentoring_sessions s
+     JOIN users t ON t.id = s.tutor_id
+     WHERE s.clan_id = $1
+     ORDER BY s.start_time ASC, s.id ASC`,
+    [clanId]
+  );
+
+  return rows;
+};
+
+export const findByTutor = async ({ tutorId, clanId }) => {
+  const { rows } = await pool.query(
+    `SELECT
+       s.*,
+       t.name AS tutor_name,
+       t.lastname AS tutor_lastname,
+       (
+         SELECT COUNT(*)::int
+         FROM session_coders sc
+         WHERE sc.session_id = s.id
+       ) AS participant_count
+     FROM mentoring_sessions s
+     JOIN users t ON t.id = s.tutor_id
+     WHERE s.tutor_id = $1
+       AND s.clan_id = $2
+     ORDER BY s.start_time ASC, s.id ASC`,
+    [tutorId, clanId]
+  );
+
+  return rows;
+};
+
+export const findForCoder = async ({ coderId, clanId }) => {
+  const { rows } = await pool.query(
+    `SELECT
+       s.*,
+       t.name AS tutor_name,
+       t.lastname AS tutor_lastname,
+       (
+         SELECT COUNT(*)::int
+         FROM session_coders sc
+         WHERE sc.session_id = s.id
+       ) AS participant_count
+     FROM mentoring_sessions s
+     JOIN users t ON t.id = s.tutor_id
+     WHERE s.clan_id = $2
+       AND (
+         s.session_type = 'open'
+         OR EXISTS (
+           SELECT 1
+           FROM session_coders sc
+           WHERE sc.session_id = s.id
+             AND sc.coder_id = $1
+         )
+       )
+     ORDER BY s.start_time ASC, s.id ASC`,
+    [coderId, clanId]
+  );
+
+  return rows;
+};
+
+export const findDetailById = async (id) => {
+  const { rows } = await pool.query(
+    `SELECT
+       s.*,
+       json_build_object(
+         'id', tutor.id,
+         'name', tutor.name,
+         'lastname', tutor.lastname,
+         'email', tutor.email
+       ) AS tutor,
+       COALESCE(
+         json_agg(
+           json_build_object(
+             'id', coder.id,
+             'name', coder.name,
+             'lastname', coder.lastname,
+             'email', coder.email
+           )
+           ORDER BY coder.name, coder.lastname
+         ) FILTER (WHERE coder.id IS NOT NULL),
+         '[]'::json
+       ) AS participants
+     FROM mentoring_sessions s
+     JOIN users tutor ON tutor.id = s.tutor_id
+     LEFT JOIN session_coders sc ON sc.session_id = s.id
+     LEFT JOIN users coder ON coder.id = sc.coder_id
+     WHERE s.id = $1
+     GROUP BY
+       s.id,
+       tutor.id,
+       tutor.name,
+       tutor.lastname,
+       tutor.email`,
+    [id]
+  );
+
+  return rows[0] ?? null;
+};
+
+export const isCoderAssigned = async ({
+  sessionId,
+  coderId,
+}) => {
+  const { rowCount } = await pool.query(
+    `SELECT 1
+     FROM session_coders
+     WHERE session_id = $1
+       AND coder_id = $2`,
+    [sessionId, coderId]
+  );
+
+  return rowCount > 0;
+};
+
 export const create = async ({
   topic,
   description,

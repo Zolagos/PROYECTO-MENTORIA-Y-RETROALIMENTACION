@@ -18,6 +18,124 @@ const requireNonEmptyString = (value, fieldName) => {
   return value.trim();
 };
 
+const getActorContext = (actor) => {
+  const actorId = Number(actor?.dbId);
+  const actorClanId = Number(actor?.clanId);
+
+  if (!Number.isInteger(actorId) || actorId <= 0) {
+    throw new ApiError('Invalid authenticated user', 401);
+  }
+
+  if (!Number.isInteger(actorClanId) || actorClanId <= 0) {
+    throw new ApiError(
+      'The authenticated user is not assigned to a clan',
+      409
+    );
+  }
+
+  return {
+    actorId,
+    actorClanId,
+    actorRole: actor?.role,
+  };
+};
+
+export const listSessions = async (actor) => {
+  const {
+    actorId,
+    actorClanId,
+    actorRole,
+  } = getActorContext(actor);
+
+  if (actorRole === ROLES.TEAM_LEADER) {
+    return sessionsRepository.findByClan(actorClanId);
+  }
+
+  if (actorRole === ROLES.TUTOR) {
+    return sessionsRepository.findByTutor({
+      tutorId: actorId,
+      clanId: actorClanId,
+    });
+  }
+
+  if (actorRole === ROLES.CODER) {
+    return sessionsRepository.findForCoder({
+      coderId: actorId,
+      clanId: actorClanId,
+    });
+  }
+
+  throw new ApiError(
+    'You do not have permission to list sessions',
+    403
+  );
+};
+
+export const getSession = async ({ sessionId, actor }) => {
+  const {
+    actorId,
+    actorClanId,
+    actorRole,
+  } = getActorContext(actor);
+
+  const session = await sessionsRepository.findDetailById(
+    sessionId
+  );
+
+  if (!session) {
+    throw new ApiError('Session not found', 404);
+  }
+
+  if (Number(session.clan_id) !== actorClanId) {
+    throw new ApiError(
+      'The session belongs to another clan',
+      403
+    );
+  }
+
+  if (actorRole === ROLES.TEAM_LEADER) {
+    return session;
+  }
+
+  if (actorRole === ROLES.TUTOR) {
+    if (Number(session.tutor_id) !== actorId) {
+      throw new ApiError(
+        'Tutors can only view their own sessions',
+        403
+      );
+    }
+
+    return session;
+  }
+
+  if (actorRole === ROLES.CODER) {
+    if (session.session_type === 'open') {
+      return session;
+    }
+
+    const isAssigned =
+      await sessionsRepository.isCoderAssigned({
+        sessionId,
+        coderId: actorId,
+      });
+
+    if (!isAssigned) {
+      throw new ApiError(
+        'You are not assigned to this closed session',
+        403
+      );
+    }
+
+    return session;
+  }
+
+  throw new ApiError(
+    'You do not have permission to view this session',
+    403
+  );
+};
+
+
 export const createSession = async ({ sessionData, actor }) => {
   const {
     topic,
