@@ -1,13 +1,27 @@
 import {
   getSessions, getSessionById,
   getTutors, getTutorById,
-  createSession, updateSession, deleteSession
+  createSession, updateSession, deleteSession,
+  loadSessions, loadTutors,
 } from '../services/mentoring.js'
 import { getMentoringCards } from '../app.js'
 import { openModal, closeModal, showToast } from '../utils.js'
 
-export function initMentoring() {
-  // "New Mentorship" button — opens the modal in create mode
+export async function initMentoring() {
+  // 1. Fetch sessions and tutors from the API in parallel
+  await Promise.all([loadSessions(), loadTutors()]);
+
+  // 2. Populate the tutor select in the modal
+  const tutorSelect = document.getElementById('m-tutor');
+  if (tutorSelect) {
+    tutorSelect.innerHTML = '<option value="">Select tutor...</option>' +
+      getTutors().map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+  }
+
+  // 3. Render the session cards
+  refreshMentoringCards();
+
+  // 4. "New Mentorship" button — opens the modal in create mode
   const btnNueva = document.getElementById('btn-new-mentoring');
   if (btnNueva) {
     btnNueva.addEventListener('click', () => {
@@ -16,7 +30,7 @@ export function initMentoring() {
     });
   }
 
-  // Grid / list view toggle
+  // 5. Grid / list view toggle
   const btnGrid = document.getElementById('view-grid');
   const btnList = document.getElementById('view-list');
   const container = document.getElementById('mentoring-container');
@@ -43,7 +57,7 @@ export function initMentoring() {
     });
   }
 
-  // Live search and filters
+  // 6. Live search and filters
   const searchInput = document.getElementById('search-mentoring');
   const filterStatus = document.getElementById('filter-status');
   const filterModality = document.getElementById('filter-modality');
