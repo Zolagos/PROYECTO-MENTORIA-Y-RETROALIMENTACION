@@ -192,6 +192,20 @@ export const create = async ({
 
   return rows[0];
 };
+export const cancelById = async (sessionId) => {
+  const { rows } = await pool.query(
+    `UPDATE mentoring_sessions
+     SET
+       status = 'cancelled',
+       updated_at = CURRENT_TIMESTAMP
+     WHERE id = $1
+       AND status = 'scheduled'
+     RETURNING *`,
+    [sessionId]
+  );
+
+  return rows[0] ?? null;
+};
 export const update = async ({
   sessionId,
   topic,

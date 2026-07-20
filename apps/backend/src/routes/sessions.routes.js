@@ -7,6 +7,7 @@ import {
   getSession,
   createSession,
   updateSession,
+  cancelSession,
   assignParticipants,
 } from '../controllers/sessions.controller.js';
 import { ROLES } from '../config/roles.js';
@@ -39,6 +40,11 @@ router.patch(
   '/:id',
   requireRole(ROLES.TEAM_LEADER, ROLES.TUTOR),
   updateSession
+);
+router.delete(
+  '/:id',
+  requireRole(ROLES.TEAM_LEADER, ROLES.TUTOR),
+  cancelSession
 );
 router.post(
   '/:id/participants',

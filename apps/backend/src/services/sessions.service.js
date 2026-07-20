@@ -579,7 +579,75 @@ export const updateSession = async ({
     tutorId,
   });
 };
+export const cancelSession = async ({
+  sessionId,
+  actor,
+}) => {
+  const {
+    actorId,
+    actorClanId,
+    actorRole,
+  } = getActorContext(actor);
 
+  if (
+    actorRole !== ROLES.TEAM_LEADER &&
+    actorRole !== ROLES.TUTOR
+  ) {
+    throw new ApiError(
+      'Only Team Leaders and Tutors can cancel sessions',
+      403
+    );
+  }
+
+  const session = await sessionsRepository.findById(sessionId);
+
+  if (!session) {
+    throw new ApiError('Session not found', 404);
+  }
+
+  if (Number(session.clan_id) !== actorClanId) {
+    throw new ApiError(
+      'The session belongs to another clan',
+      403
+    );
+  }
+
+  if (
+    actorRole === ROLES.TUTOR &&
+    Number(session.tutor_id) !== actorId
+  ) {
+    throw new ApiError(
+      'Tutors can only cancel their own sessions',
+      403
+    );
+  }
+
+  if (session.status === 'cancelled') {
+    throw new ApiError(
+      'The session is already cancelled',
+      409
+    );
+  }
+
+  if (session.status !== 'scheduled') {
+    throw new ApiError(
+      'Only scheduled sessions can be cancelled',
+      409
+    );
+  }
+
+  const cancelledSession =
+    await sessionsRepository.cancelById(sessionId);
+
+  if (!cancelledSession) {
+    throw new ApiError(
+      'The session could not be cancelled because its status changed',
+      409
+    );
+  }
+
+  return cancelledSession;
+};
 export const assignParticipants = async ({
   sessionId,
   coderIds,
