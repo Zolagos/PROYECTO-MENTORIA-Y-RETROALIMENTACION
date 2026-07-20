@@ -14,7 +14,7 @@
  */
 
 // ---- CLAVE DE ALMACENAMIENTO ----
-const MENTORING_STORAGE_KEY = 'tutorlink_mentoring';
+const MENTORING_STORAGE_KEY = 'tutorcode_mentoring';
 
 // ---- TUTORES DISPONIBLES ----
 // Sprint 4: vendrán de GET /api/users?role=tutor
@@ -68,7 +68,7 @@ export function createSession(mentoring) {
   const sessions = getSessions();
 
   mentoring.id = Date.now();
-  mentoring.status = mentoring.status || 'programada';
+  mentoring.status = mentoring.status || 'schedulled';
   mentoring.coders = mentoring.coders || [];
 
   sessions.push(mentoring);

@@ -19,7 +19,7 @@ function boot() {
   registerRoute('/login', 'Iniciar Sesión', renderLogin)
 
   const user = getSessionUser()
-  const token = sessionStorage.getItem('tutorlink_token')
+  const token = sessionStorage.getItem('tutorcode_token')
   const isAuth = !!(user && token)
 
   if (isAuth) {

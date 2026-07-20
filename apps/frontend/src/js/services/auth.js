@@ -44,16 +44,16 @@ export async function loginUser(email, password) {
     });
   } catch {
     // Error de red: backend caído o sin conexión
-    throw new Error('No se pudo conectar con el servidor. Verifica que el backend esté corriendo.');
+    throw new Error('Could not connect to the server. Please check if the backend is running.');
   }
 
   const result = await response.json().catch(() => ({}));
 
   if (!response.ok) {
     if (response.status === 401) {
-      throw new Error('Correo o contraseña incorrectos.');
+      throw new Error('Email or password are incorrect.');
     }
-    throw new Error(result.message || 'Error al iniciar sesión. Intenta de nuevo.');
+    throw new Error(result.message || 'Error occurred while trying to log in. Please try again.');
   }
 
   const { token, user } = result.data;
@@ -68,8 +68,8 @@ export async function loginUser(email, password) {
     clan:     user.clanId,
   };
 
-  sessionStorage.setItem('tutorlink_token', token);
-  sessionStorage.setItem('tutorlink_user', JSON.stringify(sessionUser));
+  sessionStorage.setItem('tutorcode_token', token);
+  sessionStorage.setItem('tutorcode_user', JSON.stringify(sessionUser));
 
   return sessionUser;
 }

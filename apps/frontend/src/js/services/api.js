@@ -42,7 +42,7 @@ const API_BASE_URL = 'http://localhost:3000/api';
 export async function fetchAPI(endpoint, options = {}) {
   // Obtiene el token de Firebase del sessionStorage
   // Sprint 4: esto vendrá de Firebase Auth directamente
-  const token = sessionStorage.getItem('tutorlink_token');
+  const token = sessionStorage.getItem('tutorcode_token');
 
   const defaultHeaders = {
     'Content-Type': 'application/json',
@@ -60,10 +60,10 @@ export async function fetchAPI(endpoint, options = {}) {
 
     // Sesión vencida o token inválido: limpiar y volver al login
     if (response.status === 401) {
-      sessionStorage.removeItem('tutorlink_user');
-      sessionStorage.removeItem('tutorlink_token');
+      sessionStorage.removeItem('tutorcode_user');
+      sessionStorage.removeItem('tutorcode_token');
       navigateTo('/login');
-      throw new Error('Tu sesión expiró. Inicia sesión de nuevo.');
+      throw new Error('Your session has expired. Please log in again.');
     }
 
     // Si el servidor responde con error HTTP (400, 404, 500...)
@@ -80,7 +80,7 @@ export async function fetchAPI(endpoint, options = {}) {
   } catch (error) {
     // Error de red (sin conexión, CORS, etc.)
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
-      throw new Error('No se pudo conectar con el servidor. Verifica que el backend esté corriendo.');
+      throw new Error('Could not connect to the server. Please verify that the backend is running.');
     }
     throw error;
   }
@@ -118,8 +118,8 @@ export const authService = {
    */
   async logout() {
     // TODO Sprint 4: firebase.auth().signOut()
-    sessionStorage.removeItem('tutorlink_user');
-    sessionStorage.removeItem('tutorlink_token');
+    sessionStorage.removeItem('tutorcode_user');
+    sessionStorage.removeItem('tutorcode_token');
     navigateTo('/login');
   },
 };
@@ -135,7 +135,7 @@ export const mentoringService = {
    */
   async getAll(filters = {}) {
     const params = new URLSearchParams(filters).toString();
-    return await fetchAPI(`/mentorias${params ? '?' + params : ''}`);
+    return await fetchAPI(`/mentoring${params ? '?' + params : ''}`);
   },
 
   /**
@@ -143,7 +143,7 @@ export const mentoringService = {
    * TODO Sprint 4: GET /api/mentorias/:id
    */
   async getById(id) {
-    return await fetchAPI(`/mentorias/${id}`);
+    return await fetchAPI(`/mentoring/${id}`);
   },
 
   /**
@@ -152,7 +152,7 @@ export const mentoringService = {
    * @param {Object} data - { topic, tutorId, date, time, modality, location, description, type }
    */
   async create(data) {
-    return await fetchAPI('/mentorias', {
+    return await fetchAPI('/mentoring', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -163,7 +163,7 @@ export const mentoringService = {
    * TODO Sprint 4: PUT /api/mentorias/:id
    */
   async update(id, data) {
-    return await fetchAPI(`/mentorias/${id}`, {
+    return await fetchAPI(`/mentoring/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
@@ -174,7 +174,7 @@ export const mentoringService = {
    * TODO Sprint 4: PATCH /api/mentorias/:id/estado
    */
   async changeStatus(id, status) {
-    return await fetchAPI(`/mentorias/${id}/estado`, {
+    return await fetchAPI(`/mentoring/${id}/status`, {
       method: 'PATCH',
       body: JSON.stringify({ estado: status }),
     });
@@ -185,7 +185,7 @@ export const mentoringService = {
    * TODO Sprint 4: DELETE /api/mentorias/:id
    */
   async delete(id) {
-    return await fetchAPI(`/mentorias/${id}`, { method: 'DELETE' });
+    return await fetchAPI(`/mentoring/${id}`, { method: 'DELETE' });
   },
 };
 
@@ -200,7 +200,7 @@ export const observationsService = {
    */
   async getAll(filters = {}) {
     const params = new URLSearchParams(filters).toString();
-    return await fetchAPI(`/observaciones${params ? '?' + params : ''}`);
+    return await fetchAPI(`/observation${params ? '?' + params : ''}`);
   },
 
   /**
@@ -209,7 +209,7 @@ export const observationsService = {
    * @param {Object} data - { targetUserId, type, text }
    */
   async create(data) {
-    return await fetchAPI('/observaciones', {
+    return await fetchAPI('/observations', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -220,7 +220,7 @@ export const observationsService = {
    * TODO Sprint 4: PUT /api/observaciones/:id
    */
   async update(id, data) {
-    return await fetchAPI(`/observaciones/${id}`, {
+    return await fetchAPI(`/observations/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
@@ -231,7 +231,7 @@ export const observationsService = {
    * TODO Sprint 4: DELETE /api/observaciones/:id
    */
   async delete(id) {
-    return await fetchAPI(`/observaciones/${id}`, { method: 'DELETE' });
+    return await fetchAPI(`/observations/${id}`, { method: 'DELETE' });
   },
 };
 
@@ -272,7 +272,7 @@ export const usersService = {
    */
   async getAll(filters = {}) {
     const params = new URLSearchParams(filters).toString();
-    return await fetchAPI(`/usuarios${params ? '?' + params : ''}`);
+    return await fetchAPI(`/users${params ? '?' + params : ''}`);
   },
 
   /**
@@ -280,6 +280,6 @@ export const usersService = {
    * TODO Sprint 4: GET /api/usuarios/me
    */
   async getProfile() {
-    return await fetchAPI('/usuarios/me');
+    return await fetchAPI('/users/me');
   },
 };

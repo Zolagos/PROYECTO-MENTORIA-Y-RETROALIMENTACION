@@ -1,8 +1,3 @@
-/* ============================================================
-   dashboard.css — Estilos específicos de los dashboards
-   TutorLink | Kevin Mendoza | Frontend Developer
-   ============================================================ */
-
 /* ---- Welcome Banner ---- */
 .welcome-banner {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);

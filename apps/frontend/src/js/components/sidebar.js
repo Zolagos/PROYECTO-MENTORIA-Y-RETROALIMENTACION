@@ -180,7 +180,7 @@ export function initSidebarCollapse() {
 }
 
 export function handleLogout() {
-  sessionStorage.removeItem('tutorlink_user');
-  sessionStorage.removeItem('tutorlink_token');
+  sessionStorage.removeItem('tutorcode_user');
+  sessionStorage.removeItem('tutorcode_token');
   window.navigateTo('/login');
 }

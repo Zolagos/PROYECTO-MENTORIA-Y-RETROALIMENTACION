@@ -5,8 +5,7 @@
  * - Actualiza el avatar del header con las iniciales del usuario
  * - Maneja el menú de usuario al hacer click en el avatar
  * - Prepara el botón de notificaciones
- *
- * Kevin Mendoza | Frontend Developer
+
  */
 
 /**
@@ -142,7 +141,7 @@ function toggleUserMenu() {
  */
 export function getSessionUser() {
   try {
-    const stored = sessionStorage.getItem('tutorlink_user');
+    const stored = sessionStorage.getItem('tutorcode_user');
     return stored ? JSON.parse(stored) : null;
   } catch {
     return null;

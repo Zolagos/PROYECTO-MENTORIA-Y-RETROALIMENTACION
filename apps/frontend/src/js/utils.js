@@ -1,5 +1,5 @@
 /**
- * utils.js — Funciones utilitarias globales de TutorLink
+ * utils.js — Funciones utilitarias globales de TutorCode
  *
  * ¿Qué contiene?
  * - openModal / closeModal: controlan los modales
