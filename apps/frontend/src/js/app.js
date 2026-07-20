@@ -676,10 +676,10 @@ function getSessionCard(m) {
         ${m.status === 'completed'
           ? `
             <button class="btn btn-sm btn-secondary" onclick="navigateTo('/feedback')" style="flex:1">Feedback</button>
-            <button class="btn btn-sm btn-secondary" onclick="navigateTo('/observations')" style="flex:1">Observations</button>
+            <button class="btn btn-sm btn-secondary" onclick="navigateTo('/observations?session_id=${m.id}')" style="flex:1">Observations</button>
           `
           : m.status === 'in-progress'
-          ? `<button class="btn btn-sm btn-secondary" onclick="navigateTo('/observations')" style="flex:1">Observations</button>`
+          ? `<button class="btn btn-sm btn-secondary" onclick="navigateTo('/observations?session_id=${m.id}')" style="flex:1">Observations</button>`
           : ''
         }
       </div>

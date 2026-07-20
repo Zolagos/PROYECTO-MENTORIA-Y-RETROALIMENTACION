@@ -5,6 +5,7 @@ const SIDEBAR_MENUS = {
       items: [
         { icon: 'home',     label: 'Dashboard',      route: '/dashboard' },
         { icon: 'calendar', label: 'My Mentorships', route: '/mentoring' },
+        { icon: 'edit',     label: 'Observations',   route: '/observations' },
         { icon: 'message',  label: 'Feedback',       route: '/feedback' },
       ]
     }
