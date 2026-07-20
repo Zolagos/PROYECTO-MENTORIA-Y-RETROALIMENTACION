@@ -296,7 +296,7 @@ export function renderObservations() {
         New Observation
       </button>` : ''}
     </div>
-    <div class="content-grid">
+    <div>
       <div>
         <div class="filters-bar" style="margin-bottom:var(--space-5);">
           <div class="search-bar">
