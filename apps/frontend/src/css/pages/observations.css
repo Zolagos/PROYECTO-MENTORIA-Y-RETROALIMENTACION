@@ -1,42 +1,9 @@
 
 
 /* Observations timeline */
-.timeline {
-  position: relative;
-  padding-left: var(--space-8);
-}
-
-.timeline::before {
-  content: '';
-  position: absolute;
-  left: 11px;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: var(--color-border);
-}
-
 .timeline-item {
-  position: relative;
   margin-bottom: var(--space-6);
 }
-
-.timeline-item::before {
-  content: '';
-  position: absolute;
-  left: calc(-1 * var(--space-8) + 4px);
-  top: 6px;
-  width: 16px;
-  height: 16px;
-  border-radius: var(--radius-full);
-  background: var(--color-primary);
-  border: 3px solid var(--color-surface);
-  box-shadow: 0 0 0 2px var(--color-primary);
-}
-
-.timeline-item--green::before  { background: var(--color-accent-green); box-shadow: 0 0 0 2px var(--color-accent-green); }
-.timeline-item--orange::before { background: var(--color-accent-orange); box-shadow: 0 0 0 2px var(--color-accent-orange); }
-.timeline-item--red::before    { background: var(--color-accent-red); box-shadow: 0 0 0 2px var(--color-accent-red); }
 
 .timeline-item__card {
   background: var(--color-surface);
