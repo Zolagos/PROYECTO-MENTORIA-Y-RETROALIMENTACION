@@ -6,6 +6,7 @@ import sessionFeedback from "./session.feedback.js";
 import mentoringRequests from "./mentoring.requests.js";
 import coderObservations from "./coder.observations.js";
 import tutorObservations from "./tutor.observations.js";
+import observationsRoutes from "./observations.routes.js";
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.use("/", mentoringRequests);
 router.use("/", coderObservations);
 router.use("/", tutorObservations);
 router.use("/", sessionFeedback);
+router.use("/", observationsRoutes);
 
 export default router;
