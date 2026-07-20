@@ -1,7 +1,7 @@
 import { registerRoute, navigateTo } from './router.js';
 import { getSessionUser, initHeader } from './components/header.js';
 import { buildSidebar, initSidebarCollapse } from './components/sidebar.js';
-import { getTutors, getSessions, getSessionById, createSession, updateSession, deleteSession } from './services/mentoring.js';
+import { getSessions } from './services/mentoring.js';
 import { formatDate } from './utils.js';
 
 export function initApp(user) {
@@ -273,7 +273,9 @@ export function renderMentoring() {
       </div>
     </div>
     <div class="mentoring-grid" id="mentoring-container">
-      ${getMentoringCards()}
+      <div class="empty-state">
+        <p class="empty-state__description">Loading sessions...</p>
+      </div>
     </div>
     ${getModalMentoring(canCreate)}
   `;
@@ -655,9 +657,9 @@ export function getMentoringCards(list) {
         </div>
         <p class="mentoring-detail-card__desc">${m.desc}</p>
         <div class="mentoring-detail-card__info">
-          <div class="mentoring-detail-card__info-item">
+          <div class="mentoring-detail-card__info-item" onclick="openParticipantsModal(${m.id})" style="cursor:pointer">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <span>${m.tutor}</span>
+            <span style="text-decoration:underline dotted">${m.tutor}</span>
           </div>
           <div class="mentoring-detail-card__info-item">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -667,22 +669,22 @@ export function getMentoringCards(list) {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             <span class="mentoring-type mentoring-type--${m.modality}">${m.modality === 'virtual' ? '🔗 Virtual' : '📍 In-person'}</span>
           </div>
-          <div class="mentoring-detail-card__info-item">
+          <div class="mentoring-detail-card__info-item" onclick="openParticipantsModal(${m.id})" style="cursor:pointer">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-            <span>${m.coders.length} participante${m.coders.length !== 1 ? 's' : ''}</span>
+            <span style="text-decoration:underline dotted">${m.coders.length} participante${m.coders.length !== 1 ? 's' : ''}</span>
           </div>
         </div>
       </div>
-      <div class="mentoring-detail-card__bottom">
-        <div class="participant-avatars" aria-label="Participants">
-          ${m.coders.slice(0,3).map(c => `<div class="participant-avatars__item" title="${c}">${c}</div>`).join('')}
-          ${m.coders.length > 3 ? `<div class="participant-avatars__item participant-avatars__item--more">+${m.coders.length - 3}</div>` : ''}
-        </div>
+      <div class="mentoring-detail-card__bottom" style="gap:var(--space-2)">
+        <button class="btn btn-sm btn-secondary" onclick="openStatusModal(${m.id})" style="flex:1">Status</button>
         ${m.status === 'completed'
-          ? `<button class="btn btn-sm btn-secondary" onclick="navigateTo('/feedback')">View feedback</button>`
-          : m.status === 'scheduled'
-          ? `<button class="btn btn-sm btn-primary" onclick="alert('Join the mentorship')">Join</button>`
-          : `<span class="text-sm text-muted">In progress</span>`
+          ? `
+            <button class="btn btn-sm btn-secondary" onclick="navigateTo('/feedback')" style="flex:1">Feedback</button>
+            <button class="btn btn-sm btn-secondary" onclick="navigateTo('/observations')" style="flex:1">Observations</button>
+          `
+          : m.status === 'in-progress'
+          ? `<button class="btn btn-sm btn-secondary" onclick="navigateTo('/observations')" style="flex:1">Observations</button>`
+          : ''
         }
       </div>
     </article>
@@ -715,7 +717,6 @@ function getModalMentoring(canCreate) {
                 <label for="m-tutor" class="form-label form-label--required">Tutor</label>
                 <select id="m-tutor" class="form-select" required>
                   <option value="">Select tutor...</option>
-                  ${getTutors().map(t => `<option value="${t.id}">${t.name}</option>`).join('')}
                 </select>
                 <span class="form-error hidden" id="m-tutor-error">Select a tutor.</span>
               </div>
