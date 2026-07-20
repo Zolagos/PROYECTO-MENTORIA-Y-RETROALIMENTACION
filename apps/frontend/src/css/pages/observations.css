@@ -82,7 +82,11 @@
 
 .timeline-item__session {
   font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
+  color: #FF9A1F;
+  background-color: rgba(255, 154, 31, 0.12);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+  font-weight: 500;
 }
 
 .timeline-item__extra {
