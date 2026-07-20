@@ -44,7 +44,7 @@ export async function loadSessions() {
 }
 
 export async function loadTutors() {
-  const res = await usersService.getAll({ role: 'tutor' });
+  const res = await usersService.getAll({ role: 'Tutor' });
   tutorsCache = (res.data || []).map(u => ({
     id: u.id,
     name: `${u.name} ${u.lastname}`.trim(),
