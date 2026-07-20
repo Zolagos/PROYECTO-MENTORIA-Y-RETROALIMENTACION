@@ -1,7 +1,7 @@
 import { registerRoute, navigateTo } from './router.js';
 import { getSessionUser, initHeader } from './components/header.js';
 import { buildSidebar, initSidebarCollapse } from './components/sidebar.js';
-import { getTutors, getSessions, getSessionById, createSession, updateSession, deleteSession } from './services/mentoring.js';
+import { getSessions } from './services/mentoring.js';
 import { formatDate } from './utils.js';
 
 export function initApp(user) {
@@ -273,7 +273,9 @@ export function renderMentoring() {
       </div>
     </div>
     <div class="mentoring-grid" id="mentoring-container">
-      ${getMentoringCards()}
+      <div class="empty-state">
+        <p class="empty-state__description">Loading sessions...</p>
+      </div>
     </div>
     ${getModalMentoring(canCreate)}
   `;
@@ -715,7 +717,6 @@ function getModalMentoring(canCreate) {
                 <label for="m-tutor" class="form-label form-label--required">Tutor</label>
                 <select id="m-tutor" class="form-select" required>
                   <option value="">Select tutor...</option>
-                  ${getTutors().map(t => `<option value="${t.id}">${t.name}</option>`).join('')}
                 </select>
                 <span class="form-error hidden" id="m-tutor-error">Select a tutor.</span>
               </div>
