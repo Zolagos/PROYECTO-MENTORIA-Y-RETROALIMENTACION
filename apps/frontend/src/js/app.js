@@ -657,7 +657,7 @@ export function getMentoringCards(list) {
         </div>
         <p class="mentoring-detail-card__desc">${m.desc}</p>
         <div class="mentoring-detail-card__info">
-          <div class="mentoring-detail-card__info-item" onclick="openTutorModal(${m.id})" style="cursor:pointer">
+          <div class="mentoring-detail-card__info-item" onclick="openParticipantsModal(${m.id})" style="cursor:pointer">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             <span style="text-decoration:underline dotted">${m.tutor}</span>
           </div>

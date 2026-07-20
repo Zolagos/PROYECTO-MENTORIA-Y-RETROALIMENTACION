@@ -6,7 +6,6 @@ import {
   changeMentoringStatus, deleteMentoring,
   submitMentoring, toggleModalityField,
   openParticipantsModal, closeParticipantsModal,
-  openTutorModal, closeTutorModal,
 } from './pages/mentoring.js'
 import { submitObservation } from './pages/observations.js'
 import { setRating, submitFeedback } from './pages/feedback.js'
@@ -29,8 +28,6 @@ window.submitMentoring = submitMentoring
 window.toggleModalityField = toggleModalityField
 window.openParticipantsModal = openParticipantsModal
 window.closeParticipantsModal = closeParticipantsModal
-window.openTutorModal = openTutorModal
-window.closeTutorModal = closeTutorModal
 window.submitObservation = submitObservation
 window.setRating = setRating
 window.submitFeedback = submitFeedback
