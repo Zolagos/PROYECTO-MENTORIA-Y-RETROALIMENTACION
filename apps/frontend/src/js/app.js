@@ -777,7 +777,7 @@ export function getObservationsTimeline(list) {
               <div class="timeline-item__date">${o.date}</div>
             </div>
           </div>
-          <span class="badge badge--${o.type === 'tutor' ? 'warning' : 'success'}">${o.type === 'tutor' ? 'Tutor' : 'Coder'}</span>
+          <span class="badge badge--obs-${o.type}">${o.type === 'tutor' ? 'Tutor' : 'Coder'}</span>
         </div>
         <p class="timeline-item__text">${o.observation}</p>
         ${o.recommendation ? `<div class="timeline-item__extra"><strong>Recommendation:</strong> ${o.recommendation}</div>` : ''}
