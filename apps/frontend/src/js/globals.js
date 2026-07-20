@@ -4,6 +4,7 @@ import { openModal, closeModal, showToast } from './utils.js'
 import {
   toggleActionMenu, editMentoring,
   changeMentoringStatus, deleteMentoring,
+  respondMentoringRequest,
   submitMentoring, toggleModalityField
 } from './pages/mentoring.js'
 import { submitObservation } from './pages/observations.js'
@@ -23,6 +24,7 @@ window.toggleActionMenu = toggleActionMenu
 window.editMentoring = editMentoring
 window.changeMentoringStatus = changeMentoringStatus
 window.deleteMentoring = deleteMentoring
+window.respondMentoringRequest = respondMentoringRequest
 window.submitMentoring = submitMentoring
 window.toggleModalityField = toggleModalityField
 window.submitObservation = submitObservation

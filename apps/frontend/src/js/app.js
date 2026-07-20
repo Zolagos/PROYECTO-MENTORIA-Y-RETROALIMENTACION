@@ -1,7 +1,7 @@
 import { registerRoute, navigateTo } from './router.js';
 import { getSessionUser, initHeader } from './components/header.js';
 import { buildSidebar, initSidebarCollapse } from './components/sidebar.js';
-import { getTutors, getSessions, getSessionById, createSession, updateSession, deleteSession } from './services/mentoring.js';
+import { getTutors } from './services/mentoring.js';
 import { formatDate } from './utils.js';
 
 export function initApp(user) {
@@ -272,9 +272,7 @@ export function renderMentoring() {
         </button>
       </div>
     </div>
-    <div class="mentoring-grid" id="mentoring-container">
-      ${getMentoringCards()}
-    </div>
+    <div class="mentoring-grid" id="mentoring-container"></div>
     ${getModalMentoring(canCreate)}
   `;
 }
@@ -621,15 +619,13 @@ export function renderSettings() {
 // ============================================================
 
 /**
- * Generates the mentorship cards.
- * The data comes from the service (js/services/mentoring.js).
- * Sprint 4: the service will fetch from the backend with the same signatures.
- * @param {Array} [list] - Already-filtered list; if not passed, all are loaded.
+ * Generates the mentorship cards (scheduled sessions and mentoring requests).
+ * The data comes from the service (js/services/mentoring.js), already fetched
+ * and filtered by the caller.
+ * @param {Array} list - Items to render, each tagged with `kind: 'session'|'request'`.
  */
 export function getMentoringCards(list) {
-  const sample = list || getSessions();
-
-  if (!sample.length) {
+  if (!list.length) {
     return `
       <div class="empty-state">
         <h2 class="empty-state__title">Without mentorships</h2>
@@ -638,7 +634,11 @@ export function getMentoringCards(list) {
     `;
   }
 
-  return sample.map(m => `
+  return list.map(m => m.kind === 'request' ? getRequestCard(m) : getSessionCard(m)).join('');
+}
+
+function getSessionCard(m) {
+  return `
     <article class="mentoring-detail-card" aria-label="Mentorship: ${m.topic}">
       <div class="mentoring-detail-card__top">
         <div class="mentoring-detail-card__header">
@@ -686,7 +686,47 @@ export function getMentoringCards(list) {
         }
       </div>
     </article>
-  `).join('');
+  `;
+}
+
+function getRequestCard(m) {
+  const user = getSessionUser();
+  const role = user?.role;
+  const canRespond = m.status === 'pending' && (role === 'TL' || role === 'TUTOR');
+  const canDelete = role === 'TL';
+  const showMenu = canRespond || canDelete;
+
+  return `
+    <article class="mentoring-detail-card" aria-label="Mentoring request: ${m.topic}">
+      <div class="mentoring-detail-card__top">
+        <div class="mentoring-detail-card__header">
+          <h3 class="mentoring-detail-card__topic">${m.topic}</h3>
+          <div class="flex gap-2 items-center">
+            <span class="badge badge--${m.status}">${m.status}</span>
+            ${showMenu ? `
+            <div class="action-menu">
+              <button class="action-menu__trigger" aria-label="Actions for ${m.topic}" aria-haspopup="true"
+                onclick="toggleActionMenu(this, ${m.id})">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+              </button>
+            </div>` : ''}
+          </div>
+        </div>
+        <p class="mentoring-detail-card__desc">${m.desc}</p>
+        <div class="mentoring-detail-card__info">
+          ${role !== 'CODER' ? `
+          <div class="mentoring-detail-card__info-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>${m.coder}</span>
+          </div>` : ''}
+          <div class="mentoring-detail-card__info-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span>Requested ${formatDate(m.date)}</span>
+          </div>
+        </div>
+      </div>
+    </article>
+  `;
 }
 
 /** Generates the create/edit mentorship modal */

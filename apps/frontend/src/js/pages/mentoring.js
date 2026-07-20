@@ -1,12 +1,17 @@
 import {
-  getSessions, getSessionById,
+  getVisibleMentoringItems, getSessionById,
   getTutors, getTutorById,
-  createSession, updateSession, deleteSession
+  createSession, updateSession, deleteSession,
+  changeRequestStatus, deleteRequestItem
 } from '../services/mentoring.js'
 import { getMentoringCards } from '../app.js'
+import { getSessionUser } from '../components/header.js'
 import { openModal, closeModal, showToast } from '../utils.js'
 
 export function initMentoring() {
+  // Loads sessions + mentoring requests and paints the initial cards
+  refreshMentoringCards();
+
   // "New Mentorship" button — opens the modal in create mode
   const btnNueva = document.getElementById('btn-new-mentoring');
   if (btnNueva) {
@@ -54,12 +59,12 @@ export function initMentoring() {
 }
 
 /** Repaints the cards respecting the active search and filters */
-export function refreshMentoringCards() {
-  applyMentoringFilters();
+export async function refreshMentoringCards() {
+  await applyMentoringFilters();
 }
 
-/** Filters the mentorships by search, status and modality */
-export function applyMentoringFilters() {
+/** Filters the mentorships by search, status and modality (status/modality only apply to sessions) */
+export async function applyMentoringFilters() {
   const container = document.getElementById('mentoring-container');
   if (!container) return;
 
@@ -67,8 +72,18 @@ export function applyMentoringFilters() {
   const status = document.getElementById('filter-status')?.value || '';
   const modality = document.getElementById('filter-modality')?.value || '';
 
-  const filtered = getSessions().filter(m => {
+  let items;
+  try {
+    items = await getVisibleMentoringItems();
+  } catch (error) {
+    container.innerHTML = '';
+    showToast(error.message || 'Could not load mentorships.', 'error');
+    return;
+  }
+
+  const filtered = items.filter(m => {
     const matchesQuery = !query || m.topic.toLowerCase().includes(query);
+    if (m.kind !== 'session') return matchesQuery;
     const matchesStatus = !status || m.status === status;
     const matchesModality = !modality || m.modality === modality;
     return matchesQuery && matchesStatus && matchesModality;
@@ -82,22 +97,57 @@ export function toggleActionMenu(btn, id) {
   // Closes any open menu
   document.querySelectorAll('.action-menu__dropdown').forEach(d => d.remove());
 
+  const item = getSessionById(id);
+  if (!item) return;
+
+  const role = getSessionUser()?.role;
+  let itemsHtml = '';
+
+  if (item.kind === 'session') {
+    itemsHtml = `
+      <button class="action-menu__item" onclick="editMentoring(${id})">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit
+      </button>
+      <button class="action-menu__item" onclick="changeMentoringStatus(${id})">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        Change status
+      </button>
+      <button class="action-menu__item action-menu__item--danger" onclick="deleteMentoring(${id})">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        Delete
+      </button>
+    `;
+  } else {
+    const canRespond = item.status === 'pending' && (role === 'TL' || role === 'TUTOR');
+    const canDelete = role === 'TL';
+    if (canRespond) {
+      itemsHtml += `
+        <button class="action-menu__item" onclick="respondMentoringRequest(${id}, 'accepted')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          Accept
+        </button>
+        <button class="action-menu__item" onclick="respondMentoringRequest(${id}, 'denied')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Deny
+        </button>
+      `;
+    }
+    if (canDelete) {
+      itemsHtml += `
+        <button class="action-menu__item action-menu__item--danger" onclick="deleteMentoring(${id})">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          Delete
+        </button>
+      `;
+    }
+  }
+
+  if (!itemsHtml) return;
+
   const dropdown = document.createElement('div');
   dropdown.className = 'action-menu__dropdown';
-  dropdown.innerHTML = `
-    <button class="action-menu__item" onclick="editMentoring(${id})">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-      Edit
-    </button>
-    <button class="action-menu__item" onclick="changeMentoringStatus(${id})">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-      Change status
-    </button>
-    <button class="action-menu__item action-menu__item--danger" onclick="deleteMentoring(${id})">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-      Delete
-    </button>
-  `;
+  dropdown.innerHTML = itemsHtml;
 
   btn.parentElement.appendChild(dropdown);
 
@@ -115,7 +165,7 @@ export function toggleActionMenu(btn, id) {
 /** Opens the modal in edit mode with the mentorship's data */
 export function editMentoring(id) {
   const mentoring = getSessionById(id);
-  if (!mentoring) return;
+  if (!mentoring || mentoring.kind !== 'session') return;
 
   document.getElementById('m-id').value = mentoring.id;
   document.getElementById('m-topic').value = mentoring.topic;
@@ -136,10 +186,10 @@ export function editMentoring(id) {
   openModal('modal-mentoring');
 }
 
-/** Advances the status: scheduled → in-progress → completed */
+/** Advances a session's status: scheduled → in-progress → completed (local only) */
 export function changeMentoringStatus(id) {
   const mentoring = getSessionById(id);
-  if (!mentoring) return;
+  if (!mentoring || mentoring.kind !== 'session') return;
 
   const next = { 'scheduled': 'in-progress', 'in-progress': 'completed' };
 
@@ -154,16 +204,41 @@ export function changeMentoringStatus(id) {
   showToast(`Mentorship now in status: ${mentoring.status}.`, 'success');
 }
 
-/** Deletes a mentorship after confirmation */
-export function deleteMentoring(id) {
-  const mentoring = getSessionById(id);
-  if (!mentoring) return;
+/** Accepts or denies a mentoring request against the backend */
+export async function respondMentoringRequest(id, state) {
+  const request = getSessionById(id);
+  if (!request || request.kind !== 'request') return;
 
-  if (!confirm(`Delete the mentorship "${mentoring.topic}"?`)) return;
+  try {
+    await changeRequestStatus(id, state);
+    await refreshMentoringCards();
+    showToast(`Request ${state === 'accepted' ? 'accepted' : 'denied'}.`, 'success');
+  } catch (error) {
+    showToast(error.message || 'Could not update the request.', 'error');
+  }
+}
 
-  deleteSession(id);
-  refreshMentoringCards();
-  showToast('Mentorship deleted.', 'success');
+/** Deletes a mentorship (session, local only) or a mentoring request (backend) after confirmation */
+export async function deleteMentoring(id) {
+  const item = getSessionById(id);
+  if (!item) return;
+
+  if (!confirm(`Delete "${item.topic}"?`)) return;
+
+  if (item.kind === 'session') {
+    deleteSession(id);
+    refreshMentoringCards();
+    showToast('Mentorship deleted.', 'success');
+    return;
+  }
+
+  try {
+    await deleteRequestItem(id);
+    await refreshMentoringCards();
+    showToast('Request deleted.', 'success');
+  } catch (error) {
+    showToast(error.message || 'Could not delete the request.', 'error');
+  }
 }
 
 /** Leaves the modal form in create mode */

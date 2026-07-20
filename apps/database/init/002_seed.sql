@@ -79,6 +79,18 @@ WITH inserted_sessions AS (
         ('Pair Programming', 'Práctica de pair programming con rotación de roles', 'group', 'in person', 'open', 'Lab 305', NULL,
          '2025-01-18 09:00:00-05', '2025-01-18 12:00:00-05', 'in_progress',
          (SELECT id FROM users WHERE email = 'ana.garcia@tutorlink.com'),
+         (SELECT id FROM users WHERE email = 'maria.torres@tutorlink.com')),
+
+        ('Introducción a Git y GitHub', 'Sesión grupal sobre control de versiones y flujo de ramas', 'group', 'virtual', 'closed', NULL,
+         'https://meet.google.com/xyz-mnop-qrs',
+         '2025-01-22 15:00:00-05', '2025-01-22 17:00:00-05', 'scheduled',
+         (SELECT id FROM users WHERE email = 'carlos.lopez@tutorlink.com'),
+         (SELECT id FROM users WHERE email = 'maria.torres@tutorlink.com')),
+
+        ('Estructuras de datos', 'Sesión individual sobre pilas, colas y listas enlazadas', 'individual', 'virtual', 'closed', NULL,
+         'https://meet.google.com/lmn-opqr-stu',
+         '2025-01-10 08:00:00-05', '2025-01-10 09:00:00-05', 'cancelled',
+         (SELECT id FROM users WHERE email = 'carlos.lopez@tutorlink.com'),
          (SELECT id FROM users WHERE email = 'maria.torres@tutorlink.com'))
     RETURNING id, topic
 )
@@ -89,7 +101,29 @@ FROM (VALUES
     ('Fundamentos de JavaScript', 'juan.perez@tutorlink.com'),
     ('Resolución de dudas SQL', 'laura.castro@tutorlink.com'),
     ('Pair Programming', 'kevin.mendoza@tutorlink.com'),
-    ('Pair Programming', 'laura.castro@tutorlink.com')
+    ('Pair Programming', 'laura.castro@tutorlink.com'),
+    ('Introducción a Git y GitHub', 'kevin.mendoza@tutorlink.com'),
+    ('Introducción a Git y GitHub', 'juan.perez@tutorlink.com'),
+    ('Introducción a Git y GitHub', 'laura.castro@tutorlink.com'),
+    ('Estructuras de datos', 'laura.castro@tutorlink.com')
 ) AS v(topic, email)
 JOIN inserted_sessions s ON s.topic = v.topic
 JOIN users u ON u.email = v.email;
+
+-- ---- MENTORING REQUESTS ----
+INSERT INTO mentoring_requests (coder_id, topic, description, request_date, state)
+VALUES
+    ((SELECT id FROM users WHERE email = 'kevin.mendoza@tutorlink.com'),
+     'Dudas sobre closures en JavaScript',
+     'No entiendo bien cómo funcionan los closures en funciones anidadas.',
+     '2025-01-14 09:30:00-05', 'accepted'),
+
+    ((SELECT id FROM users WHERE email = 'juan.perez@tutorlink.com'),
+     'Ayuda con consultas SQL avanzadas',
+     'Necesito apoyo con JOINs múltiples y subconsultas.',
+     '2025-01-17 15:00:00-05', 'pending'),
+
+    ((SELECT id FROM users WHERE email = 'laura.castro@tutorlink.com'),
+     'Repaso de estructuras de datos',
+     'Quisiera reforzar pilas, colas y listas enlazadas antes del proyecto.',
+     '2025-01-19 11:00:00-05', 'denied');

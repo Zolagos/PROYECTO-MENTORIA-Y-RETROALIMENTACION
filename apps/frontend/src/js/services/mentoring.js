@@ -2,19 +2,15 @@
  * mentoring.js — Mentoring data service
  *
  * What does it do?
- * Handles mentorship CRUD (create, list, edit, delete).
- * For now it persists to localStorage with the same sample data
- * from the design, so the view works end-to-end without a backend.
- *
- * Why this way?
- * Mentorships use the SAME structure as the cards in app.js
- * (topic, desc, tutor, date, time, modality, link/room, status, coders),
- * so the view doesn't change. Sprint 4: each function is replaced by its
- * backend fetch while keeping the same signature.
+ * Loads scheduled sessions (GET /api/sessions) and mentoring requests
+ * (GET /api/mentoring-requests) from the backend, normalizes both shapes
+ * into a common card-friendly format, and exposes the actions the
+ * Mentoring page needs (status changes / delete on requests, plus the
+ * still-local-only create/edit/delete for sessions — no backend endpoint
+ * exists yet to persist a full session).
  */
 
-// ---- STORAGE KEY ----
-const MENTORING_STORAGE_KEY = 'tutorcode_mentoring';
+import { mentoringService, sessionsService } from "./api";
 
 // ---- AVAILABLE TUTORS ----
 // Sprint 4: will come from GET /api/users?role=tutor
@@ -22,16 +18,6 @@ const TUTORS = [
   { id: 1, name: 'Ana García' },
   { id: 2, name: 'Carlos López' },
   { id: 3, name: 'María Torres' },
-];
-
-// ---- SAMPLE DATA ----
-// date in ISO format (YYYY-MM-DD) and time in 24h (HH:MM) so they
-// work directly in the modal inputs; the card shows them
-// formatted with formatDate() from utils.js
-const MENTORING_SAMPLE = [
-  { id:1, topic:'Advanced JavaScript', desc:'Closures, promises and async/await in depth.', tutorId:1, tutor:'Ana García', date:'2026-07-15', time:'10:00', modality:'virtual', link:'meet.google.com/abc', room:'', type:'open', status:'scheduled', coders:['KM','JP','LC'] },
-  { id:2, topic:'SQL Databases', desc:'Normalization up to 3NF, joins and complex queries.', tutorId:2, tutor:'Carlos López', date:'2026-07-16', time:'14:00', modality:'in-person', link:'', room:'Room A-101', type:'closed', status:'completed', coders:['MR','SV'] },
-  { id:3, topic:'Git and GitHub Flow', desc:'Branches, pull requests and conflict resolution.', tutorId:3, tutor:'María Torres', date:'2026-07-17', time:'09:00', modality:'virtual', link:'zoom.us/j/123', room:'', type:'open', status:'in-progress', coders:['DG','RP','KM','AB'] },
 ];
 
 /** Returns the available tutors for the modal select */
@@ -44,47 +30,126 @@ export function getTutorById(id) {
   return TUTORS.find(t => t.id === Number(id)) || null;
 }
 
-/** Returns all mentorships (seeds the sample data the first time) */
-export function getSessions() {
-  const data = localStorage.getItem(MENTORING_STORAGE_KEY);
-  if (data) return JSON.parse(data);
+// ---- CACHE ----
+// Holds the last-fetched, normalized items (sessions + requests) so
+// synchronous lookups (getSessionById) and card actions work without refetching.
+let cache = [];
 
-  localStorage.setItem(MENTORING_STORAGE_KEY, JSON.stringify(MENTORING_SAMPLE));
-  return MENTORING_SAMPLE;
+/** Splits an ISO timestamp into a YYYY-MM-DD date and HH:MM time (local time) */
+function splitDateTime(isoString) {
+  if (!isoString) return { date: '', time: '' };
+  const d = new Date(isoString);
+  const pad = (n) => String(n).padStart(2, '0');
+  return {
+    date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+    time: `${pad(d.getHours())}:${pad(d.getMinutes())}`,
+  };
 }
 
-/** Finds a mentorship by id */
+function initials(name, lastname) {
+  const first = name?.[0] || '';
+  const last = lastname?.[0] || '';
+  return (first + last).toUpperCase() || '—';
+}
+
+/** Maps a mentoring_sessions row (GET /sessions) into the card shape */
+function mapSessionToCard(row) {
+  const { date, time } = splitDateTime(row.start_time);
+  return {
+    kind: 'session',
+    id: row.id,
+    topic: row.topic,
+    desc: row.description || '',
+    tutorId: row.tutor_id,
+    tutor: row.tutor_name ? `${row.tutor_name} ${row.tutor_lastname || ''}`.trim() : '—',
+    date,
+    time,
+    modality: (row.modality || '').replace(' ', '-'),
+    link: row.meeting_link || '',
+    room: row.room || '',
+    type: row.session_type || 'open',
+    status: (row.status || 'scheduled').replace(/_/g, '-'),
+    coders: (row.coders || []).map(c => initials(c.name, c.lastname)),
+  };
+}
+
+/** Maps a mentoring_requests row (GET /mentoring-requests) into the card shape */
+function mapRequestToCard(row) {
+  const { date } = splitDateTime(row.request_date);
+  return {
+    kind: 'request',
+    id: row.id,
+    topic: row.topic,
+    desc: row.description || '',
+    coderId: row.coder_id,
+    coder: row.coder_name ? `${row.coder_name} ${row.coder_lastname || ''}`.trim() : '—',
+    date,
+    status: row.state,
+  };
+}
+
+/** Fetches and normalizes scheduled sessions visible to the current user */
+export async function getScheduledSessions() {
+  const response = await sessionsService.getAll();
+  return (response?.data || []).map(mapSessionToCard);
+}
+
+/** Fetches and normalizes mentoring requests visible to the current user */
+export async function getMentoringRequests() {
+  const response = await mentoringService.getAll();
+  return (response?.data || []).map(mapRequestToCard);
+}
+
+/**
+ * Fetches everything the current user should see on the Mentoring page
+ * (both scheduled sessions and mentoring requests — the backend already
+ * scopes each list to the caller's role/ownership) and refreshes the cache.
+ */
+export async function getVisibleMentoringItems() {
+  const [sessions, requests] = await Promise.all([
+    getScheduledSessions(),
+    getMentoringRequests(),
+  ]);
+  cache = [...sessions, ...requests];
+  return cache;
+}
+
+/** Finds a cached item (session or request) by id */
 export function getSessionById(id) {
-  return getSessions().find(m => m.id === Number(id)) || null;
+  return cache.find(m => m.id === Number(id)) || null;
 }
 
-/** Saves the full list to localStorage */
-function saveSessions(sessions) {
-  localStorage.setItem(MENTORING_STORAGE_KEY, JSON.stringify(sessions));
-}
-
-/** Creates a new mentorship */
+/** Creates a new session card locally (no backend endpoint yet — not persisted) */
 export function createSession(mentoring) {
-  const sessions = getSessions();
-
   mentoring.id = Date.now();
+  mentoring.kind = 'session';
   mentoring.status = mentoring.status || 'scheduled';
   mentoring.coders = mentoring.coders || [];
-
-  sessions.push(mentoring);
-  saveSessions(sessions);
+  cache.push(mentoring);
 }
 
-/** Updates an existing mentorship (keeps unedited fields) */
+/** Updates a session card locally (no backend endpoint yet — not persisted) */
 export function updateSession(mentoring) {
-  const sessions = getSessions().map(m =>
-    m.id === mentoring.id ? { ...m, ...mentoring } : m
-  );
-  saveSessions(sessions);
+  cache = cache.map(m => (m.id === mentoring.id ? { ...m, ...mentoring } : m));
 }
 
-/** Deletes a mentorship by id */
+/** Removes a session card locally (no backend endpoint yet — not persisted) */
 export function deleteSession(id) {
-  const sessions = getSessions().filter(m => m.id !== Number(id));
-  saveSessions(sessions);
+  cache = cache.filter(m => m.id !== Number(id));
+}
+
+/** Accepts/denies a mentoring request (TL and Tutor only, enforced server-side) */
+export async function changeRequestStatus(id, state) {
+  const response = await mentoringService.changeStatus(id, state);
+  const updated = response?.data;
+  if (updated) {
+    cache = cache.map(m => (m.kind === 'request' && m.id === Number(id) ? mapRequestToCard(updated) : m));
+  }
+  return updated;
+}
+
+/** Deletes a mentoring request (TL only, enforced server-side) */
+export async function deleteRequestItem(id) {
+  await mentoringService.delete(id);
+  cache = cache.filter(m => !(m.kind === 'request' && m.id === Number(id)));
 }
