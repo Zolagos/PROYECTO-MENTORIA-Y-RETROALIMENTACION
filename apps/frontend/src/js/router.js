@@ -70,21 +70,26 @@ function updateSidebarActive(activePath) {
     }
   });
 }
-
 function initPageScript(path) {
   const pageInits = {
-    '/login': typeof initLogin === 'function' ? initLogin : null,
-    '/dashboard': typeof initDashboard === 'function' ? initDashboard : null,
-    '/mentoring': typeof initMentoring === 'function' ? initMentoring : null,
-    '/observations': typeof initObservations === 'function' ? initObservations : null,
-    '/feedback': typeof initFeedback === 'function' ? initFeedback : null,
+    '/login': window.initLogin,
+    '/dashboard': window.initDashboard,
+    '/mentoring': window.initMentoring,
+    '/observations': window.initObservations,
+    '/feedback': window.initFeedback,
   };
 
   const init = pageInits[path];
-  if (init) {
-    setTimeout(init, 0);
+
+  if (typeof init === 'function') {
+    setTimeout(() => {
+      Promise.resolve(init()).catch((error) => {
+        console.error(`Error inicializando la ruta ${path}:`, error);
+      });
+    }, 0);
   }
 }
+
 
 export function render404() {
   return `

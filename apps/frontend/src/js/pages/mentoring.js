@@ -1,12 +1,17 @@
 import {
-  getSessions, getSessionById,
-  getTutors, getTutorById,
-  createSession, updateSession, deleteSession
+  loadSessions,
+  getSessions,
+  getSessionById,
+  getTutors,
+  getTutorById,
+  createSession,
+  updateSession,
+  deleteSession
 } from '../services/mentoring.js'
 import { getMentoringCards } from '../app.js'
 import { openModal, closeModal, showToast } from '../utils.js'
 
-export function initMentoring() {
+export async function initMentoring() {
   // Botón "Nueva Mentoría" — abre el modal en modo crear
   const btnNueva = document.getElementById('btn-nueva-mentoria');
   if (btnNueva) {
@@ -51,6 +56,47 @@ export function initMentoring() {
   if (searchInput) searchInput.addEventListener('input', applyMentoringFilters);
   if (filterEstado) filterEstado.addEventListener('change', applyMentoringFilters);
   if (filterModalidad) filterModalidad.addEventListener('change', applyMentoringFilters);
+  await loadMentoringSessions();
+}
+
+async function loadMentoringSessions() {
+  const container = document.getElementById(
+    'mentoring-container'
+  );
+
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="empty-state">
+      <h2 class="empty-state__title">
+        Cargando mentorías...
+      </h2>
+      <p class="empty-state__description">
+        Consultando las sesiones disponibles.
+      </p>
+    </div>
+  `;
+
+  try {
+    await loadSessions();
+    applyMentoringFilters();
+  } catch (error) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <h2 class="empty-state__title">
+          No fue posible cargar las mentorías
+        </h2>
+        <p class="empty-state__description">
+          Verifica que el backend esté disponible e intenta nuevamente.
+        </p>
+      </div>
+    `;
+
+    showToast(
+      error.message || 'No fue posible cargar las mentorías.',
+      'error'
+    );
+  }
 }
 
 /** Vuelve a pintar las cards respetando búsqueda y filtros activos */

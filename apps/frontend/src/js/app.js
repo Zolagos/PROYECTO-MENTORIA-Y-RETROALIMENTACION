@@ -3,6 +3,7 @@ import { getSessionUser, initHeader } from './components/header.js';
 import { buildSidebar, initSidebarCollapse } from './components/sidebar.js';
 import { getTutors, getSessions, getSessionById, createSession, updateSession, deleteSession } from './services/mentoring.js';
 import { formatDate } from './utils.js';
+const SESSION_WRITES_ENABLED = false;
 
 export function initApp(user) {
   registerAllRoutes(user.rol);
@@ -233,7 +234,14 @@ function renderDashboardTL(user) {
 
 export function renderMentoring() {
   const user = getSessionUser();
-  const canCreate = user && (user.rol === 'TL' || user.rol === 'TUTOR' || user.rol === 'ADMIN');
+  const canCreate =
+  SESSION_WRITES_ENABLED &&
+  user &&
+  (
+    user.rol === 'TL' ||
+    user.rol === 'TUTOR' ||
+    user.rol === 'ADMIN'
+  );
   return `
     <div class="page-header">
       <div>
@@ -273,9 +281,16 @@ export function renderMentoring() {
       </div>
     </div>
     <div class="mentoring-grid" id="mentoring-container">
-      ${getMentoringCards()}
-    </div>
-    ${getModalMentoring(canCreate)}
+  <div class="empty-state">
+    <h2 class="empty-state__title">
+      Cargando mentorías...
+    </h2>
+    <p class="empty-state__description">
+      Consultando las sesiones disponibles.
+    </p>
+  </div>
+</div>
+${getModalMentoring(canCreate)}
   `;
 }
 
@@ -645,12 +660,22 @@ export function getMentoringCards(list) {
           <h3 class="mentoring-detail-card__topic">${m.topic}</h3>
           <div class="flex gap-2 items-center">
             <span class="badge badge--${m.status}">${m.status}</span>
-            <div class="action-menu">
-              <button class="action-menu__trigger" aria-label="Acciones para ${m.topic}" aria-haspopup="true"
-                onclick="toggleActionMenu(this, ${m.id})">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-              </button>
-            </div>
+            ${SESSION_WRITES_ENABLED ? `
+                <div class="action-menu">
+                  <button
+                    class="action-menu__trigger"
+                    aria-label="Acciones para ${m.topic}"
+                    aria-haspopup="true"
+                    onclick="toggleActionMenu(this, ${m.id})"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <circle cx="12" cy="5" r="1"/>
+                      <circle cx="12" cy="12" r="1"/>
+                      <circle cx="12" cy="19" r="1"/>
+                    </svg>
+                  </button>
+                </div>
+              ` : ''}
           </div>
         </div>
         <p class="mentoring-detail-card__desc">${m.desc}</p>
@@ -669,8 +694,11 @@ export function getMentoringCards(list) {
           </div>
           <div class="mentoring-detail-card__info-item">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-            <span>${m.coders.length} participante${m.coders.length !== 1 ? 's' : ''}</span>
-          </div>
+            <span>
+              ${m.participantCount ?? m.coders.length}
+              participante${(m.participantCount ?? m.coders.length) !== 1 ? 's' : ''}
+            </span>
+        </div>
         </div>
       </div>
       <div class="mentoring-detail-card__bottom">
@@ -682,6 +710,8 @@ export function getMentoringCards(list) {
           ? `<button class="btn btn-sm btn-secondary" onclick="navigateTo('/feedback')">Ver feedback</button>`
           : m.status === 'programada'
           ? `<button class="btn btn-sm btn-primary" onclick="alert('Unirse a la mentoría')">Unirse</button>`
+          : m.status === 'cancelada'
+          ? `<span class="text-sm text-muted">Mentoría cancelada</span>`
           : `<span class="text-sm text-muted">En curso</span>`
         }
       </div>
