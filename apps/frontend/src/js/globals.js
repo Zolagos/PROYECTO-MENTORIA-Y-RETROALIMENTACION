@@ -2,9 +2,14 @@ import { navigateTo } from './router.js'
 import { handleLogout } from './components/sidebar.js'
 import { openModal, closeModal, showToast } from './utils.js'
 import {
-  toggleActionMenu, editMentoring,
-  changeMentoringStatus, deleteMentoring,
-  submitMentoring, toggleModalityField
+  toggleActionMenu,
+  editMentoring,
+  changeMentoringStatus,
+  deleteMentoring,
+  submitMentoring,
+  toggleModalityField,
+  openParticipantsModal,
+  submitParticipants
 } from './pages/mentoring.js'
 import { submitObservation } from './pages/observations.js'
 import { setRating, submitFeedback } from './pages/feedback.js'
@@ -14,6 +19,8 @@ import { initMentoring } from './pages/mentoring.js'
 import { initObservations } from './pages/observations.js'
 import { initFeedback } from './pages/feedback.js'
 
+window.openParticipantsModal = openParticipantsModal
+window.submitParticipants = submitParticipants
 window.navigateTo = navigateTo
 window.handleLogout = handleLogout
 window.openModal = openModal

@@ -5,6 +5,7 @@ import { getTutors, getSessions, getSessionById, createSession, updateSession, d
 import { formatDate } from './utils.js';
 const SESSION_CREATE_ENABLED = true;
 const SESSION_ACTIONS_ENABLED = false;
+const SESSION_PARTICIPANTS_ENABLED = true;
 
 export function initApp(user) {
   registerAllRoutes(user.rol);
@@ -244,6 +245,14 @@ export function renderMentoring() {
       user.rol === 'TUTOR'
     );
 
+  const canManageParticipants =
+    SESSION_PARTICIPANTS_ENABLED &&
+    user &&
+    (
+      user.rol === 'TL' ||
+      user.rol === 'TUTOR'
+    );
+
   return `
     <div class="page-header">
       <div>
@@ -293,6 +302,90 @@ export function renderMentoring() {
   </div>
 </div>
 ${getModalMentoring(canCreate)}
+${getModalParticipants(canManageParticipants)}
+`;
+}
+
+function getModalParticipants(canManageParticipants) {
+  if (!canManageParticipants) return '';
+
+  return `
+    <div
+      class="modal-overlay"
+      id="modal-participants"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-participants-title"
+    >
+      <div class="modal">
+        <div class="modal__header">
+          <div>
+            <h2
+              class="modal__title"
+              id="modal-participants-title"
+            >
+              Agregar participantes
+            </h2>
+            <p
+              class="text-sm text-muted"
+              id="modal-participants-session"
+            ></p>
+          </div>
+
+          <button
+            class="modal__close"
+            onclick="closeModal('modal-participants')"
+            aria-label="Cerrar modal"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="modal__body">
+          <input
+            type="hidden"
+            id="participants-session-id"
+            value=""
+          />
+
+          <div id="participants-list">
+            <div class="empty-state">
+              <p class="empty-state__description">
+                Cargando coders...
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal__footer">
+          <button
+            class="btn btn-ghost"
+            onclick="closeModal('modal-participants')"
+          >
+            Cancelar
+          </button>
+
+          <button
+            class="btn btn-primary"
+            id="participants-submit-btn"
+            onclick="submitParticipants()"
+          >
+            Agregar participantes
+          </button>
+        </div>
+      </div>
+    </div>
   `;
 }
 
@@ -646,6 +739,23 @@ export function renderSettings() {
 export function getMentoringCards(list) {
   const sample = list || getSessions();
 
+  const user = getSessionUser();
+
+  const canManageParticipants =
+    SESSION_PARTICIPANTS_ENABLED &&
+    user &&
+    (
+      user.rol === 'TL' ||
+      user.rol === 'TUTOR'
+    );
+
+  const canManageSessionParticipants = (mentoring) =>
+  canManageParticipants &&
+  (
+    user.rol === 'TL' ||
+    Number(mentoring.tutorId) === Number(user.id)
+  );
+
   if (!sample.length) {
     return `
       <div class="empty-state">
@@ -710,8 +820,25 @@ export function getMentoringCards(list) {
         </div>
         ${m.status === 'completada'
           ? `<button class="btn btn-sm btn-secondary" onclick="navigateTo('/feedback')">Ver feedback</button>`
-          : m.status === 'programada'
-          ? `<button class="btn btn-sm btn-primary" onclick="alert('Unirse a la mentoría')">Unirse</button>`
+          : m.status === 'programada' &&
+            canManageSessionParticipants(m)
+            ? `
+              <button
+                class="btn btn-sm btn-primary"
+                onclick="openParticipantsModal(${m.id})"
+              >
+                Agregar participantes
+              </button>
+            `
+            : m.status === 'programada'
+            ? `
+              <button
+                class="btn btn-sm btn-primary"
+                onclick="alert('Unirse a la mentoría')"
+              >
+                Unirse
+              </button>
+            `
           : m.status === 'cancelada'
           ? `<span class="text-sm text-muted">Mentoría cancelada</span>`
           : `<span class="text-sm text-muted">En curso</span>`

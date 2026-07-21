@@ -6,7 +6,10 @@ import {
   getTutorById,
   createSession,
   updateSession,
-  deleteSession
+  deleteSession,
+  loadCoders,
+  loadSessionDetail,
+  assignParticipants
 } from '../services/mentoring.js'
 import { getMentoringCards } from '../app.js'
 import { openModal, closeModal, showToast } from '../utils.js'
@@ -121,6 +124,234 @@ export function applyMentoringFilters() {
   });
 
   container.innerHTML = getMentoringCards(filtered);
+}
+
+function escapeHtml(value) {
+  const element = document.createElement('div');
+  element.textContent = String(value ?? '');
+  return element.innerHTML;
+}
+
+export async function openParticipantsModal(sessionId) {
+  const id = Number(sessionId);
+  const session = getSessionById(id);
+
+  if (!Number.isInteger(id) || id <= 0 || !session) {
+    showToast('La sesión seleccionada no es válida.', 'error');
+    return;
+  }
+
+  if (session.status !== 'programada') {
+    showToast(
+      'Solo puedes agregar participantes a sesiones programadas.',
+      'error'
+    );
+    return;
+  }
+
+  const idInput = document.getElementById(
+    'participants-session-id'
+  );
+  const sessionLabel = document.getElementById(
+    'modal-participants-session'
+  );
+  const list = document.getElementById('participants-list');
+  const submitButton = document.getElementById(
+    'participants-submit-btn'
+  );
+
+  if (!idInput || !sessionLabel || !list || !submitButton) {
+    showToast(
+      'No fue posible preparar el formulario de participantes.',
+      'error'
+    );
+    return;
+  }
+
+  idInput.value = String(id);
+  sessionLabel.textContent = session.topic;
+
+  list.innerHTML = `
+    <div class="empty-state">
+      <p class="empty-state__description">
+        Cargando coders...
+      </p>
+    </div>
+  `;
+
+  submitButton.disabled = true;
+  submitButton.textContent = 'Cargando...';
+
+  openModal('modal-participants');
+
+  try {
+    const [coders, detail] = await Promise.all([
+      loadCoders(),
+      loadSessionDetail(id),
+    ]);
+
+    const participants = Array.isArray(detail.participants)
+      ? detail.participants
+      : [];
+
+    const assignedIds = new Set(
+      participants
+        .map((participant) => Number(participant.id))
+        .filter((participantId) =>
+          Number.isInteger(participantId)
+        )
+    );
+
+    if (coders.length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <p class="empty-state__description">
+            No hay coders activos disponibles en este clan.
+          </p>
+        </div>
+      `;
+
+      submitButton.disabled = true;
+      submitButton.textContent = 'Sin coders disponibles';
+      return;
+    }
+
+    list.innerHTML = coders.map((coder) => {
+      const alreadyAssigned = assignedIds.has(coder.id);
+      const fullName = escapeHtml(
+        coder.fullName || `${coder.name} ${coder.lastname}`
+      );
+
+      return `
+        <label
+          class="card"
+          style="
+            display:flex;
+            align-items:center;
+            gap:var(--space-3);
+            padding:var(--space-3);
+            margin-bottom:var(--space-2);
+            cursor:${alreadyAssigned ? 'default' : 'pointer'};
+          "
+        >
+          <input
+            type="checkbox"
+            name="participant-coder"
+            value="${coder.id}"
+            ${alreadyAssigned ? 'checked disabled' : ''}
+          />
+
+          <span>
+            <strong>${fullName}</strong>
+            <span
+              class="text-sm text-muted"
+              style="display:block;"
+            >
+              ${
+                alreadyAssigned
+                  ? 'Ya está asignado'
+                  : 'Disponible para agregar'
+              }
+            </span>
+          </span>
+        </label>
+      `;
+    }).join('');
+
+    const availableCoders = coders.filter(
+      (coder) => !assignedIds.has(coder.id)
+    );
+
+    submitButton.disabled = availableCoders.length === 0;
+    submitButton.textContent =
+      availableCoders.length === 0
+        ? 'Todos están asignados'
+        : 'Agregar participantes';
+  } catch (error) {
+    console.error(
+      'Error cargando participantes:',
+      error
+    );
+
+    list.innerHTML = `
+      <div class="empty-state">
+        <p class="empty-state__description">
+          No fue posible cargar los coders.
+        </p>
+      </div>
+    `;
+
+    submitButton.disabled = true;
+    submitButton.textContent = 'No disponible';
+
+    showToast(
+      error.message || 'No fue posible cargar los coders.',
+      'error'
+    );
+  }
+}
+
+export async function submitParticipants() {
+  const sessionId = Number(
+    document.getElementById('participants-session-id')?.value
+  );
+
+  const submitButton = document.getElementById(
+    'participants-submit-btn'
+  );
+
+  const coderIds = Array.from(
+    document.querySelectorAll(
+      '#participants-list input[name="participant-coder"]:checked:not(:disabled)'
+    )
+  ).map((checkbox) => Number(checkbox.value));
+
+  if (!Number.isInteger(sessionId) || sessionId <= 0) {
+    showToast('La sesión seleccionada no es válida.', 'error');
+    return;
+  }
+
+  if (coderIds.length === 0) {
+    showToast(
+      'Selecciona al menos un coder para agregar.',
+      'error'
+    );
+    return;
+  }
+
+  try {
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = 'Agregando...';
+    }
+
+    await assignParticipants(sessionId, coderIds);
+    await loadSessions();
+
+    applyMentoringFilters();
+    closeModal('modal-participants');
+
+    showToast(
+      'Participantes agregados correctamente.',
+      'success'
+    );
+  } catch (error) {
+    console.error(
+      'Error agregando participantes:',
+      error
+    );
+
+    showToast(
+      error.message ||
+        'No fue posible agregar los participantes.',
+      'error'
+    );
+  } finally {
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.textContent = 'Agregar participantes';
+    }
+  }
 }
 
 /** Alterna el menú de acciones de una card */

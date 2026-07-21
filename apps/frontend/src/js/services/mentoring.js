@@ -209,3 +209,68 @@ export async function deleteSession() {
     'La cancelación de mentorías todavía está en integración.'
   );
 }
+export async function loadCoders() {
+  const response = await fetchAPI(
+    `/users?role=${encodeURIComponent('Coder')}`
+  );
+
+  if (!Array.isArray(response?.data)) {
+    throw new Error(
+      'El servidor devolvió una lista de coders inválida.'
+    );
+  }
+
+  return response.data.map((coder) => ({
+    id: Number(coder.id),
+    name: coder.name || '',
+    lastname: coder.lastname || '',
+    fullName: `${coder.name || ''} ${coder.lastname || ''}`.trim(),
+    clanId: Number(coder.clan_id),
+  }));
+}
+
+export async function loadSessionDetail(sessionId) {
+  const id = Number(sessionId);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new Error('La sesión seleccionada no es válida.');
+  }
+
+  const response = await fetchAPI(`/sessions/${id}`);
+
+  if (!response?.data) {
+    throw new Error(
+      'El servidor devolvió un detalle de sesión inválido.'
+    );
+  }
+
+  return response.data;
+}
+
+export async function assignParticipants(sessionId, coderIds) {
+  const id = Number(sessionId);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new Error('La sesión seleccionada no es válida.');
+  }
+
+  if (!Array.isArray(coderIds) || coderIds.length === 0) {
+    throw new Error('Selecciona al menos un participante.');
+  }
+
+  const response = await fetchAPI(
+    `/sessions/${id}/participants`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ coderIds }),
+    }
+  );
+
+  if (!response?.data) {
+    throw new Error(
+      'El servidor devolvió una respuesta inválida al asignar participantes.'
+    );
+  }
+
+  return response.data;
+}
