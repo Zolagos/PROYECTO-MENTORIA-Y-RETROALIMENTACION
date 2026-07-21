@@ -17,6 +17,7 @@ import { initDashboard } from './pages/dashboard.js'
 import { initMentoring } from './pages/mentoring.js'
 import { initObservations } from './pages/observations.js'
 import { initFeedback } from './pages/feedback.js'
+import { initMetrics } from './pages/metrics.js'
 
 window.navigateTo = navigateTo
 window.handleLogout = handleLogout
@@ -48,3 +49,4 @@ window.initDashboard = initDashboard
 window.initMentoring = initMentoring
 window.initObservations = initObservations
 window.initFeedback = initFeedback
+window.initMetrics = initMetrics

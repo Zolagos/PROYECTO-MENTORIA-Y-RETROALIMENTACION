@@ -78,6 +78,7 @@ function initPageScript(path) {
     '/mentoring': typeof initMentoring === 'function' ? initMentoring : null,
     '/observations': typeof initObservations === 'function' ? initObservations : null,
     '/feedback': typeof initFeedback === 'function' ? initFeedback : null,
+    '/metrics': typeof initMetrics === 'function' ? initMetrics : null,
   };
 
   const init = pageInits[path];

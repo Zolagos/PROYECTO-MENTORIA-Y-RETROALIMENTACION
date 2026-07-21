@@ -254,6 +254,19 @@ export const sessionsService = {
 };
 
 // ============================================================
+// DASHBOARD SERVICE
+// ============================================================
+
+export const dashboardService = {
+  async getSummary() {
+    return await fetchAPI('/dashboard/summary');
+  },
+  async getMetrics() {
+    return await fetchAPI('/dashboard/metrics');
+  },
+};
+
+// ============================================================
 // OBSERVATIONS SERVICES
 // ============================================================
 
