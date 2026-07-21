@@ -1,0 +1,31 @@
+import asyncHandler from '../utils/asyncHandler.js';
+import ApiResponse from '../utils/ApiResponse.js';
+import ApiError from '../utils/ApiError.js';
+import * as usersRepository from '../repositories/users.repository.js';
+import { ROLES } from '../config/roles.js';
+
+export const listByRole = asyncHandler(async (req, res) => {
+  const { role } = req.query;
+  const clanId = Number(req.user?.clanId);
+
+  if (![ROLES.TUTOR, ROLES.CODER].includes(role)) {
+    throw new ApiError(
+      `role must be ${ROLES.TUTOR} or ${ROLES.CODER}`,
+      400
+    );
+  }
+
+  if (!Number.isInteger(clanId) || clanId <= 0) {
+    throw new ApiError(
+      'The authenticated user is not assigned to a clan',
+      409
+    );
+  }
+
+  const users = await usersRepository.findByRoleAndClan({
+    roleName: role,
+    clanId,
+  });
+
+  return ApiResponse.success(res, users);
+});
