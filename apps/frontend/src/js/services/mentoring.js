@@ -16,7 +16,6 @@ let sessionsCache = [];
 // La lista real de tutores deberá venir de un endpoint del backend.
 const TUTORS = [
   { id: 2, name: 'Ana García' },
-  { id: 3, name: 'Carlos López' },
 ];
 
 const STATUS_MAP = {
@@ -152,6 +151,25 @@ export function getSessionById(id) {
 }
 
 export function getTutors() {
+  const storedUser = sessionStorage.getItem('tutorlink_user');
+
+  if (!storedUser) {
+    return [...TUTORS];
+  }
+
+  try {
+    const user = JSON.parse(storedUser);
+
+    if (user.rol === 'TUTOR') {
+      return [{
+        id: Number(user.id),
+        name: `${user.nombre || ''} ${user.apellido || ''}`.trim(),
+      }];
+    }
+  } catch {
+    return [...TUTORS];
+  }
+
   return [...TUTORS];
 }
 
@@ -165,10 +183,19 @@ export function getTutorById(id) {
  * Las escrituras se conectarán en la siguiente etapa.
  * Las acciones están ocultas en la interfaz mientras tanto.
  */
-export async function createSession() {
-  throw new Error(
-    'La creación de mentorías todavía está en integración.'
-  );
+export async function createSession(sessionData) {
+  const response = await fetchAPI('/sessions', {
+    method: 'POST',
+    body: JSON.stringify(sessionData),
+  });
+
+  if (!response?.data) {
+    throw new Error(
+      'El servidor devolvió una respuesta inválida al crear la mentoría.'
+    );
+  }
+
+  return response.data;
 }
 
 export async function updateSession() {

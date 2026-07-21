@@ -251,41 +251,69 @@ export function toggleModalityField() {
 }
 
 /** Envía el formulario de crear/editar mentoría */
-export function submitMentoring() {
+export async function submitMentoring() {
   clearMentoringErrors();
 
-  const topic    = document.getElementById('m-topic');
-  const tutor    = document.getElementById('m-tutor');
-  const date     = document.getElementById('m-date');
-  const time     = document.getElementById('m-time');
+  const topic = document.getElementById('m-topic');
+  const tutor = document.getElementById('m-tutor');
+  const date = document.getElementById('m-date');
+  const startTime = document.getElementById('m-time');
+  const endTime = document.getElementById('m-end-time');
+  const mentorshipType = document.getElementById(
+    'm-mentorship-type'
+  );
   const modality = document.getElementById('m-modality');
   const location = document.getElementById('m-location');
+  const sessionType = document.getElementById('m-type');
+  const description = document.getElementById('m-desc');
+  const submitButton = document.getElementById('m-submit-btn');
+
   let valid = true;
 
   if (!topic?.value.trim()) {
-    topic.classList.add('form-input--error');
-    document.getElementById('m-topic-error')?.classList.remove('hidden');
+    topic?.classList.add('form-input--error');
+    document
+      .getElementById('m-topic-error')
+      ?.classList.remove('hidden');
     valid = false;
   }
+
   if (!tutor?.value) {
-    tutor.classList.add('form-select--error');
-    document.getElementById('m-tutor-error')?.classList.remove('hidden');
+    tutor?.classList.add('form-select--error');
+    document
+      .getElementById('m-tutor-error')
+      ?.classList.remove('hidden');
     valid = false;
   }
+
   if (!date?.value) {
-    date.classList.add('form-input--error');
-    document.getElementById('m-date-error')?.classList.remove('hidden');
+    date?.classList.add('form-input--error');
+    document
+      .getElementById('m-date-error')
+      ?.classList.remove('hidden');
+    valid = false;
+  }
+
+  if (!startTime?.value || !endTime?.value) {
+    showToast(
+      'Selecciona la hora de inicio y finalización.',
+      'error'
+    );
     valid = false;
   }
 
   if (!valid) return;
+
+  if (!mentorshipType?.value) {
+    showToast('Selecciona el tipo de mentoría.', 'error');
+    return;
+  }
 
   if (!modality?.value) {
     showToast('Selecciona la modalidad.', 'error');
     return;
   }
 
-  // La ubicación depende de la modalidad (regla de US-04)
   if (!location?.value.trim()) {
     showToast(
       modality.value === 'virtual'
@@ -296,32 +324,74 @@ export function submitMentoring() {
     return;
   }
 
-  const id = Number(document.getElementById('m-id').value);
-  const selectedTutor = getTutorById(tutor.value);
+  const parsedStartTime = new Date(
+    `${date.value}T${startTime.value}:00`
+  );
 
-  const mentoring = {
-    topic: topic.value.trim(),
-    desc: document.getElementById('m-desc').value.trim(),
-    tutorId: Number(tutor.value),
-    tutor: selectedTutor ? selectedTutor.name : '—',
-    date: date.value,
-    time: time?.value || '',
-    modality: modality.value,
-    link: modality.value === 'virtual' ? location.value.trim() : '',
-    sala: modality.value === 'presencial' ? location.value.trim() : '',
-    type: document.getElementById('m-type')?.value || 'abierta',
-  };
+  const parsedEndTime = new Date(
+    `${date.value}T${endTime.value}:00`
+  );
 
-  if (id) {
-    mentoring.id = id;
-    updateSession(mentoring);
-    showToast('Mentoría actualizada correctamente.', 'success');
-  } else {
-    createSession(mentoring);
-    showToast('Mentoría creada correctamente.', 'success');
+  if (
+    Number.isNaN(parsedStartTime.getTime()) ||
+    Number.isNaN(parsedEndTime.getTime())
+  ) {
+    showToast('La fecha o las horas no son válidas.', 'error');
+    return;
   }
 
-  closeModal('modal-mentoring');
-  resetMentoringForm();
-  refreshMentoringCards();
+  if (parsedEndTime <= parsedStartTime) {
+    showToast(
+      'La hora de finalización debe ser posterior a la hora de inicio.',
+      'error'
+    );
+    return;
+  }
+
+  const isVirtual = modality.value === 'virtual';
+
+  const payload = {
+    topic: topic.value.trim(),
+    description: description?.value.trim() || null,
+    mentorship_type: mentorshipType.value,
+    modality: isVirtual ? 'virtual' : 'in person',
+    session_type:
+      sessionType?.value === 'abierta' ? 'open' : 'closed',
+    room: isVirtual ? null : location.value.trim(),
+    meeting_link: isVirtual ? location.value.trim() : null,
+    start_time: parsedStartTime.toISOString(),
+    end_time: parsedEndTime.toISOString(),
+    tutor_id: Number(tutor.value),
+  };
+
+  try {
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = 'Creando...';
+    }
+
+    await createSession(payload);
+    await loadSessions();
+
+    applyMentoringFilters();
+    closeModal('modal-mentoring');
+    resetMentoringForm();
+
+    showToast(
+      'Mentoría creada correctamente.',
+      'success'
+    );
+  } catch (error) {
+    console.error('Error creando la mentoría:', error);
+
+    showToast(
+      error.message || 'No fue posible crear la mentoría.',
+      'error'
+    );
+  } finally {
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.textContent = 'Crear Mentoría';
+    }
+  }
 }

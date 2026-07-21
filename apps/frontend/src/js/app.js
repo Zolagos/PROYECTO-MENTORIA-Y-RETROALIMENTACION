@@ -3,7 +3,8 @@ import { getSessionUser, initHeader } from './components/header.js';
 import { buildSidebar, initSidebarCollapse } from './components/sidebar.js';
 import { getTutors, getSessions, getSessionById, createSession, updateSession, deleteSession } from './services/mentoring.js';
 import { formatDate } from './utils.js';
-const SESSION_WRITES_ENABLED = false;
+const SESSION_CREATE_ENABLED = true;
+const SESSION_ACTIONS_ENABLED = false;
 
 export function initApp(user) {
   registerAllRoutes(user.rol);
@@ -234,14 +235,15 @@ function renderDashboardTL(user) {
 
 export function renderMentoring() {
   const user = getSessionUser();
+
   const canCreate =
-  SESSION_WRITES_ENABLED &&
-  user &&
-  (
-    user.rol === 'TL' ||
-    user.rol === 'TUTOR' ||
-    user.rol === 'ADMIN'
-  );
+    SESSION_CREATE_ENABLED &&
+    user &&
+    (
+      user.rol === 'TL' ||
+      user.rol === 'TUTOR'
+    );
+
   return `
     <div class="page-header">
       <div>
@@ -660,7 +662,7 @@ export function getMentoringCards(list) {
           <h3 class="mentoring-detail-card__topic">${m.topic}</h3>
           <div class="flex gap-2 items-center">
             <span class="badge badge--${m.status}">${m.status}</span>
-            ${SESSION_WRITES_ENABLED ? `
+            ${SESSION_ACTIONS_ENABLED ? `
                 <div class="action-menu">
                   <button
                     class="action-menu__trigger"
@@ -750,31 +752,92 @@ function getModalMentoring(canCreate) {
                 <span class="form-error hidden" id="m-tutor-error">Selecciona un tutor.</span>
               </div>
               <div class="form-group">
-                <label for="m-date" class="form-label form-label--required">Fecha</label>
-                <input type="date" id="m-date" class="form-input" required />
-                <span class="form-error hidden" id="m-date-error">Selecciona una fecha.</span>
+                <label for="m-date" class="form-label form-label--required">
+                  Fecha
+                </label>
+                <input
+                  type="date"
+                  id="m-date"
+                  class="form-input"
+                  required
+                />
+                <span class="form-error hidden" id="m-date-error">
+                  Selecciona una fecha.
+                </span>
               </div>
+
               <div class="form-group">
-                <label for="m-time" class="form-label form-label--required">Hora</label>
-                <input type="time" id="m-time" class="form-input" required />
+                <label for="m-time" class="form-label form-label--required">
+                  Hora de inicio
+                </label>
+                <input
+                  type="time"
+                  id="m-time"
+                  class="form-input"
+                  required
+                />
               </div>
+
               <div class="form-group">
-                <label for="m-modality" class="form-label form-label--required">Modalidad</label>
-                <select id="m-modality" class="form-select" required onchange="toggleModalityField()">
+                <label for="m-end-time" class="form-label form-label--required">
+                  Hora de finalización
+                </label>
+                <input
+                  type="time"
+                  id="m-end-time"
+                  class="form-input"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label
+                  for="m-mentorship-type"
+                  class="form-label form-label--required"
+                >
+                  Tipo de mentoría
+                </label>
+                <select
+                  id="m-mentorship-type"
+                  class="form-select"
+                  required
+                >
+                  <option value="group">Grupal</option>
+                  <option value="individual">Individual</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="m-modality" class="form-label form-label--required">
+                  Modalidad
+                </label>
+                <select
+                  id="m-modality"
+                  class="form-select"
+                  required
+                  onchange="toggleModalityField()"
+                >
                   <option value="">Seleccionar...</option>
                   <option value="virtual">Virtual</option>
                   <option value="presencial">Presencial</option>
                 </select>
               </div>
+
               <div class="form-group" id="m-location-group">
                 <label for="m-location" class="form-label" id="m-location-label">Enlace / Sala</label>
                 <input type="text" id="m-location" class="form-input" placeholder="meet.google.com/..." />
               </div>
               <div class="form-group">
-                <label for="m-type" class="form-label">Tipo</label>
+                <label for="m-type" class="form-label">
+                  Acceso de la sesión
+                </label>
                 <select id="m-type" class="form-select">
-                  <option value="abierta">Abierta (todos los clanes)</option>
-                  <option value="cerrada">Cerrada (mismo clan)</option>
+                  <option value="abierta">
+                    Abierta para coders del clan
+                  </option>
+                  <option value="cerrada" selected>
+                    Cerrada para participantes asignados
+                  </option>
                 </select>
               </div>
             </div>
