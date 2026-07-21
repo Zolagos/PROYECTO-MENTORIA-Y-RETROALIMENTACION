@@ -165,16 +165,20 @@ export async function submitObservation() {
   const id = document.getElementById('obs-id').value;
   const recommendation = document.getElementById('obs-recommendation').value.trim();
   const technicalNotes = document.getElementById('obs-technical-notes').value.trim();
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session_id');
 
   const payload = type === 'tutor'
     ? {
         tutor_id: Number(targetId),
+        session_id: sessionId ? Number(sessionId) : undefined,
         observation: text.value.trim(),
         recommendation: recommendation || null,
         technical_notes: technicalNotes || null,
       }
     : {
         coder_id: Number(targetId),
+        session_id: sessionId ? Number(sessionId) : undefined,
         observation: text.value.trim(),
         recommendation: recommendation || null,
       };
@@ -189,8 +193,6 @@ export async function submitObservation() {
     }
 
     closeModal('modal-observation');
-    const params = new URLSearchParams(window.location.search);
-    const sessionId = params.get('session_id');
     await loadObservations(sessionId ? { session_id: sessionId } : {});
     renderTimeline();
   } catch (error) {

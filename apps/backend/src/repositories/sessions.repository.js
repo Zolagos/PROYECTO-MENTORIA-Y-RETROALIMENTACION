@@ -37,7 +37,20 @@ export const findByClan = async (clanId) => {
          SELECT COUNT(*)::int
          FROM session_coders sc
          WHERE sc.session_id = s.id
-       ) AS participant_count
+       ) AS participant_count,
+       COALESCE(
+         (SELECT json_agg(json_build_object(
+             'id', c.id,
+             'name', c.name,
+             'lastname', c.lastname,
+             'role', r.name
+         ))
+         FROM session_coders sc
+         JOIN users c ON sc.coder_id = c.id
+         JOIN roles r ON c.role_id = r.id
+         WHERE sc.session_id = s.id),
+         '[]'::json
+       ) AS coders
      FROM mentoring_sessions s
      JOIN users t ON t.id = s.tutor_id
      WHERE s.clan_id = $1
@@ -57,7 +70,20 @@ export const findByTutor = async ({ tutorId, clanId }) => {
          SELECT COUNT(*)::int
          FROM session_coders sc
          WHERE sc.session_id = s.id
-       ) AS participant_count
+       ) AS participant_count,
+       COALESCE(
+         (SELECT json_agg(json_build_object(
+             'id', c.id,
+             'name', c.name,
+             'lastname', c.lastname,
+             'role', r.name
+         ))
+         FROM session_coders sc
+         JOIN users c ON sc.coder_id = c.id
+         JOIN roles r ON c.role_id = r.id
+         WHERE sc.session_id = s.id),
+         '[]'::json
+       ) AS coders
      FROM mentoring_sessions s
      JOIN users t ON t.id = s.tutor_id
      WHERE s.tutor_id = $1
@@ -78,7 +104,20 @@ export const findForCoder = async ({ coderId, clanId }) => {
          SELECT COUNT(*)::int
          FROM session_coders sc
          WHERE sc.session_id = s.id
-       ) AS participant_count
+       ) AS participant_count,
+       COALESCE(
+         (SELECT json_agg(json_build_object(
+             'id', c.id,
+             'name', c.name,
+             'lastname', c.lastname,
+             'role', r.name
+         ))
+         FROM session_coders sc
+         JOIN users c ON sc.coder_id = c.id
+         JOIN roles r ON c.role_id = r.id
+         WHERE sc.session_id = s.id),
+         '[]'::json
+       ) AS coders
      FROM mentoring_sessions s
      JOIN users t ON t.id = s.tutor_id
      WHERE s.clan_id = $2

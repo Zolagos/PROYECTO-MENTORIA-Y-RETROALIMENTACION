@@ -87,44 +87,6 @@ export async function fetchAPI(endpoint, options = {}) {
 }
 
 // ============================================================
-// AUTHENTICATION SERVICES
-// ============================================================
-
-export const authService = {
-  /**
-   * Logs in with Firebase and validates against the backend.
-   * TODO Sprint 4: integrate the Firebase Auth SDK
-   *
-   * @param {string} email
-   * @param {string} password
-   * @returns {Promise<{user, token}>}
-   */
-  async login(email, password) {
-    // Step 1: Authenticate with Firebase (returns an ID Token)
-    // const firebaseResult = await firebase.auth().signInWithEmailAndPassword(email, password);
-    // const idToken = await firebaseResult.user.getIdToken();
-
-    // Step 2: Validate the token against the backend and get the profile
-    // return await fetchAPI('/auth/verify', {
-    //   method: 'POST',
-    //   body: JSON.stringify({ idToken }),
-    // });
-
-    throw new Error('TODO: Implement in Sprint 4 with real Firebase Auth.');
-  },
-
-  /**
-   * Logs the user out.
-   */
-  async logout() {
-    // TODO Sprint 4: firebase.auth().signOut()
-    sessionStorage.removeItem('tutorcode_user');
-    sessionStorage.removeItem('tutorcode_token');
-    navigateTo('/login');
-  },
-};
-
-// ============================================================
 // MENTORING SERVICES
 // ============================================================
 

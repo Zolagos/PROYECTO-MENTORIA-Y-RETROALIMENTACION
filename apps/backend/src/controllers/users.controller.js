@@ -9,6 +9,12 @@ export const listByRole = asyncHandler(async (req, res) => {
   if (![ROLES.TUTOR, ROLES.CODER].includes(role)) {
     throw new ApiError(`role must be ${ROLES.TUTOR} or ${ROLES.CODER}`, 400);
   }
-  const users = await usersRepository.findByRole(role);
+
+  const clanId = Number(req.user.clanId);
+  if (!Number.isInteger(clanId) || clanId <= 0) {
+    throw new ApiError('The authenticated user is not assigned to a clan', 409);
+  }
+
+  const users = await usersRepository.findByRole(role, clanId);
   return ApiResponse.success(res, users);
 });

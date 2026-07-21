@@ -1,13 +1,13 @@
 import pool from '../config/database.js';
 
-export const findByRole = async (roleName) => {
+export const findByRole = async (roleName, clanId) => {
     const { rows } = await pool.query(
         `SELECT u.id, u.name, u.lastname, u.clan_id
         FROM users u
         JOIN roles r ON u.role_id = r.id
-        WHERE r.name = $1 AND u.status = TRUE
+        WHERE r.name = $1 AND u.status = TRUE AND u.clan_id = $2
         ORDER BY u.name`,
-        [roleName]
+        [roleName, clanId]
     );
     return rows;
 };
