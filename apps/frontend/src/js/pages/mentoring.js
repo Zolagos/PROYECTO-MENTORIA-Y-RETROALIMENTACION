@@ -3,6 +3,7 @@ import {
   getTutors, getTutorById,
   createSession, updateSession, deleteSession,
   changeRequestStatus, deleteRequestItem,
+  changeSessionStatus,
   loadTutors,
 } from '../services/mentoring.js'
 import { getMentoringCards } from '../app.js'
@@ -276,15 +277,18 @@ export function closeStatusModal() {
   if (overlay) { overlay.remove(); document.body.style.overflow = ''; }
 }
 
-export function confirmStatusChange(id, newStatus) {
+export async function confirmStatusChange(id, newStatus) {
   const session = getSessionById(id);
   if (!session) return;
 
-  session.status = newStatus;
-  updateSession(session);
-  refreshMentoringCards();
-  closeStatusModal();
-  showToast(`Status changed to "${newStatus}".`, 'success');
+  try {
+    await changeSessionStatus(id, newStatus);
+    await refreshMentoringCards();
+    closeStatusModal();
+    showToast(`Status changed to "${newStatus}".`, 'success');
+  } catch (error) {
+    showToast(error.message || 'Could not change the status.', 'error');
+  }
 }
 
 /** Opens a unified modal showing the tutor first, then participants */

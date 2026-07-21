@@ -191,6 +191,19 @@ export const sessionsService = {
     const params = new URLSearchParams(filters).toString();
     return await fetchAPI(`/sessions${params ? '?' + params : ''}`);
   },
+
+  /**
+   * Changes a session's status (scheduled/in_progress/completed/cancelled).
+   * Allowed transitions and permissions are enforced server-side.
+   * @param {number} id
+   * @param {'scheduled'|'in_progress'|'completed'|'cancelled'} status
+   */
+  async updateStatus(id, status) {
+    return await fetchAPI(`/sessions/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    });
+  },
 };
 
 // ============================================================
@@ -271,7 +284,7 @@ export const feedbackService = {
 
 export const usersService = {
   /**
-   * Gets all users (TL/ADMIN only).
+   * Gets all users (TL only).
    * TODO Sprint 4: GET /api/users
    */
   async getAll(filters = {}) {

@@ -152,6 +152,18 @@ export function deleteSession(id) {
   cache = cache.filter(m => m.id !== Number(id));
 }
 
+/** Changes a session's status against the backend (US-08) and refreshes the cache */
+export async function changeSessionStatus(id, status) {
+  const backendStatus = status.replace(/-/g, '_');
+  const response = await sessionsService.updateStatus(id, backendStatus);
+  const updated = response?.data;
+  if (updated) {
+    const newStatus = (updated.status || backendStatus).replace(/_/g, '-');
+    cache = cache.map(m => (m.kind === 'session' && m.id === Number(id) ? { ...m, status: newStatus } : m));
+  }
+  return updated;
+}
+
 /** Accepts/denies a mentoring request (TL and Tutor only, enforced server-side) */
 export async function changeRequestStatus(id, state) {
   const response = await mentoringService.changeStatus(id, state);

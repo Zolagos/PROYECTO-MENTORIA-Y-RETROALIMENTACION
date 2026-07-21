@@ -227,6 +227,19 @@ export const cancelById = async (sessionId) => {
 
   return rows[0] ?? null;
 };
+export const updateStatus = async (sessionId, newStatus) => {
+  const { rows } = await pool.query(
+    `UPDATE mentoring_sessions
+     SET
+       status = $2,
+       updated_at = CURRENT_TIMESTAMP
+     WHERE id = $1
+     RETURNING *`,
+    [sessionId, newStatus]
+  );
+
+  return rows[0] ?? null;
+};
 export const update = async ({
   sessionId,
   topic,

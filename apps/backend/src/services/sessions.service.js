@@ -648,6 +648,89 @@ export const cancelSession = async ({
 
   return cancelledSession;
 };
+const STATUS_TRANSITIONS = {
+  scheduled: ['in_progress', 'completed', 'cancelled'],
+  in_progress: ['completed', 'cancelled'],
+  cancelled: ['scheduled'],
+  completed: [],
+};
+
+export const changeSessionStatus = async ({
+  sessionId,
+  status,
+  actor,
+}) => {
+  const {
+    actorId,
+    actorClanId,
+    actorRole,
+  } = getActorContext(actor);
+
+  if (
+    actorRole !== ROLES.TEAM_LEADER &&
+    actorRole !== ROLES.TUTOR
+  ) {
+    throw new ApiError(
+      'Only Team Leaders and Tutors can change session status',
+      403
+    );
+  }
+
+  if (!Object.hasOwn(STATUS_TRANSITIONS, status)) {
+    throw new ApiError(
+      'status must be one of scheduled, in_progress, completed, cancelled',
+      400
+    );
+  }
+
+  const session = await sessionsRepository.findById(sessionId);
+
+  if (!session) {
+    throw new ApiError('Session not found', 404);
+  }
+
+  if (Number(session.clan_id) !== actorClanId) {
+    throw new ApiError(
+      'The session belongs to another clan',
+      403
+    );
+  }
+
+  if (
+    actorRole === ROLES.TUTOR &&
+    Number(session.tutor_id) !== actorId
+  ) {
+    throw new ApiError(
+      'Tutors can only change the status of their own sessions',
+      403
+    );
+  }
+
+  const allowedNextStatuses =
+    STATUS_TRANSITIONS[session.status] || [];
+
+  if (!allowedNextStatuses.includes(status)) {
+    throw new ApiError(
+      `Cannot change status from ${session.status} to ${status}`,
+      400
+    );
+  }
+
+  const updatedSession = await sessionsRepository.updateStatus(
+    sessionId,
+    status
+  );
+
+  if (!updatedSession) {
+    throw new ApiError(
+      'The session could not be updated because its status changed',
+      409
+    );
+  }
+
+  return updatedSession;
+};
+
 export const assignParticipants = async ({
   sessionId,
   coderIds,

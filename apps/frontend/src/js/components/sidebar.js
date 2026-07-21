@@ -16,7 +16,6 @@ const SIDEBAR_MENUS = {
       items: [
         { icon: 'home',     label: 'Dashboard',        route: '/dashboard' },
         { icon: 'calendar', label: 'Mentorships',      route: '/mentoring' },
-        { icon: 'users',    label: 'My Coders',        route: '/my-coders' },
         { icon: 'edit',     label: 'Observations',     route: '/observations' },
       ]
     }
@@ -32,7 +31,6 @@ const SIDEBAR_MENUS = {
       section: 'Management',
       items: [
         { icon: 'calendar',  label: 'Mentorships',      route: '/mentoring' },
-        { icon: 'users',     label: 'Users',            route: '/users' },
         { icon: 'edit',      label: 'Observations',     route: '/observations' },
         { icon: 'message',   label: 'Feedback',         route: '/feedback' },
       ]
@@ -40,30 +38,6 @@ const SIDEBAR_MENUS = {
     {
       section: 'Reports',
       items: [
-        { icon: 'bar-chart', label: 'Metrics',          route: '/metrics' },
-      ]
-    }
-  ],
-  ADMIN: [
-    {
-      section: 'Main',
-      items: [
-        { icon: 'home',      label: 'Dashboard',        route: '/dashboard' },
-      ]
-    },
-    {
-      section: 'Management',
-      items: [
-        { icon: 'calendar',  label: 'Mentorships',      route: '/mentoring' },
-        { icon: 'users',     label: 'Users',            route: '/users' },
-        { icon: 'edit',      label: 'Observations',     route: '/observations' },
-        { icon: 'message',   label: 'Feedback',         route: '/feedback' },
-      ]
-    },
-    {
-      section: 'Admin',
-      items: [
-        { icon: 'settings',  label: 'Settings',         route: '/settings' },
         { icon: 'bar-chart', label: 'Metrics',          route: '/metrics' },
       ]
     }

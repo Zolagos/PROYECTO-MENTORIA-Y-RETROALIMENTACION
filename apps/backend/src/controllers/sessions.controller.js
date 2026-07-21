@@ -96,6 +96,28 @@ export const assignParticipants = asyncHandler(
   }
 );
 
+export const changeSessionStatus = asyncHandler(async (req, res) => {
+  const sessionId = Number(req.params.id);
+
+  if (!Number.isInteger(sessionId) || sessionId <= 0) {
+    throw new ApiError('Invalid session id', 400);
+  }
+
+  const { status } = req.body;
+
+  const session = await sessionsService.changeSessionStatus({
+    sessionId,
+    status,
+    actor: req.user,
+  });
+
+  return ApiResponse.success(
+    res,
+    session,
+    'Session status updated'
+  );
+});
+
 export const cancelSession = asyncHandler(async (req, res) => {
   const sessionId = Number(req.params.id);
 

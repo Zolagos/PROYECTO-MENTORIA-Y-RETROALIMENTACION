@@ -26,17 +26,8 @@ function registerAllRoutes(role) {
   registerRoute('/observations', 'Observations',  renderObservations);
 
   // Role-based routes
-  if (role === 'TUTOR' || role === 'TL' || role === 'ADMIN') {
-    registerRoute('/my-coders', 'My Coders', renderMyCoders);
-  }
-
-  if (role === 'TL' || role === 'ADMIN') {
-    registerRoute('/users',   'Users', renderUsers);
+  if (role === 'TL') {
     registerRoute('/metrics', 'Metrics', renderMetrics);
-  }
-
-  if (role === 'ADMIN') {
-    registerRoute('/settings', 'Settings', renderSettings);
   }
 }
 
@@ -50,7 +41,7 @@ export function renderDashboard() {
   const role = user?.role || 'CODER';
 
   // Different dashboard depending on role
-  if (role === 'TL' || role === 'ADMIN') return renderDashboardTL(user);
+  if (role === 'TL') return renderDashboardTL(user);
   if (role === 'TUTOR') return renderDashboardTutor(user);
   return renderDashboardCoder(user);
 }
@@ -145,17 +136,6 @@ function renderDashboardTutor(user) {
         </div>
       </div>
     </div>
-    <div class="card">
-      <div class="card__header">
-        <h3 class="card__title">My Coders</h3>
-        <button class="btn btn-secondary btn-sm" onclick="navigateTo('/my-coders')">View All</button>
-      </div>
-      <div class="card__body">
-        <div class="empty-state">
-          <p class="empty-state__description">You don't have any assigned coders yet.</p>
-        </div>
-      </div>
-    </div>
   `;
 }
 
@@ -235,7 +215,7 @@ function renderDashboardTL(user) {
 
 export function renderMentoring() {
   const user = getSessionUser();
-  const canCreate = user && (user.role === 'TL' || user.role === 'TUTOR' || user.role === 'ADMIN');
+  const canCreate = user && (user.role === 'TL' || user.role === 'TUTOR');
   return `
     <div class="page-header">
       <div>
@@ -285,7 +265,7 @@ export function renderMentoring() {
 
 export function renderObservations() {
   const user = getSessionUser();
-  const canAdd = user && (user.role === 'TL' || user.role === 'TUTOR' || user.role === 'ADMIN');
+  const canAdd = user && (user.role === 'TL' || user.role === 'TUTOR');
   return `
     <div class="page-header">
       <div>
@@ -380,117 +360,6 @@ export function renderFeedback() {
   `;
 }
 
-export function renderUsers() {
-  return `
-    <div class="page-header">
-      <div>
-        <h2 class="page-header__title">Users</h2>
-        <p class="page-header__subtitle">Management of users in the TutorCode system.</p>
-      </div>
-    </div>
-    <div class="filters-bar">
-      <div class="search-bar">
-        <svg class="search-bar__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="search" class="search-bar__input" placeholder="Search user..." aria-label="Search user" />
-      </div>
-      <select class="filters-bar__select" aria-label="Filter by role">
-        <option value="">All roles</option>
-        <option value="CODER">Coder</option>
-        <option value="TUTOR">Tutor</option>
-        <option value="TL">Team Leader</option>
-      </select>
-      <select class="filters-bar__select" aria-label="Filter by status">
-        <option value="">All</option>
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
-      </select>
-    </div>
-    <div class="card">
-      <div class="table-container">
-        <table class="table" aria-label="Users table">
-          <thead>
-            <tr>
-              <th scope="col">User</th>
-              <th scope="col">Email</th>
-              <th scope="col">Role</th>
-              <th scope="col">Clan</th>
-              <th scope="col">Status</th>
-              <th scope="col">Registration</th>
-              <th scope="col"><span class="sr-only">Actions</span></th>
-            </tr>
-          </thead>
-          <tbody id="users-table-body">
-            <tr>
-              <td colspan="7">
-                <div class="empty-state" style="padding:var(--space-8);">
-                  <svg class="empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                  <h4 class="empty-state__title">No users found</h4>
-                  <p class="empty-state__description">Users will be loaded from the backend in Sprint 4.</p>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  `;
-}
-
-export function renderMyCoders() {
-  return `
-    <div class="page-header">
-      <div>
-        <h2 class="page-header__title">My Coders</h2>
-        <p class="page-header__subtitle">Coders assigned to your supervision.</p>
-      </div>
-    </div>
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-card__icon stat-card__icon--blue">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-        </div>
-        <div class="stat-card__content">
-          <div class="stat-card__value">0</div>
-          <div class="stat-card__label">Coders assigned</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card__icon stat-card__icon--green">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div class="stat-card__content">
-          <div class="stat-card__value">0</div>
-          <div class="stat-card__label">With good progress</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card__icon stat-card__icon--orange">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        </div>
-        <div class="stat-card__content">
-          <div class="stat-card__value">0</div>
-          <div class="stat-card__label">Require attention</div>
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card__header">
-        <h3 class="card__title">List of Coders</h3>
-        <div class="search-bar">
-          <svg class="search-bar__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="search" class="search-bar__input" placeholder="Search coder..." aria-label="Search coder" />
-        </div>
-      </div>
-      <div class="card__body">
-        <div class="empty-state">
-          <h4 class="empty-state__title">No coders assigned</h4>
-          <p class="empty-state__description">Coders will be assigned from the backend in Sprint 4.</p>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
 export function renderMetrics() {
   return `
     <div class="page-header">
@@ -558,52 +427,6 @@ export function renderMetrics() {
         <div class="card__body">
           <div class="empty-state" style="padding:var(--space-6);">
             <p class="empty-state__description">The real data will come from the backend in Sprint 4.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-export function renderSettings() {
-  return `
-    <div class="page-header">
-      <div>
-        <h2 class="page-header__title">Settings</h2>
-        <p class="page-header__subtitle">System configuration for TutorCode.</p>
-      </div>
-    </div>
-    <div class="content-grid">
-      <div class="card">
-        <div class="card__header"><h3 class="card__title">System Profile</h3></div>
-        <div class="card__body">
-          <div class="form-group">
-            <label class="form-label">Platform Name</label>
-            <input type="text" class="form-input" value="TutorCode" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Organization</label>
-            <input type="text" class="form-input" value="RIWI Academy" />
-          </div>
-          <button class="btn btn-primary">Save Changes</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card__header"><h3 class="card__title">System Status</h3></div>
-        <div class="card__body">
-          <div style="display:flex;flex-direction:column;gap:var(--space-4);">
-            <div class="flex justify-between items-center">
-              <span style="font-size:var(--font-size-sm);">Backend API</span>
-              <span class="badge badge--pending">Not connected</span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span style="font-size:var(--font-size-sm);">Database</span>
-              <span class="badge badge--pending">Not connected</span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span style="font-size:var(--font-size-sm);">Firebase Auth</span>
-              <span class="badge badge--pending">Not connected</span>
-            </div>
           </div>
         </div>
       </div>
