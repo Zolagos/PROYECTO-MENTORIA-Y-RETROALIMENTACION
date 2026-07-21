@@ -7,9 +7,10 @@ import {
   submitMentoring, toggleModalityField,
   openParticipantsModal, closeParticipantsModal,
   openStatusModal, closeStatusModal, confirmStatusChange,
-  respondMentoringRequest,
+  openAssignParticipantsModal, closeAssignParticipantsModal, submitAssignParticipants,
+  respondMentoringRequest, submitMentoringRequest,
 } from './pages/mentoring.js'
-import { submitObservation } from './pages/observations.js'
+import { submitObservation, editObservationItem, deleteObservationItem } from './pages/observations.js'
 import { setRating, submitFeedback } from './pages/feedback.js'
 import { initLogin } from './pages/login.js'
 import { initDashboard } from './pages/dashboard.js'
@@ -26,6 +27,7 @@ window.toggleActionMenu = toggleActionMenu
 window.editMentoring = editMentoring
 window.deleteMentoring = deleteMentoring
 window.respondMentoringRequest = respondMentoringRequest
+window.submitMentoringRequest = submitMentoringRequest
 window.submitMentoring = submitMentoring
 window.toggleModalityField = toggleModalityField
 window.openParticipantsModal = openParticipantsModal
@@ -33,7 +35,12 @@ window.closeParticipantsModal = closeParticipantsModal
 window.openStatusModal = openStatusModal
 window.closeStatusModal = closeStatusModal
 window.confirmStatusChange = confirmStatusChange
+window.openAssignParticipantsModal = openAssignParticipantsModal
+window.closeAssignParticipantsModal = closeAssignParticipantsModal
+window.submitAssignParticipants = submitAssignParticipants
 window.submitObservation = submitObservation
+window.editObservationItem = editObservationItem
+window.deleteObservationItem = deleteObservationItem
 window.setRating = setRating
 window.submitFeedback = submitFeedback
 window.initLogin = initLogin

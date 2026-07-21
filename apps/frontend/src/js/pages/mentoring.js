@@ -1,9 +1,10 @@
 import {
   getVisibleMentoringItems, getSessionById,
   getTutors, getTutorById,
-  createSession, updateSession, deleteSession,
-  changeRequestStatus, deleteRequestItem,
-  changeSessionStatus,
+  getCoders, loadCoders,
+  createSession, updateSession,
+  changeRequestStatus, deleteRequestItem, createMentoringRequest,
+  changeSessionStatus, assignParticipants,
   loadTutors,
 } from '../services/mentoring.js'
 import { getMentoringCards } from '../app.js'
@@ -30,6 +31,15 @@ export async function initMentoring() {
     btnNueva.addEventListener('click', () => {
       resetMentoringForm();
       openModal('modal-mentoring');
+    });
+  }
+
+  // 4b. "Request Mentorship" button (Coder) — opens the request modal
+  const btnRequest = document.getElementById('btn-new-mentoring-request');
+  if (btnRequest) {
+    btnRequest.addEventListener('click', () => {
+      resetMentoringRequestForm();
+      openModal('modal-mentoring-request');
     });
   }
 
@@ -121,14 +131,15 @@ export function toggleActionMenu(btn, id) {
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         Edit
       </button>
-      <button class="action-menu__item" onclick="changeMentoringStatus(${id})">
+      <button class="action-menu__item" onclick="openStatusModal(${id})">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
         Change status
       </button>
-      <button class="action-menu__item action-menu__item--danger" onclick="deleteMentoring(${id})">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-        Delete
-      </button>
+      ${item.status === 'scheduled' ? `
+      <button class="action-menu__item" onclick="openAssignParticipantsModal(${id})">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg>
+        Assign participants
+      </button>` : ''}
     `;
   } else {
     const canRespond = item.status === 'pending' && (role === 'TL' || role === 'TUTOR');
@@ -159,16 +170,7 @@ export function toggleActionMenu(btn, id) {
 
   const dropdown = document.createElement('div');
   dropdown.className = 'action-menu__dropdown';
-  dropdown.innerHTML = `
-    <button class="action-menu__item" onclick="editMentoring(${id})">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-      Edit
-    </button>
-    <button class="action-menu__item action-menu__item--danger" onclick="deleteMentoring(${id})">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-      Delete
-    </button>
-  `;
+  dropdown.innerHTML = itemsHtml;
 
   btn.parentElement.appendChild(dropdown);
 
@@ -193,6 +195,8 @@ export function editMentoring(id) {
   document.getElementById('m-tutor').value = mentoring.tutorId || '';
   document.getElementById('m-date').value = mentoring.date;
   document.getElementById('m-time').value = mentoring.time;
+  document.getElementById('m-end-time').value = mentoring.endTime || '';
+  document.getElementById('m-mentorship-type').value = mentoring.mentorshipType || 'individual';
   document.getElementById('m-modality').value = mentoring.modality;
   toggleModalityField();
   document.getElementById('m-location').value =
@@ -357,6 +361,88 @@ export function closeParticipantsModal() {
   }
 }
 
+/** Opens a modal with a coder checklist to assign participants to a scheduled session */
+export async function openAssignParticipantsModal(id) {
+  const session = getSessionById(id);
+  if (!session || session.status !== 'scheduled') return;
+
+  await loadCoders();
+  const assignedIds = new Set((session.codersDetail || []).map(c => c.id));
+
+  const existing = document.getElementById('modal-assign-participants');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay active';
+  overlay.id = 'modal-assign-participants';
+  overlay.style.display = 'flex';
+  overlay.innerHTML = `
+    <div class="modal modal--sm">
+      <div class="modal__header">
+        <h2 class="modal__title">Assign participants</h2>
+        <button class="modal__close" onclick="closeAssignParticipantsModal()" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <p style="font-size:var(--font-size-sm);color:var(--color-text-secondary);margin:0 0 var(--space-3);">${session.topic}</p>
+        ${getCoders().length === 0
+          ? '<p class="text-muted">No coders available in this clan.</p>'
+          : `<div style="display:flex;flex-direction:column;gap:var(--space-2);">
+               ${getCoders().map(c => `
+                 <label style="display:flex;align-items:center;gap:var(--space-2);">
+                   <input type="checkbox" name="assign-coder" value="${c.id}" ${assignedIds.has(c.id) ? 'checked' : ''} />
+                   <span>${c.name}</span>
+                 </label>
+               `).join('')}
+             </div>`
+        }
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn-ghost" onclick="closeAssignParticipantsModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="submitAssignParticipants(${id})">Save</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+
+  const escHandler = (e) => {
+    if (e.key === 'Escape') { closeAssignParticipantsModal(); document.removeEventListener('keydown', escHandler); }
+  };
+  document.addEventListener('keydown', escHandler);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeAssignParticipantsModal(); });
+}
+
+export function closeAssignParticipantsModal() {
+  const overlay = document.getElementById('modal-assign-participants');
+  if (overlay) {
+    overlay.remove();
+    document.body.style.overflow = '';
+  }
+}
+
+/** Reads the checked coders and submits the assignment against the backend */
+export async function submitAssignParticipants(id) {
+  const checked = Array.from(document.querySelectorAll('input[name="assign-coder"]:checked'))
+    .map(el => Number(el.value));
+
+  if (checked.length === 0) {
+    showToast('Select at least one coder.', 'error');
+    return;
+  }
+
+  try {
+    await assignParticipants(id, checked);
+    await refreshMentoringCards();
+    closeAssignParticipantsModal();
+    showToast('Participants assigned.', 'success');
+  } catch (error) {
+    showToast(error.message || 'Could not assign participants.', 'error');
+  }
+}
+
 /** Accepts or denies a mentoring request against the backend */
 export async function respondMentoringRequest(id, state) {
   const request = getSessionById(id);
@@ -371,19 +457,12 @@ export async function respondMentoringRequest(id, state) {
   }
 }
 
-/** Deletes a mentorship (session, local only) or a mentoring request (backend) after confirmation */
+/** Deletes a mentoring request after confirmation (TL only, enforced server-side) */
 export async function deleteMentoring(id) {
   const item = getSessionById(id);
-  if (!item) return;
+  if (!item || item.kind !== 'request') return;
 
   if (!confirm(`Delete "${item.topic}"?`)) return;
-
-  if (item.kind === 'session') {
-    deleteSession(id);
-    refreshMentoringCards();
-    showToast('Mentorship deleted.', 'success');
-    return;
-  }
 
   try {
     await deleteRequestItem(id);
@@ -391,6 +470,40 @@ export async function deleteMentoring(id) {
     showToast('Request deleted.', 'success');
   } catch (error) {
     showToast(error.message || 'Could not delete the request.', 'error');
+  }
+}
+
+/** Resets the mentoring-request modal form */
+function resetMentoringRequestForm() {
+  const form = document.getElementById('form-mentoring-request');
+  if (!form) return;
+  form.reset();
+  document.getElementById('mr-topic')?.classList.remove('form-input--error');
+  document.getElementById('mr-topic-error')?.classList.add('hidden');
+}
+
+/** Submits a new mentoring request (Coder only) */
+export async function submitMentoringRequest() {
+  const topic = document.getElementById('mr-topic');
+  const description = document.getElementById('mr-description');
+
+  if (!topic?.value.trim()) {
+    topic.classList.add('form-input--error');
+    document.getElementById('mr-topic-error')?.classList.remove('hidden');
+    return;
+  }
+
+  try {
+    await createMentoringRequest({
+      topic: topic.value.trim(),
+      description: description?.value.trim() || undefined,
+    });
+    closeModal('modal-mentoring-request');
+    resetMentoringRequestForm();
+    await refreshMentoringCards();
+    showToast('Mentorship request sent.', 'success');
+  } catch (error) {
+    showToast(error.message || 'Could not send the request.', 'error');
   }
 }
 
@@ -433,13 +546,14 @@ export function toggleModalityField() {
 }
 
 /** Submits the create/edit mentorship form */
-export function submitMentoring() {
+export async function submitMentoring() {
   clearMentoringErrors();
 
   const topic    = document.getElementById('m-topic');
   const tutor    = document.getElementById('m-tutor');
   const date     = document.getElementById('m-date');
   const time     = document.getElementById('m-time');
+  const endTime  = document.getElementById('m-end-time');
   const modality = document.getElementById('m-modality');
   const location = document.getElementById('m-location');
   let valid = true;
@@ -478,6 +592,17 @@ export function submitMentoring() {
     return;
   }
 
+  if (!time?.value || !endTime?.value) {
+    showToast('Select the start and end time.', 'error');
+    return;
+  }
+
+  if (endTime.value <= time.value) {
+    endTime.classList.add('form-input--error');
+    document.getElementById('m-end-time-error')?.classList.remove('hidden');
+    return;
+  }
+
   const id = Number(document.getElementById('m-id').value);
   const selectedTutor = getTutorById(tutor.value);
 
@@ -487,23 +612,29 @@ export function submitMentoring() {
     tutorId: Number(tutor.value),
     tutor: selectedTutor ? selectedTutor.name : '—',
     date: date.value,
-    time: time?.value || '',
+    time: time.value,
+    endTime: endTime.value,
+    mentorshipType: document.getElementById('m-mentorship-type')?.value || 'individual',
     modality: modality.value,
     link: modality.value === 'virtual' ? location.value.trim() : '',
     room: modality.value === 'in-person' ? location.value.trim() : '',
     type: document.getElementById('m-type')?.value || 'open',
   };
 
-  if (id) {
-    mentoring.id = id;
-    updateSession(mentoring);
-    showToast('Mentorship updated successfully.', 'success');
-  } else {
-    createSession(mentoring);
-    showToast('Mentorship created successfully.', 'success');
-  }
+  try {
+    if (id) {
+      mentoring.id = id;
+      await updateSession(mentoring);
+      showToast('Mentorship updated successfully.', 'success');
+    } else {
+      await createSession(mentoring);
+      showToast('Mentorship created successfully.', 'success');
+    }
 
-  closeModal('modal-mentoring');
-  resetMentoringForm();
-  refreshMentoringCards();
+    closeModal('modal-mentoring');
+    resetMentoringForm();
+    refreshMentoringCards();
+  } catch (error) {
+    showToast(error.message || 'Could not save the mentorship.', 'error');
+  }
 }

@@ -5,9 +5,8 @@
  * Loads scheduled sessions (GET /api/sessions) and mentoring requests
  * (GET /api/mentoring-requests) from the backend, normalizes both shapes
  * into a common card-friendly format, and exposes the actions the
- * Mentoring page needs (status changes / delete on requests, plus the
- * still-local-only create/edit/delete for sessions — no backend endpoint
- * exists yet to persist a full session).
+ * Mentoring page needs (create/edit sessions, status changes, participant
+ * assignment, request create/respond/delete).
  */
 
 import { mentoringService, sessionsService, usersService } from './api.js';
@@ -35,6 +34,24 @@ export async function loadTutors() {
   return tutorsCache;
 }
 
+// ---- AVAILABLE CODERS ----
+let codersCache = [];
+
+/** Returns the available coders for the participants/observations modals */
+export function getCoders() {
+  return codersCache;
+}
+
+/** Loads the available coders from the backend */
+export async function loadCoders() {
+  const res = await usersService.getAll({ role: 'Coder' });
+  codersCache = (res.data || []).map(u => ({
+    id: u.id,
+    name: `${u.name} ${u.lastname}`.trim(),
+  }));
+  return codersCache;
+}
+
 // ---- CACHE ----
 // Holds the last-fetched, normalized items (sessions + requests) so
 // synchronous lookups (getSessionById) and card actions work without refetching.
@@ -60,6 +77,7 @@ function initials(name, lastname) {
 /** Maps a mentoring_sessions row (GET /sessions) into the card shape */
 function mapSessionToCard(row) {
   const { date, time } = splitDateTime(row.start_time);
+  const { time: endTime } = splitDateTime(row.end_time);
   return {
     kind: 'session',
     id: row.id,
@@ -69,6 +87,8 @@ function mapSessionToCard(row) {
     tutor: row.tutor_name ? `${row.tutor_name} ${row.tutor_lastname || ''}`.trim() : '—',
     date,
     time,
+    endTime,
+    mentorshipType: row.mentorship_type || 'individual',
     modality: (row.modality || '').replace(' ', '-'),
     link: row.meeting_link || row.link || '',
     room: row.room || '',
@@ -133,23 +153,38 @@ export function getSessionById(id) {
   return cache.find(m => m.id === Number(id)) || null;
 }
 
-/** Creates a new session card locally (no backend endpoint yet — not persisted) */
-export function createSession(mentoring) {
-  mentoring.id = Date.now();
-  mentoring.kind = 'session';
-  mentoring.status = mentoring.status || 'scheduled';
-  mentoring.coders = mentoring.coders || [];
-  cache.push(mentoring);
+/** Builds the POST/PATCH /sessions payload from the modal's form values */
+function buildSessionPayload(mentoring) {
+  return {
+    topic: mentoring.topic,
+    description: mentoring.desc || null,
+    mentorship_type: mentoring.mentorshipType,
+    modality: mentoring.modality === 'in-person' ? 'in person' : mentoring.modality,
+    session_type: mentoring.type || 'open',
+    room: mentoring.modality === 'in-person' ? mentoring.room : null,
+    meeting_link: mentoring.modality === 'virtual' ? mentoring.link : null,
+    start_time: `${mentoring.date}T${mentoring.time}:00`,
+    end_time: `${mentoring.date}T${mentoring.endTime}:00`,
+    tutor_id: mentoring.tutorId,
+  };
 }
 
-/** Updates a session card locally (no backend endpoint yet — not persisted) */
-export function updateSession(mentoring) {
-  cache = cache.map(m => (m.id === mentoring.id ? { ...m, ...mentoring } : m));
+/** Creates a new session against the backend and refreshes the cache */
+export async function createSession(mentoring) {
+  const response = await sessionsService.create(buildSessionPayload(mentoring));
+  const created = response?.data;
+  if (created) cache.push(mapSessionToCard(created));
+  return created;
 }
 
-/** Removes a session card locally (no backend endpoint yet — not persisted) */
-export function deleteSession(id) {
-  cache = cache.filter(m => m.id !== Number(id));
+/** Updates a scheduled session against the backend and refreshes the cache */
+export async function updateSession(mentoring) {
+  const response = await sessionsService.update(mentoring.id, buildSessionPayload(mentoring));
+  const updated = response?.data;
+  if (updated) {
+    cache = cache.map(m => (m.kind === 'session' && m.id === mentoring.id ? mapSessionToCard(updated) : m));
+  }
+  return updated;
 }
 
 /** Changes a session's status against the backend (US-08) and refreshes the cache */
@@ -162,6 +197,11 @@ export async function changeSessionStatus(id, status) {
     cache = cache.map(m => (m.kind === 'session' && m.id === Number(id) ? { ...m, status: newStatus } : m));
   }
   return updated;
+}
+
+/** Creates a mentoring request (Coder only, enforced server-side) */
+export async function createMentoringRequest(data) {
+  return await mentoringService.create(data);
 }
 
 /** Accepts/denies a mentoring request (TL and Tutor only, enforced server-side) */
@@ -178,4 +218,27 @@ export async function changeRequestStatus(id, state) {
 export async function deleteRequestItem(id) {
   await mentoringService.delete(id);
   cache = cache.filter(m => !(m.kind === 'request' && m.id === Number(id)));
+}
+
+/** Assigns coder participants to a scheduled session (TL/Tutor, enforced server-side) */
+export async function assignParticipants(id, coderIds) {
+  const response = await sessionsService.assignParticipants(id, coderIds);
+  const updated = response?.data;
+  if (updated) {
+    cache = cache.map(m => (m.kind === 'session' && m.id === Number(id) ? mapSessionToCard(updated) : m));
+  }
+  return updated;
+}
+
+/** Fetches the current coder's completed sessions, for the Feedback form's dropdown */
+export async function getCompletedSessionsForFeedback() {
+  const response = await sessionsService.getAll();
+  return (response?.data || [])
+    .filter(row => row.status === 'completed')
+    .map(row => ({ id: row.id, topic: row.topic, date: splitDateTime(row.start_time).date }));
+}
+
+/** Submits feedback for a completed session (Coder only, enforced server-side) */
+export async function submitSessionFeedback(sessionId, data) {
+  return await sessionsService.submitFeedback(sessionId, data);
 }

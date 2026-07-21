@@ -193,6 +193,29 @@ export const sessionsService = {
   },
 
   /**
+   * Creates a new mentoring session. TL and Tutor only.
+   * @param {Object} data - { topic, description, mentorship_type, modality, session_type, room, meeting_link, start_time, end_time, tutor_id }
+   */
+  async create(data) {
+    return await fetchAPI('/sessions', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  /**
+   * Updates a scheduled mentoring session. TL and Tutor only.
+   * @param {number} id
+   * @param {Object} data - Same shape as create(), all fields optional.
+   */
+  async update(id, data) {
+    return await fetchAPI(`/sessions/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+
+  /**
    * Changes a session's status (scheduled/in_progress/completed/cancelled).
    * Allowed transitions and permissions are enforced server-side.
    * @param {number} id
@@ -204,6 +227,30 @@ export const sessionsService = {
       body: JSON.stringify({ status }),
     });
   },
+
+  /**
+   * Assigns coder participants to a scheduled session. TL and Tutor only.
+   * @param {number} id
+   * @param {number[]} coderIds
+   */
+  async assignParticipants(id, coderIds) {
+    return await fetchAPI(`/sessions/${id}/participants`, {
+      method: 'POST',
+      body: JSON.stringify({ coderIds }),
+    });
+  },
+
+  /**
+   * Submits feedback for a completed session. Coder only.
+   * @param {number} sessionId
+   * @param {Object} data - { tutor_rating, session_rating, comments }
+   */
+  async submitFeedback(sessionId, data) {
+    return await fetchAPI(`/sessions/${sessionId}/feedback`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
 };
 
 // ============================================================
@@ -212,69 +259,71 @@ export const sessionsService = {
 
 export const observationsService = {
   /**
-   * Gets all observations.
-   * TODO Sprint 4: GET /api/observations
+   * Gets the unified coder+tutor observations timeline (role-scoped server-side).
    */
   async getAll(filters = {}) {
     const params = new URLSearchParams(filters).toString();
     return await fetchAPI(`/observations${params ? '?' + params : ''}`);
   },
+};
 
+export const coderObservationsService = {
   /**
-   * Creates a new observation.
-   * TODO Sprint 4: POST /api/observations
-   * @param {Object} data - { targetUserId, type, text }
+   * Creates a coder observation. Tutor and Team Leader only.
+   * @param {Object} data - { coder_id, session_id?, observation, recommendation? }
    */
   async create(data) {
-    return await fetchAPI('/observations', {
+    return await fetchAPI('/coder-observations', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   },
 
   /**
-   * Updates an observation.
-   * TODO Sprint 4: PUT /api/observations/:id
+   * Updates a coder observation. Tutor and Team Leader only.
    */
   async update(id, data) {
-    return await fetchAPI(`/observations/${id}`, {
+    return await fetchAPI(`/coder-observations/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
   },
 
   /**
-   * Deletes an observation.
-   * TODO Sprint 4: DELETE /api/observations/:id
+   * Deletes a coder observation. Team Leader only.
    */
   async delete(id) {
-    return await fetchAPI(`/observations/${id}`, { method: 'DELETE' });
+    return await fetchAPI(`/coder-observations/${id}`, { method: 'DELETE' });
   },
 };
 
-// ============================================================
-// FEEDBACK SERVICES
-// ============================================================
-
-export const feedbackService = {
+export const tutorObservationsService = {
   /**
-   * Gets all feedback.
-   * TODO Sprint 4: GET /api/feedback
-   */
-  async getAll() {
-    return await fetchAPI('/feedback');
-  },
-
-  /**
-   * Creates a new feedback entry.
-   * TODO Sprint 4: POST /api/feedback
-   * @param {Object} data - { mentoringId, rating, comment }
+   * Creates a tutor observation. Team Leader only.
+   * @param {Object} data - { tutor_id, session_id?, observation, recommendation?, technical_notes? }
    */
   async create(data) {
-    return await fetchAPI('/feedback', {
+    return await fetchAPI('/tutor-observations', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+  },
+
+  /**
+   * Updates a tutor observation. Team Leader only.
+   */
+  async update(id, data) {
+    return await fetchAPI(`/tutor-observations/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  /**
+   * Deletes a tutor observation. Team Leader only.
+   */
+  async delete(id) {
+    return await fetchAPI(`/tutor-observations/${id}`, { method: 'DELETE' });
   },
 };
 

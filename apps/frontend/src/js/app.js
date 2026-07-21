@@ -216,6 +216,7 @@ function renderDashboardTL(user) {
 export function renderMentoring() {
   const user = getSessionUser();
   const canCreate = user && (user.role === 'TL' || user.role === 'TUTOR');
+  const isCoder = user?.role === 'CODER';
   return `
     <div class="page-header">
       <div>
@@ -225,6 +226,10 @@ export function renderMentoring() {
       ${canCreate ? `<button class="btn btn-primary" id="btn-new-mentoring">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         New Mentorship
+      </button>` : ''}
+      ${isCoder ? `<button class="btn btn-primary" id="btn-new-mentoring-request">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Request Mentorship
       </button>` : ''}
     </div>
     <div class="filters-bar">
@@ -260,6 +265,7 @@ export function renderMentoring() {
       </div>
     </div>
     ${getModalMentoring(canCreate)}
+    ${getModalMentoringRequest(isCoder)}
   `;
 }
 
@@ -585,8 +591,20 @@ function getModalMentoring(canCreate) {
                 <span class="form-error hidden" id="m-date-error">Select a date.</span>
               </div>
               <div class="form-group">
-                <label for="m-time" class="form-label form-label--required">Time</label>
+                <label for="m-time" class="form-label form-label--required">Start time</label>
                 <input type="time" id="m-time" class="form-input" required />
+              </div>
+              <div class="form-group">
+                <label for="m-end-time" class="form-label form-label--required">End time</label>
+                <input type="time" id="m-end-time" class="form-input" required />
+                <span class="form-error hidden" id="m-end-time-error">End time must be after the start time.</span>
+              </div>
+              <div class="form-group">
+                <label for="m-mentorship-type" class="form-label form-label--required">Mentorship Type</label>
+                <select id="m-mentorship-type" class="form-select" required>
+                  <option value="individual">Individual</option>
+                  <option value="group">Group</option>
+                </select>
               </div>
               <div class="form-group">
                 <label for="m-modality" class="form-label form-label--required">Modality</label>
@@ -623,6 +641,40 @@ function getModalMentoring(canCreate) {
   `;
 }
 
+/** Generates the mentoring-request creation modal (Coder only) */
+function getModalMentoringRequest(isCoder) {
+  if (!isCoder) return '';
+  return `
+    <div class="modal-overlay" id="modal-mentoring-request" role="dialog" aria-modal="true" aria-labelledby="modal-mentoring-request-title">
+      <div class="modal">
+        <div class="modal__header">
+          <h2 class="modal__title" id="modal-mentoring-request-title">Request Mentorship</h2>
+          <button class="modal__close" onclick="closeModal('modal-mentoring-request')" aria-label="Close modal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal__body">
+          <form id="form-mentoring-request" novalidate>
+            <div class="form-group">
+              <label for="mr-topic" class="form-label form-label--required">Topic</label>
+              <input type="text" id="mr-topic" class="form-input" placeholder="What do you need help with?" required />
+              <span class="form-error hidden" id="mr-topic-error">Enter the topic.</span>
+            </div>
+            <div class="form-group">
+              <label for="mr-description" class="form-label">Description</label>
+              <textarea id="mr-description" class="form-textarea" placeholder="Add any extra context (optional)..." rows="4"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal__footer">
+          <button class="btn btn-ghost" onclick="closeModal('modal-mentoring-request')">Cancel</button>
+          <button class="btn btn-primary" onclick="submitMentoringRequest()">Send Request</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 /** Generates the observations timeline */
 export function getObservationsTimeline(list) {
   const items = list || getObservations();
@@ -630,8 +682,12 @@ export function getObservationsTimeline(list) {
     return '<p style="text-align:center;color:var(--color-text-muted);padding:var(--space-10) 0;">No observations found.</p>';
   }
 
+  const role = getSessionUser()?.role;
+
   return items.map(o => {
     const typeClass = o.type === 'tutor' ? 'timeline-item--orange' : 'timeline-item--green';
+    const canEdit = o.type === 'tutor' ? role === 'TL' : (role === 'TL' || role === 'TUTOR');
+    const canDelete = role === 'TL';
     return `
     <div class="timeline-item ${typeClass}" data-type="${o.type}">
       <div class="timeline-item__card">
@@ -643,7 +699,15 @@ export function getObservationsTimeline(list) {
               <div class="timeline-item__date">${o.date}</div>
             </div>
           </div>
-          <span class="badge badge--obs-${o.type}">${o.type === 'tutor' ? 'Tutor' : 'Coder'}</span>
+          <div class="flex gap-2 items-center">
+            <span class="badge badge--obs-${o.type}">${o.type === 'tutor' ? 'Tutor' : 'Coder'}</span>
+            ${canEdit ? `<button class="action-menu__trigger" aria-label="Edit observation" onclick="editObservationItem(${o.id}, '${o.type}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>` : ''}
+            ${canDelete ? `<button class="action-menu__trigger" aria-label="Delete observation" onclick="deleteObservationItem(${o.id}, '${o.type}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            </button>` : ''}
+          </div>
         </div>
         <p class="timeline-item__text">${o.observation}</p>
         ${o.recommendation ? `<div class="timeline-item__extra"><strong>Recommendation:</strong> ${o.recommendation}</div>` : ''}
@@ -660,7 +724,7 @@ export function getObservationsTimeline(list) {
   }).join('');
 }
 
-/** New observation modal */
+/** New/edit observation modal */
 function getModalObservation(canAdd) {
   if (!canAdd) return '';
   return `
@@ -674,34 +738,32 @@ function getModalObservation(canAdd) {
         </div>
         <div class="modal__body">
           <form id="form-observation" novalidate>
+            <input type="hidden" id="obs-id" value="" />
             <div class="form-group">
               <label for="obs-target" class="form-label form-label--required">Coder / Tutor observed</label>
               <select id="obs-target" class="form-select" required>
                 <option value="">Select person...</option>
-                <option value="1">Kevin Mendoza (Coder)</option>
-                <option value="2">Juan Pérez (Coder)</option>
-                <option value="3">Ana García (Tutor)</option>
               </select>
               <span class="form-error hidden" id="obs-target-error">Select the person this observation is directed to.</span>
             </div>
             <div class="form-group">
-              <label for="obs-type" class="form-label">Type</label>
-              <select id="obs-type" class="form-select">
-                <option value="positive">✅ Positive</option>
-                <option value="improvement">⚠️ To improve</option>
-                <option value="critical">🔴 Critical</option>
-              </select>
+              <label for="obs-text" class="form-label form-label--required">Observation</label>
+              <textarea id="obs-text" class="form-textarea" placeholder="Describe the observation..." rows="4" required></textarea>
+              <span class="form-error hidden" id="obs-text-error">The observation cannot be empty.</span>
             </div>
             <div class="form-group">
-              <label for="obs-text" class="form-label form-label--required">Observation</label>
-              <textarea id="obs-text" class="form-textarea" placeholder="Describe the observation or recommendation..." rows="4" required></textarea>
-              <span class="form-error hidden" id="obs-text-error">The observation cannot be empty.</span>
+              <label for="obs-recommendation" class="form-label">Recommendation</label>
+              <textarea id="obs-recommendation" class="form-textarea" placeholder="Optional recommendation..." rows="2"></textarea>
+            </div>
+            <div class="form-group" id="obs-technical-notes-group" style="display:none">
+              <label for="obs-technical-notes" class="form-label">Technical notes</label>
+              <textarea id="obs-technical-notes" class="form-textarea" placeholder="Optional technical notes (tutor observations only)..." rows="2"></textarea>
             </div>
           </form>
         </div>
         <div class="modal__footer">
           <button class="btn btn-ghost" onclick="closeModal('modal-observation')">Cancel</button>
-          <button class="btn btn-primary" onclick="submitObservation()">Save</button>
+          <button class="btn btn-primary" id="obs-submit-btn" onclick="submitObservation()">Save</button>
         </div>
       </div>
     </div>
@@ -726,23 +788,34 @@ function getModalFeedback(isCoder) {
               <label for="fb-mentoring" class="form-label form-label--required">Mentorship</label>
               <select id="fb-mentoring" class="form-select" required>
                 <option value="">Select completed mentorship...</option>
-                <option value="1">Advanced JavaScript — 15 Jul 2026</option>
-                <option value="2">SQL Databases — 16 Jul 2026</option>
               </select>
               <span class="form-error hidden" id="fb-mentoring-error">Select the mentorship.</span>
             </div>
             <div class="form-group">
-              <label class="form-label form-label--required">Rating</label>
-              <div class="star-rating" id="star-rating" role="group" aria-label="Rate from 1 to 5 stars">
+              <label class="form-label form-label--required">Session Rating</label>
+              <div class="star-rating" id="star-rating-session" role="group" aria-label="Rate the session from 1 to 5 stars">
                 ${[1,2,3,4,5].map(n => `
                   <svg class="star-rating__star" data-value="${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     tabindex="0" role="radio" aria-label="${n} star${n>1?'s':''}" aria-checked="false"
-                    onclick="setRating(${n})" onkeydown="if(event.key==='Enter'||event.key===' '){setRating(${n})}">
+                    onclick="setRating(${n}, 'session')" onkeydown="if(event.key==='Enter'||event.key===' '){setRating(${n}, 'session')}">
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                   </svg>`).join('')}
               </div>
-              <input type="hidden" id="fb-rating" value="0" />
-              <span class="form-error hidden" id="fb-rating-error">Select a rating.</span>
+              <input type="hidden" id="fb-session-rating" value="0" />
+              <span class="form-error hidden" id="fb-session-rating-error">Rate the session.</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label form-label--required">Tutor Rating</label>
+              <div class="star-rating" id="star-rating-tutor" role="group" aria-label="Rate the tutor from 1 to 5 stars">
+                ${[1,2,3,4,5].map(n => `
+                  <svg class="star-rating__star" data-value="${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    tabindex="0" role="radio" aria-label="${n} star${n>1?'s':''}" aria-checked="false"
+                    onclick="setRating(${n}, 'tutor')" onkeydown="if(event.key==='Enter'||event.key===' '){setRating(${n}, 'tutor')}">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  </svg>`).join('')}
+              </div>
+              <input type="hidden" id="fb-tutor-rating" value="0" />
+              <span class="form-error hidden" id="fb-tutor-rating-error">Rate the tutor.</span>
             </div>
             <div class="form-group">
               <label for="fb-comment" class="form-label form-label--required">Comment</label>
