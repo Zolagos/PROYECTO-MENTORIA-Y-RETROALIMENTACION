@@ -1,13 +1,19 @@
 import pool from '../config/database.js';
 
 export const findByRole = async (roleName, clanId) => {
+    const params = [roleName];
+    let clanFilter = '';
+    if (clanId !== null) {
+        params.push(clanId);
+        clanFilter = `AND u.clan_id = $${params.length}`;
+    }
     const { rows } = await pool.query(
         `SELECT u.id, u.name, u.lastname, u.clan_id
         FROM users u
         JOIN roles r ON u.role_id = r.id
-        WHERE r.name = $1 AND u.status = TRUE AND u.clan_id = $2
+        WHERE r.name = $1 AND u.status = TRUE ${clanFilter}
         ORDER BY u.name`,
-        [roleName, clanId]
+        params
     );
     return rows;
 };

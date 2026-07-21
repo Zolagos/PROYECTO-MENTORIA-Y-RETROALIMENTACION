@@ -458,6 +458,8 @@ export function getMentoringCards(list) {
 }
 
 function getSessionCard(m) {
+  const role = getSessionUser()?.role;
+  const canManageParticipants = m.status === 'scheduled' && (role === 'TL' || role === 'TUTOR');
   return `
     <article class="mentoring-detail-card" aria-label="Mentorship: ${m.topic}">
       <div class="mentoring-detail-card__top">
@@ -495,6 +497,10 @@ function getSessionCard(m) {
       </div>
       <div class="mentoring-detail-card__bottom" style="gap:var(--space-2)">
         <button class="btn btn-sm btn-secondary" onclick="openStatusModal(${m.id})" style="flex:1">Status</button>
+        ${canManageParticipants
+          ? `<button class="btn btn-sm btn-secondary" onclick="openAssignParticipantsModal(${m.id})" style="flex:1">Participants</button>`
+          : ''
+        }
         ${m.status === 'completed'
           ? `
             <button class="btn btn-sm btn-secondary" onclick="navigateTo('/feedback')" style="flex:1">Feedback</button>

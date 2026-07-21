@@ -135,11 +135,6 @@ export function toggleActionMenu(btn, id) {
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
         Change status
       </button>
-      ${item.status === 'scheduled' ? `
-      <button class="action-menu__item" onclick="openAssignParticipantsModal(${id})">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg>
-        Assign participants
-      </button>` : ''}
     `;
   } else {
     const canRespond = item.status === 'pending' && (role === 'TL' || role === 'TUTOR');
@@ -366,7 +361,7 @@ export async function openAssignParticipantsModal(id) {
   const session = getSessionById(id);
   if (!session || session.status !== 'scheduled') return;
 
-  await loadCoders();
+  await loadCoders({ crossClan: session.type === 'open' });
   const assignedIds = new Set((session.codersDetail || []).map(c => c.id));
 
   const existing = document.getElementById('modal-assign-participants');

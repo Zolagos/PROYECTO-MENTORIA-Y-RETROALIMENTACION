@@ -42,9 +42,15 @@ export function getCoders() {
   return codersCache;
 }
 
-/** Loads the available coders from the backend */
-export async function loadCoders() {
-  const res = await usersService.getAll({ role: 'Coder' });
+/**
+ * Loads the available coders from the backend.
+ * `crossClan: true` is used only when assigning participants to an 'open'
+ * session, which explicitly accepts coders from any clan.
+ */
+export async function loadCoders({ crossClan = false } = {}) {
+  const params = { role: 'Coder' };
+  if (crossClan) params.allClans = 'true';
+  const res = await usersService.getAll(params);
   codersCache = (res.data || []).map(u => ({
     id: u.id,
     name: `${u.name} ${u.lastname}`.trim(),

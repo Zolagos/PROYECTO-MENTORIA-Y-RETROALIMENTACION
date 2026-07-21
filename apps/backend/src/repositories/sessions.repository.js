@@ -120,9 +120,8 @@ export const findForCoder = async ({ coderId, clanId }) => {
        ) AS coders
      FROM mentoring_sessions s
      JOIN users t ON t.id = s.tutor_id
-     WHERE s.clan_id = $2
-       AND (
-         s.session_type = 'open'
+     WHERE (
+         (s.clan_id = $2 AND s.session_type = 'open')
          OR EXISTS (
            SELECT 1
            FROM session_coders sc

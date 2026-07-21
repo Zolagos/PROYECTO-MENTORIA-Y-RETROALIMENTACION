@@ -1,9 +1,9 @@
 import pool from '../config/database.js';
 
-export const findAll = async ({ tutor_id } = {}) => {
+export const findAll = async ({ tutor_id, clan_id } = {}) => {
   let query = `
     SELECT tobs.*,
-           u_tutor.name AS tutor_name, u_tutor.lastname AS tutor_lastname,
+           u_tutor.name AS tutor_name, u_tutor.lastname AS tutor_lastname, u_tutor.clan_id AS tutor_clan_id,
            u_observer.name AS observer_name, u_observer.lastname AS observer_lastname,
            ms.topic AS session_topic
     FROM tutor_observations tobs
@@ -11,11 +11,21 @@ export const findAll = async ({ tutor_id } = {}) => {
     JOIN users u_observer ON tobs.observed_by = u_observer.id
     LEFT JOIN mentoring_sessions ms ON tobs.session_id = ms.id
   `;
+  const conditions = [];
   const params = [];
 
   if (tutor_id) {
     params.push(tutor_id);
-    query += ` WHERE tobs.tutor_id = $1`;
+    conditions.push(`tobs.tutor_id = $${params.length}`);
+  }
+
+  if (clan_id) {
+    params.push(clan_id);
+    conditions.push(`u_tutor.clan_id = $${params.length}`);
+  }
+
+  if (conditions.length) {
+    query += ` WHERE ${conditions.join(' AND ')}`;
   }
 
   query += ` ORDER BY tobs.created_at DESC`;
@@ -27,7 +37,7 @@ export const findAll = async ({ tutor_id } = {}) => {
 export const findById = async (id) => {
   const { rows } = await pool.query(
     `SELECT tobs.*,
-            u_tutor.name AS tutor_name, u_tutor.lastname AS tutor_lastname,
+            u_tutor.name AS tutor_name, u_tutor.lastname AS tutor_lastname, u_tutor.clan_id AS tutor_clan_id,
             u_observer.name AS observer_name, u_observer.lastname AS observer_lastname,
             ms.topic AS session_topic
      FROM tutor_observations tobs

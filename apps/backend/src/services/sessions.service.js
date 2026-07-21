@@ -846,15 +846,18 @@ export const assignParticipants = async ({
     );
   }
 
-  const coderFromAnotherClan = coders.find(
-    (coder) => Number(coder.clan_id) !== Number(session.clan_id)
-  );
-
-  if (coderFromAnotherClan) {
-    throw new ApiError(
-      'All coders must belong to the session clan',
-      403
+  // Closed sessions are clan-exclusive; open sessions accept coders from any clan.
+  if (session.session_type === 'closed') {
+    const coderFromAnotherClan = coders.find(
+      (coder) => Number(coder.clan_id) !== Number(session.clan_id)
     );
+
+    if (coderFromAnotherClan) {
+      throw new ApiError(
+        'All coders must belong to the session clan for closed sessions',
+        403
+      );
+    }
   }
 
   await sessionsRepository.assignParticipants({

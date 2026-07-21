@@ -27,6 +27,17 @@ export const getSessionFeedback = asyncHandler(async (req, res) => {
     }
   }
 
+  if (req.user.role === ROLES.TEAM_LEADER) {
+    const { rows: clanSessions } = await pool.query(
+      `SELECT 1 FROM mentoring_sessions WHERE id = $1 AND clan_id = $2`,
+      [sessionId, req.user.clanId]
+    );
+
+    if (clanSessions.length === 0) {
+      throw new ApiError('Session not found', 404);
+    }
+  }
+
   const coderId = req.user.role === ROLES.CODER ? req.user.id : Number(req.query.coder_id);
 
   if (!Number.isInteger(coderId) || coderId <= 0) {

@@ -1,4 +1,5 @@
 import * as tutorObservationModel from '../models/tutor.observation.model.js';
+import * as usersRepository from '../repositories/users.repository.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
@@ -6,14 +7,17 @@ import { ROLES } from '../config/roles.js';
 
 export const listObservations = asyncHandler(async (req, res) => {
   let tutor_id = req.query.tutor_id ? Number(req.query.tutor_id) : undefined;
+  let clan_id;
 
   if (req.user.role === ROLES.TUTOR) {
     tutor_id = req.user.id;
-  } else if (req.user.role !== ROLES.TEAM_LEADER) {
+  } else if (req.user.role === ROLES.TEAM_LEADER) {
+    clan_id = req.user.clanId;
+  } else {
     throw new ApiError('Access denied', 403);
   }
 
-  const observations = await tutorObservationModel.findAll({ tutor_id });
+  const observations = await tutorObservationModel.findAll({ tutor_id, clan_id });
 
   return ApiResponse.success(res, observations);
 });
@@ -31,6 +35,10 @@ export const getObservation = asyncHandler(async (req, res) => {
   }
 
   if (req.user.role === ROLES.TUTOR && observation.tutor_id !== req.user.id) {
+    throw new ApiError('Access denied', 403);
+  }
+
+  if (req.user.role === ROLES.TEAM_LEADER && Number(observation.tutor_clan_id) !== Number(req.user.clanId)) {
     throw new ApiError('Access denied', 403);
   }
 
@@ -69,6 +77,14 @@ export const createObservation = asyncHandler(async (req, res) => {
     throw new ApiError('technical_notes must be a string', 400);
   }
 
+  const targetTutor = await usersRepository.findById(parsedTutorId);
+  if (!targetTutor || targetTutor.role !== ROLES.TUTOR) {
+    throw new ApiError('tutor_id does not reference an existing tutor', 404);
+  }
+  if (Number(targetTutor.clan_id) !== Number(req.user.clanId)) {
+    throw new ApiError('The tutor must belong to your own clan', 403);
+  }
+
   let newObservation;
   try {
     newObservation = await tutorObservationModel.create({
@@ -99,6 +115,10 @@ export const updateObservation = asyncHandler(async (req, res) => {
 
   if (!existing) {
     throw new ApiError('Observation not found', 404);
+  }
+
+  if (Number(existing.tutor_clan_id) !== Number(req.user.clanId)) {
+    throw new ApiError('You can only edit observations for tutors in your own clan', 403);
   }
 
   const { observation, recommendation, technical_notes } = req.body;
@@ -134,6 +154,10 @@ export const deleteObservation = asyncHandler(async (req, res) => {
 
   if (!existing) {
     throw new ApiError('Observation not found', 404);
+  }
+
+  if (Number(existing.tutor_clan_id) !== Number(req.user.clanId)) {
+    throw new ApiError('You can only delete observations for tutors in your own clan', 403);
   }
 
   const deleted = await tutorObservationModel.remove(id);
