@@ -1,0 +1,833 @@
+import { registerRoute, navigateTo } from './router.js';
+import { getSessionUser, initHeader } from './components/header.js';
+import { buildSidebar, initSidebarCollapse } from './components/sidebar.js';
+import { getTutors } from './services/mentoring.js';
+import { getSessions } from './services/mentoring.js';
+import { getObservations } from './services/observations.js';
+import { formatDate } from './utils.js';
+
+export function initApp(user) {
+  registerAllRoutes(user.role);
+  buildSidebar(user.role, user);
+  initHeader(user);
+  initSidebarCollapse();
+}
+
+/**
+ * Registers all the application routes.
+ * Each route points to a render function imported from js/pages/.
+ * @param {string} role - Active user's role
+ */
+function registerAllRoutes(role) {
+  // Common routes for all roles
+  registerRoute('/dashboard',    'Dashboard',      renderDashboard);
+  registerRoute('/mentoring',    'Mentoring sessions',      renderMentoring);
+  registerRoute('/feedback',     'Feedback',       renderFeedback);
+  registerRoute('/observations', 'Observations',  renderObservations);
+
+  // Role-based routes
+  if (role === 'TL') {
+    registerRoute('/metrics', 'Metrics', renderMetrics);
+  }
+}
+
+// ---- PLACEHOLDER RENDER FUNCTIONS ----
+// These functions return the HTML for each page.
+// Sprint 2: will be replaced with complete, designed HTML.
+// For now they just show that the route works.
+
+export function renderDashboard() {
+  const user = getSessionUser();
+  const role = user?.role || 'CODER';
+
+  // Different dashboard depending on role
+  if (role === 'TL') return renderDashboardTL(user);
+  if (role === 'TUTOR') return renderDashboardTutor(user);
+  return renderDashboardCoder(user);
+}
+
+function renderDashboardCoder(user) {
+  return `
+    <div class="welcome-banner">
+      <div class="welcome-banner__content">
+        <h2 class="welcome-banner__greeting">Hello, ${user?.name || 'Coder'}! 👋</h2>
+        <p class="welcome-banner__subtitle">Welcome to TutorCode. Here you can manage your mentoring sessions.</p>
+      </div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--blue">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div class="stat-card__content">
+          <div class="stat-card__value" id="dash-sessions-month">0</div>
+          <div class="stat-card__label">Mentoring Sessions this month</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--green">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="stat-card__content">
+          <div class="stat-card__value" id="dash-completed">0</div>
+          <div class="stat-card__label">Completed</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--orange">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="stat-card__content">
+          <div class="stat-card__value" id="dash-pending">0</div>
+          <div class="stat-card__label">Pending</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card__header">
+        <h3 class="card__title">Upcoming Mentorships</h3>
+      </div>
+      <div class="card__body">
+        <div class="empty-state">
+          <svg class="empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <h4 class="empty-state__title">No Upcoming Mentorships</h4>
+          <p class="empty-state__description">When you have scheduled mentorships, they will appear here.</p>
+          <button class="btn btn-primary" onclick="navigateTo('/mentoring')">View Mentorships</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderDashboardTutor(user) {
+  return `
+    <div class="welcome-banner">
+      <div class="welcome-banner__content">
+        <h2 class="welcome-banner__greeting">Hello, ${user?.name || 'Tutor'}! 👋</h2>
+        <p class="welcome-banner__subtitle">Manage your mentoring sessions and track your coders' progress.</p>
+      </div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--blue">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        </div>
+        <div class="stat-card__content">
+          <div class="stat-card__value" id="dash-assigned-coders">0</div>
+          <div class="stat-card__label">Assigned Coders</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--green">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div class="stat-card__content">
+          <div class="stat-card__value" id="dash-active-mentorships">0</div>
+          <div class="stat-card__label">Active Mentorships</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--orange">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="stat-card__content">
+          <div class="stat-card__value" id="dash-pending-feedbacks">0</div>
+          <div class="stat-card__label">Pending Feedbacks</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderDashboardTL(user) {
+  return `
+    <div class="welcome-banner">
+      <div class="welcome-banner__content">
+        <h2 class="welcome-banner__greeting">Hello, ${user?.name || 'Team Leader'}! 👋</h2>
+        <p class="welcome-banner__subtitle">Monitor your team's progress and program metrics.</p>
+      </div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--blue">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="stat-card__content">
+          <div class="stat-card__value" id="dash-total-users">0</div>
+          <div class="stat-card__label">Total Users</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--green">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="stat-card__content">
+          <div class="stat-card__value" id="dash-completed-mentorships">0</div>
+          <div class="stat-card__label">Completed Mentorships</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--orange">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="stat-card__content">
+          <div class="stat-card__value" id="dash-pending-mentorships">0</div>
+          <div class="stat-card__label">Pending Mentorships</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--red">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+        <div class="stat-card__content">
+          <div class="stat-card__value" id="dash-completion-rate">0%</div>
+          <div class="stat-card__label">Completion Rate</div>
+        </div>
+      </div>
+    </div>
+    <div class="content-grid">
+      <div class="card">
+        <div class="card__header">
+          <h3 class="card__title">Recent Mentorships</h3>
+          <button class="btn btn-secondary btn-sm" onclick="navigateTo('/mentoring')">View All</button>
+        </div>
+        <div class="card__body">
+          <div class="empty-state">
+            <p class="empty-state__description">No recent mentorships.</p>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card__header">
+          <h3 class="card__title">Recent Activity</h3>
+        </div>
+        <div class="card__body">
+          <div class="empty-state">
+            <p class="empty-state__description">No recent activity.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ---- PLACEHOLDER PAGES (fully developed in Sprint 2) ----
+
+export function renderMentoring() {
+  const user = getSessionUser();
+  const canCreate = user && (user.role === 'TL' || user.role === 'TUTOR');
+  const isCoder = user?.role === 'CODER';
+  return `
+    <div class="page-header">
+      <div>
+        <h2 class="page-header__title">Mentorships</h2>
+        <p class="page-header__subtitle">Manage all mentorships in the program.</p>
+      </div>
+      ${canCreate ? `<button class="btn btn-primary" id="btn-new-mentoring">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Mentorship
+      </button>` : ''}
+      ${isCoder ? `<button class="btn btn-primary" id="btn-new-mentoring-request">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Request Mentorship
+      </button>` : ''}
+    </div>
+    <div class="filters-bar">
+      <div class="search-bar">
+        <svg class="search-bar__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" class="search-bar__input" id="search-mentoring" placeholder="Search mentorship..." aria-label="Search mentorship" />
+      </div>
+      <select class="filters-bar__select" id="filter-status" aria-label="Filter by status">
+        <option value="">All statuses</option>
+        <option value="scheduled">Scheduled</option>
+        <option value="in-progress">In Progress</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      <select class="filters-bar__select" id="filter-modality" aria-label="Filter by modality">
+        <option value="">All modalities</option>
+        <option value="virtual">Virtual</option>
+        <option value="in-person">In-person</option>
+      </select>
+      <div class="filters-bar__spacer"></div>
+      <div class="view-toggle" role="group" aria-label="Change view">
+        <button class="view-toggle__btn active" id="view-grid" aria-label="Grid view" aria-pressed="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </button>
+        <button class="view-toggle__btn" id="view-list" aria-label="List view" aria-pressed="false">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="mentoring-grid" id="mentoring-container">
+      <div class="empty-state">
+        <p class="empty-state__description">Loading sessions...</p>
+      </div>
+    </div>
+    ${getModalMentoring(canCreate)}
+    ${getModalMentoringRequest(isCoder)}
+  `;
+}
+
+export function renderObservations() {
+  const user = getSessionUser();
+  const canAdd = user && (user.role === 'TL' || user.role === 'TUTOR');
+  return `
+    <div class="page-header">
+      <div>
+        <h2 class="page-header__title">Observations</h2>
+        <p class="page-header__subtitle">Record of the progress of the coders.</p>
+      </div>
+      ${canAdd ? `<button class="btn btn-primary" id="btn-new-observation">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Observation
+      </button>` : ''}
+    </div>
+    <div>
+      <div>
+        <div class="filters-bar" style="margin-bottom:var(--space-5);">
+          <div class="search-bar">
+            <svg class="search-bar__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" class="search-bar__input" id="search-obs" placeholder="Search observation..." aria-label="Search observation" />
+          </div>
+          <select class="filters-bar__select" id="filter-obs-type" aria-label="Filter by type">
+            <option value="">All types</option>
+            <option value="coder">Coder</option>
+            <option value="tutor">Tutor</option>
+          </select>
+        </div>
+        <div class="timeline" id="observations-timeline"></div>
+      </div>
+    </div>
+    ${getModalObservation(canAdd)}
+  `;
+}
+
+export function renderFeedback() {
+  const user = getSessionUser();
+  const isCoder = user && user.role === 'CODER';
+  return `
+    <div class="page-header">
+      <div>
+        <h2 class="page-header__title">Feedback</h2>
+        <p class="page-header__subtitle">Feedback from coders about the mentorships sessions.</p>
+      </div>
+      ${isCoder ? `<button class="btn btn-primary" id="btn-new-feedback">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Give Feedback
+      </button>` : ''}
+    </div>
+    <div class="stats-grid" style="margin-bottom:var(--space-6);">
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--blue">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="stat-card__content">
+          <div class="stat-card__value">0</div>
+          <div class="stat-card__label">Total feedbacks</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--green">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <div class="stat-card__content">
+          <div class="stat-card__value">0.0</div>
+          <div class="stat-card__label">Average Rating</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--orange">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="stat-card__content">
+          <div class="stat-card__value">0</div>
+          <div class="stat-card__label">Unanswered</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card__header">
+        <h3 class="card__title">Feedback History</h3>
+        <div class="search-bar">
+          <svg class="search-bar__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" class="search-bar__input" placeholder="Search..." aria-label="Search feedback" />
+        </div>
+      </div>
+      <div class="card__body">
+        <div class="empty-state">
+          <svg class="empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <h4 class="empty-state__title">No feedbacks yet</h4>
+          <p class="empty-state__description">When the coders rate their mentorships, they will appear here.</p>
+        </div>
+      </div>
+    </div>
+    ${getModalFeedback(isCoder)}
+  `;
+}
+
+export function renderMetrics() {
+  return `
+    <div class="page-header">
+      <div>
+        <h2 class="page-header__title">Metrics</h2>
+        <p class="page-header__subtitle">Performance indicators of the mentoring program.</p>
+      </div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--blue">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div class="stat-card__content">
+          <div class="stat-card__value" id="metric-total">0</div>
+          <div class="stat-card__label">Total mentorships</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--green">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="stat-card__content">
+          <div class="stat-card__value" id="metric-completion-rate">0%</div>
+          <div class="stat-card__label">Completion rate</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--orange">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <div class="stat-card__content">
+          <div class="stat-card__value" id="metric-avg-rating">0.0</div>
+          <div class="stat-card__label">Average rating</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--red">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        </div>
+        <div class="stat-card__content">
+          <div class="stat-card__value" id="metric-active-coders">0</div>
+          <div class="stat-card__label">Active coders</div>
+        </div>
+      </div>
+    </div>
+    <div class="content-grid">
+      <div class="card">
+        <div class="card__header"><h3 class="card__title">Mentorships by status</h3></div>
+        <div class="card__body">
+          <div id="metric-by-status" style="display:flex;flex-direction:column;gap:var(--space-4);">
+            <p class="empty-state__description">Loading...</p>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card__header"><h3 class="card__title">Distribution by modality</h3></div>
+        <div class="card__body">
+          <div id="metric-by-modality" style="display:flex;flex-direction:column;gap:var(--space-4);">
+            <p class="empty-state__description">Loading...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// HELPERS — HTML generators for each section
+// Sprint 4: these functions will use real data from the backend
+// ============================================================
+
+/**
+ * Generates the mentorship cards (scheduled sessions and mentoring requests).
+ * The data comes from the service (js/services/mentoring.js), already fetched
+ * and filtered by the caller.
+ * @param {Array} list - Items to render, each tagged with `kind: 'session'|'request'`.
+ */
+export function getMentoringCards(list) {
+  if (!list.length) {
+    return `
+      <div class="empty-state">
+        <h2 class="empty-state__title">Without mentorships</h2>
+        <p class="empty-state__description">There are no mentorships that match your criteria. Create one with "New Mentorship".</p>
+      </div>
+    `;
+  }
+
+  return list.map(m => m.kind === 'request' ? getRequestCard(m) : getSessionCard(m)).join('');
+}
+
+function getSessionCard(m) {
+  const role = getSessionUser()?.role;
+  const canManageParticipants = m.status === 'scheduled' && (role === 'TL' || role === 'TUTOR');
+  return `
+    <article class="mentoring-detail-card" aria-label="Mentorship: ${m.topic}">
+      <div class="mentoring-detail-card__top">
+        <div class="mentoring-detail-card__header">
+          <h3 class="mentoring-detail-card__topic">${m.topic}</h3>
+          <div class="flex gap-2 items-center">
+            <span class="badge badge--${m.status}">${m.status}</span>
+            <div class="action-menu">
+              <button class="action-menu__trigger" aria-label="Actions for ${m.topic}" aria-haspopup="true"
+                onclick="toggleActionMenu(this, ${m.id})">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <p class="mentoring-detail-card__desc">${m.desc}</p>
+        <div class="mentoring-detail-card__info">
+          <div class="mentoring-detail-card__info-item" onclick="openParticipantsModal(${m.id})" style="cursor:pointer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span style="text-decoration:underline dotted">${m.tutor}</span>
+          </div>
+          <div class="mentoring-detail-card__info-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span>${formatDate(m.date)} · ${m.time}</span>
+          </div>
+          <div class="mentoring-detail-card__info-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span class="mentoring-type mentoring-type--${m.modality}">${m.modality === 'virtual' ? '🔗 Virtual' : '📍 In-person'}</span>
+          </div>
+          <div class="mentoring-detail-card__info-item" onclick="openParticipantsModal(${m.id})" style="cursor:pointer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <span style="text-decoration:underline dotted">${m.coders.length} participante${m.coders.length !== 1 ? 's' : ''}</span>
+          </div>
+        </div>
+      </div>
+      <div class="mentoring-detail-card__bottom" style="gap:var(--space-2)">
+        <button class="btn btn-sm btn-secondary" onclick="openStatusModal(${m.id})" style="flex:1">Status</button>
+        ${canManageParticipants
+          ? `<button class="btn btn-sm btn-secondary" onclick="openAssignParticipantsModal(${m.id})" style="flex:1">Participants</button>`
+          : ''
+        }
+        ${m.status === 'completed'
+          ? `
+            <button class="btn btn-sm btn-secondary" onclick="navigateTo('/feedback')" style="flex:1">Feedback</button>
+            <button class="btn btn-sm btn-secondary" onclick="navigateTo('/observations?session_id=${m.id}')" style="flex:1">Observations</button>
+          `
+          : m.status === 'in-progress'
+          ? `<button class="btn btn-sm btn-secondary" onclick="navigateTo('/observations?session_id=${m.id}')" style="flex:1">Observations</button>`
+          : ''
+        }
+      </div>
+    </article>
+  `;
+}
+
+function getRequestCard(m) {
+  const user = getSessionUser();
+  const role = user?.role;
+  const canRespond = m.status === 'pending' && (role === 'TL' || role === 'TUTOR');
+  const canDelete = role === 'TL';
+  const showMenu = canRespond || canDelete;
+
+  return `
+    <article class="mentoring-detail-card" aria-label="Mentoring request: ${m.topic}">
+      <div class="mentoring-detail-card__top">
+        <div class="mentoring-detail-card__header">
+          <h3 class="mentoring-detail-card__topic">${m.topic}</h3>
+          <div class="flex gap-2 items-center">
+            <span class="badge badge--${m.status}">${m.status}</span>
+            ${showMenu ? `
+            <div class="action-menu">
+              <button class="action-menu__trigger" aria-label="Actions for ${m.topic}" aria-haspopup="true"
+                onclick="toggleActionMenu(this, ${m.id})">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+              </button>
+            </div>` : ''}
+          </div>
+        </div>
+        <p class="mentoring-detail-card__desc">${m.desc}</p>
+        <div class="mentoring-detail-card__info">
+          ${role !== 'CODER' ? `
+          <div class="mentoring-detail-card__info-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>${m.coder}</span>
+          </div>` : ''}
+          <div class="mentoring-detail-card__info-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span>Requested ${formatDate(m.date)}</span>
+          </div>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+/** Generates the create/edit mentorship modal */
+function getModalMentoring(canCreate) {
+  if (!canCreate) return '';
+  return `
+    <div class="modal-overlay" id="modal-mentoring" role="dialog" aria-modal="true" aria-labelledby="modal-mentoring-title">
+      <div class="modal modal--lg">
+        <div class="modal__header">
+          <h2 class="modal__title" id="modal-mentoring-title">New Mentorship</h2>
+          <button class="modal__close" onclick="closeModal('modal-mentoring')" aria-label="Close modal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal__body">
+          <form id="form-mentoring" novalidate>
+            <!-- hidden id: empty = create, with value = edit -->
+            <input type="hidden" id="m-id" value="" />
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="m-topic" class="form-label form-label--required">Topic</label>
+                <input type="text" id="m-topic" class="form-input" placeholder="Ej: JavaScript Advanced" required />
+                <span class="form-error hidden" id="m-topic-error">Enter the topic.</span>
+              </div>
+              <div class="form-group">
+                <label for="m-tutor" class="form-label form-label--required">Tutor</label>
+                <select id="m-tutor" class="form-select" required>
+                  <option value="">Select tutor...</option>
+                </select>
+                <span class="form-error hidden" id="m-tutor-error">Select a tutor.</span>
+              </div>
+              <div class="form-group">
+                <label for="m-date" class="form-label form-label--required">Date</label>
+                <input type="date" id="m-date" class="form-input" required />
+                <span class="form-error hidden" id="m-date-error">Select a date.</span>
+              </div>
+              <div class="form-group">
+                <label for="m-time" class="form-label form-label--required">Start time</label>
+                <input type="time" id="m-time" class="form-input" required />
+              </div>
+              <div class="form-group">
+                <label for="m-end-time" class="form-label form-label--required">End time</label>
+                <input type="time" id="m-end-time" class="form-input" required />
+                <span class="form-error hidden" id="m-end-time-error">End time must be after the start time.</span>
+              </div>
+              <div class="form-group">
+                <label for="m-mentorship-type" class="form-label form-label--required">Mentorship Type</label>
+                <select id="m-mentorship-type" class="form-select" required>
+                  <option value="individual">Individual</option>
+                  <option value="group">Group</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="m-modality" class="form-label form-label--required">Modality</label>
+                <select id="m-modality" class="form-select" required onchange="toggleModalityField()">
+                  <option value="">Select...</option>
+                  <option value="virtual">Virtual</option>
+                  <option value="in-person">In-person</option>
+                </select>
+              </div>
+              <div class="form-group" id="m-location-group">
+                <label for="m-location" class="form-label" id="m-location-label">Link / Room</label>
+                <input type="text" id="m-location" class="form-input" placeholder="meet.google.com/..." />
+              </div>
+              <div class="form-group">
+                <label for="m-type" class="form-label">Type</label>
+                <select id="m-type" class="form-select">
+                  <option value="open">Open (all clans)</option>
+                  <option value="closed">Closed (same clan)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="m-desc" class="form-label">Description</label>
+              <textarea id="m-desc" class="form-textarea" placeholder="Describe the content of the mentoring session..." rows="3"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal__footer">
+          <button class="btn btn-ghost" onclick="closeModal('modal-mentoring')">Cancel</button>
+          <button class="btn btn-primary" id="m-submit-btn" onclick="submitMentoring()">Create Mentorship</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/** Generates the mentoring-request creation modal (Coder only) */
+function getModalMentoringRequest(isCoder) {
+  if (!isCoder) return '';
+  return `
+    <div class="modal-overlay" id="modal-mentoring-request" role="dialog" aria-modal="true" aria-labelledby="modal-mentoring-request-title">
+      <div class="modal">
+        <div class="modal__header">
+          <h2 class="modal__title" id="modal-mentoring-request-title">Request Mentorship</h2>
+          <button class="modal__close" onclick="closeModal('modal-mentoring-request')" aria-label="Close modal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal__body">
+          <form id="form-mentoring-request" novalidate>
+            <div class="form-group">
+              <label for="mr-topic" class="form-label form-label--required">Topic</label>
+              <input type="text" id="mr-topic" class="form-input" placeholder="What do you need help with?" required />
+              <span class="form-error hidden" id="mr-topic-error">Enter the topic.</span>
+            </div>
+            <div class="form-group">
+              <label for="mr-description" class="form-label">Description</label>
+              <textarea id="mr-description" class="form-textarea" placeholder="Add any extra context (optional)..." rows="4"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal__footer">
+          <button class="btn btn-ghost" onclick="closeModal('modal-mentoring-request')">Cancel</button>
+          <button class="btn btn-primary" onclick="submitMentoringRequest()">Send Request</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/** Generates the observations timeline */
+export function getObservationsTimeline(list) {
+  const items = list || getObservations();
+  if (!items.length) {
+    return '<p style="text-align:center;color:var(--color-text-muted);padding:var(--space-10) 0;">No observations found.</p>';
+  }
+
+  const role = getSessionUser()?.role;
+
+  return items.map(o => {
+    const typeClass = o.type === 'tutor' ? 'timeline-item--orange' : 'timeline-item--green';
+    const canEdit = o.type === 'tutor' ? role === 'TL' : (role === 'TL' || role === 'TUTOR');
+    const canDelete = role === 'TL';
+    return `
+    <div class="timeline-item ${typeClass}" data-type="${o.type}">
+      <div class="timeline-item__card">
+        <div class="timeline-item__header">
+          <div class="timeline-item__author">
+            <div class="timeline-item__avatar">${o.initials}</div>
+            <div>
+              <div class="timeline-item__author-name">${o.observer}</div>
+              <div class="timeline-item__date">${o.date}</div>
+            </div>
+          </div>
+          <div class="flex gap-2 items-center">
+            <span class="badge badge--obs-${o.type}">${o.type === 'tutor' ? 'Tutor' : 'Coder'}</span>
+            ${canEdit ? `<button class="action-menu__trigger" aria-label="Edit observation" onclick="editObservationItem(${o.id}, '${o.type}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>` : ''}
+            ${canDelete ? `<button class="action-menu__trigger" aria-label="Delete observation" onclick="deleteObservationItem(${o.id}, '${o.type}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            </button>` : ''}
+          </div>
+        </div>
+        <p class="timeline-item__text">${o.observation}</p>
+        ${o.recommendation ? `<div class="timeline-item__extra"><strong>Recommendation:</strong> ${o.recommendation}</div>` : ''}
+        ${o.technicalNotes ? `<div class="timeline-item__extra"><strong>Technical notes:</strong> ${o.technicalNotes}</div>` : ''}
+        <div class="timeline-item__meta">
+          <span class="timeline-item__target">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            ${o.target}
+          </span>
+          <span class="timeline-item__session">${o.sessionTopic}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/** New/edit observation modal */
+function getModalObservation(canAdd) {
+  if (!canAdd) return '';
+  return `
+    <div class="modal-overlay" id="modal-observation" role="dialog" aria-modal="true" aria-labelledby="modal-obs-title">
+      <div class="modal">
+        <div class="modal__header">
+          <h2 class="modal__title" id="modal-obs-title">New Observation</h2>
+          <button class="modal__close" onclick="closeModal('modal-observation')" aria-label="Close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal__body">
+          <form id="form-observation" novalidate>
+            <input type="hidden" id="obs-id" value="" />
+            <div class="form-group">
+              <label for="obs-target" class="form-label form-label--required">Coder / Tutor observed</label>
+              <select id="obs-target" class="form-select" required>
+                <option value="">Select person...</option>
+              </select>
+              <span class="form-error hidden" id="obs-target-error">Select the person this observation is directed to.</span>
+            </div>
+            <div class="form-group">
+              <label for="obs-text" class="form-label form-label--required">Observation</label>
+              <textarea id="obs-text" class="form-textarea" placeholder="Describe the observation..." rows="4" required></textarea>
+              <span class="form-error hidden" id="obs-text-error">The observation cannot be empty.</span>
+            </div>
+            <div class="form-group">
+              <label for="obs-recommendation" class="form-label">Recommendation</label>
+              <textarea id="obs-recommendation" class="form-textarea" placeholder="Optional recommendation..." rows="2"></textarea>
+            </div>
+            <div class="form-group" id="obs-technical-notes-group" style="display:none">
+              <label for="obs-technical-notes" class="form-label">Technical notes</label>
+              <textarea id="obs-technical-notes" class="form-textarea" placeholder="Optional technical notes (tutor observations only)..." rows="2"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal__footer">
+          <button class="btn btn-ghost" onclick="closeModal('modal-observation')">Cancel</button>
+          <button class="btn btn-primary" id="obs-submit-btn" onclick="submitObservation()">Save</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/** Coder feedback modal */
+function getModalFeedback(isCoder) {
+  if (!isCoder) return '';
+  return `
+    <div class="modal-overlay" id="modal-feedback" role="dialog" aria-modal="true" aria-labelledby="modal-fb-title">
+      <div class="modal">
+        <div class="modal__header">
+          <h2 class="modal__title" id="modal-fb-title">Provide Feedback</h2>
+          <button class="modal__close" onclick="closeModal('modal-feedback')" aria-label="Close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal__body">
+          <form id="form-feedback" novalidate>
+            <div class="form-group">
+              <label for="fb-mentoring" class="form-label form-label--required">Mentorship</label>
+              <select id="fb-mentoring" class="form-select" required>
+                <option value="">Select completed mentorship...</option>
+              </select>
+              <span class="form-error hidden" id="fb-mentoring-error">Select the mentorship.</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label form-label--required">Session Rating</label>
+              <div class="star-rating" id="star-rating-session" role="group" aria-label="Rate the session from 1 to 5 stars">
+                ${[1,2,3,4,5].map(n => `
+                  <svg class="star-rating__star" data-value="${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    tabindex="0" role="radio" aria-label="${n} star${n>1?'s':''}" aria-checked="false"
+                    onclick="setRating(${n}, 'session')" onkeydown="if(event.key==='Enter'||event.key===' '){setRating(${n}, 'session')}">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  </svg>`).join('')}
+              </div>
+              <input type="hidden" id="fb-session-rating" value="0" />
+              <span class="form-error hidden" id="fb-session-rating-error">Rate the session.</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label form-label--required">Tutor Rating</label>
+              <div class="star-rating" id="star-rating-tutor" role="group" aria-label="Rate the tutor from 1 to 5 stars">
+                ${[1,2,3,4,5].map(n => `
+                  <svg class="star-rating__star" data-value="${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    tabindex="0" role="radio" aria-label="${n} star${n>1?'s':''}" aria-checked="false"
+                    onclick="setRating(${n}, 'tutor')" onkeydown="if(event.key==='Enter'||event.key===' '){setRating(${n}, 'tutor')}">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  </svg>`).join('')}
+              </div>
+              <input type="hidden" id="fb-tutor-rating" value="0" />
+              <span class="form-error hidden" id="fb-tutor-rating-error">Rate the tutor.</span>
+            </div>
+            <div class="form-group">
+              <label for="fb-comment" class="form-label form-label--required">Comment</label>
+              <textarea id="fb-comment" class="form-textarea" placeholder="What did you think of the mentorship? What would you improve?" rows="4" required></textarea>
+              <span class="form-error hidden" id="fb-comment-error">Write a comment.</span>
+            </div>
+          </form>
+        </div>
+        <div class="modal__footer">
+          <button class="btn btn-ghost" onclick="closeModal('modal-feedback')">Cancel</button>
+          <button class="btn btn-primary" onclick="submitFeedback()">Submit Feedback</button>
+        </div>
+      </div>
+    </div>
+  `;
+}

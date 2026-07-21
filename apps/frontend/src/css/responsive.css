@@ -1,0 +1,366 @@
+/* ============================================================
+
+   Breakpoints used:
+   - 1200px: large desktop
+   - 1024px: normal desktop / tablet landscape
+   - 768px:  tablet portrait
+   - 640px:  large mobile
+   - 480px:  normal mobile
+   - 360px:  small mobile
+   ============================================================ */
+
+/* ============================================================
+   LARGE DESKTOP (> 1200px)
+   ============================================================ */
+@media (min-width: 1200px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .mentoring-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ============================================================
+   TABLET LANDSCAPE / SMALL DESKTOP (≤ 1024px)
+   ============================================================ */
+@media (max-width: 1024px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .mentoring-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Login: smaller branding panel */
+  .login-brand {
+    padding: var(--space-8);
+  }
+
+  .login-brand__features {
+    display: none; /* Hide the feature list on medium screens */
+  }
+}
+
+/* ============================================================
+   TABLET PORTRAIT (≤ 768px)
+   ============================================================ */
+@media (max-width: 768px) {
+  /* Login: show only the form */
+  .login-page {
+    grid-template-columns: 1fr;
+  }
+
+  .login-brand {
+    display: none;
+  }
+
+  .login-form-panel {
+    padding: var(--space-8) var(--space-6);
+    min-height: 100vh;
+    justify-content: center;
+  }
+
+  /* App: sidebar becomes a drawer */
+  .sidebar {
+    transform: translateX(-100%);
+    width: var(--sidebar-width);
+    transition: transform var(--transition-normal);
+    z-index: 100;
+    box-shadow: none;
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: var(--shadow-xl);
+  }
+
+  .main-wrapper,
+  .main-wrapper.sidebar-collapsed {
+    margin-left: 0;
+  }
+
+  .header__menu-btn {
+    display: flex;
+  }
+
+  /* Stats: 2 columns on tablet */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Mentorships: 1 column */
+  .mentoring-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Filters: stack */
+  .filters-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filters-bar .search-bar {
+    max-width: 100%;
+  }
+
+  .filters-bar__spacer {
+    display: none;
+  }
+
+  .filters-bar .view-toggle {
+    align-self: flex-end;
+  }
+
+  /* Page header: stacks */
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .page-header .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Welcome banner */
+  .welcome-banner {
+    padding: var(--space-5);
+  }
+
+  .welcome-banner__greeting {
+    font-size: var(--font-size-xl);
+  }
+
+  /* Card info grid: 1 column */
+  .mentoring-detail-card__info {
+    grid-template-columns: 1fr;
+  }
+
+  /* Table: horizontal scroll */
+  .table-container {
+    border-radius: var(--radius-md);
+  }
+
+  .table th,
+  .table td {
+    padding: var(--space-3);
+    font-size: var(--font-size-xs);
+  }
+
+  /* Timeline: less side padding */
+  .timeline {
+    padding-left: var(--space-6);
+  }
+
+  /* Form grid: 1 column */
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Modal: full screen on mobile */
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal {
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    max-height: 92vh;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  /* Header: no large side padding */
+  .header {
+    padding: 0 var(--space-4);
+  }
+
+  .page-content {
+    padding: var(--space-4);
+  }
+}
+
+/* ============================================================
+   LARGE MOBILE (≤ 640px)
+   ============================================================ */
+@media (max-width: 640px) {
+  /* Stats: 1 column on mobile */
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Horizontal stat card on mobile to save space */
+  .stat-card {
+    padding: var(--space-4);
+  }
+
+  .stat-card__value {
+    font-size: var(--font-size-2xl);
+  }
+
+  /* Hide text from some table columns */
+  .table .hide-mobile {
+    display: none;
+  }
+
+  /* Login: less padding */
+  .login-form-panel {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  /* Header: hide title text on small screens */
+  .header__page-title {
+    font-size: var(--font-size-lg);
+    /* Limit length with ellipsis if the title is long */
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Feedback card */
+  .feedback-card__meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  /* Mentoring card bottom */
+  .mentoring-detail-card__bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .mentoring-detail-card__bottom .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ============================================================
+   SMALL MOBILE (≤ 480px)
+   ============================================================ */
+@media (max-width: 480px) {
+  :root {
+    /* Slightly reduce the base typography */
+    font-size: 15px;
+  }
+
+  .page-content {
+    padding: var(--space-3);
+  }
+
+  /* Welcome banner: more compact */
+  .welcome-banner {
+    padding: var(--space-4);
+  }
+
+  .welcome-banner__greeting {
+    font-size: var(--font-size-lg);
+  }
+
+  .welcome-banner__subtitle {
+    font-size: var(--font-size-xs);
+  }
+
+  /* Modals: full screen */
+  .modal {
+    border-radius: 0;
+    max-height: 100vh;
+    height: 100vh;
+  }
+
+  .modal-overlay {
+    align-items: flex-start;
+    padding: 0;
+  }
+
+  /* Modal footer buttons */
+  .modal__footer {
+    flex-direction: column-reverse;
+    gap: var(--space-2);
+  }
+
+  .modal__footer .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Timeline: compact */
+  .timeline {
+    padding-left: var(--space-5);
+  }
+
+  .timeline::before {
+    left: 7px;
+  }
+
+  .timeline-item::before {
+    left: calc(-1 * var(--space-5) + 0px);
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Hide header notification badge on very small mobile */
+  .header__right > .header__icon-btn:first-child {
+    display: none;
+  }
+}
+
+/* ============================================================
+   VERY SMALL MOBILE (≤ 360px)
+   ============================================================ */
+@media (max-width: 360px) {
+  .stat-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .stat-card__icon {
+    margin: 0 auto;
+  }
+
+  .login-form-wrapper {
+    padding: 0 var(--space-2);
+  }
+}
+
+/* ============================================================
+   PRINT (for printing reports / documentation)
+   ============================================================ */
+@media print {
+  .sidebar,
+  .header,
+  .sidebar-overlay,
+  .btn,
+  .filters-bar,
+  .modal-overlay {
+    display: none !important;
+  }
+
+  .main-wrapper {
+    margin-left: 0 !important;
+  }
+
+  .page-content {
+    padding: 0;
+  }
+
+  .card {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+}

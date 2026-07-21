@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TutorCode</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231877F2'/><text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-family='system-ui' font-weight='900' font-size='14' fill='white'>TC</text></svg>" />
+    <link rel="stylesheet" href="/src/css/main.css" />
+    <link rel="stylesheet" href="/src/css/layout.css" />
+    <link rel="stylesheet" href="/src/css/components.css" />
+    <link rel="stylesheet" href="/src/css/animations.css" />
+    <link rel="stylesheet" href="/src/css/responsive.css" />
+    <link rel="stylesheet" href="/src/css/pages/login.css" />
+    <link rel="stylesheet" href="/src/css/pages/dashboard.css" />
+    <link rel="stylesheet" href="/src/css/pages/mentoring.css" />
+    <link rel="stylesheet" href="/src/css/pages/observations.css" />
+    <style>
+      .route-login .sidebar,
+      .route-login .header,
+      .route-login .sidebar-overlay,
+      .route-login .sidebar__collapse-btn {
+        display: none;
+      }
+      .route-login .main-wrapper {
+        margin-left: 0;
+      }
+      .route-login .page-content {
+        padding: 0;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body class="route-login">
+    <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+    <div class="app-shell">
+      <aside id="sidebar" class="sidebar" aria-label="Navigation menu">
+        <div class="sidebar__brand">
+          <div class="sidebar__logo" aria-hidden="true">TC</div>
+          <span class="sidebar__brand-name">TutorCode</span>
+        </div>
+
+        <div class="sidebar__user" id="sidebar-user">
+          <div class="sidebar__avatar" id="sidebar-avatar" aria-hidden="true">?</div>
+          <div class="sidebar__user-info">
+            <div class="sidebar__user-name" id="sidebar-user-name">Loading...</div>
+            <div class="sidebar__user-role" id="sidebar-user-role"></div>
+          </div>
+        </div>
+
+        <nav class="sidebar__nav" id="sidebar-nav" aria-label="Main navigation"></nav>
+
+        <div class="sidebar__footer">
+          <button class="sidebar__collapse-btn" id="sidebar-collapse-btn" aria-label="Collapse menu" aria-expanded="true">
+            <svg class="sidebar__collapse-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            <span class="sidebar__collapse-text">Collapse</span>
+          </button>
+        </div>
+      </aside>
+
+      <div class="main-wrapper" id="main-wrapper">
+        <header class="header" role="banner">
+          <div class="header__left">
+            <button class="header__menu-btn" id="header-menu-btn" aria-label="Open menu" aria-controls="sidebar" aria-expanded="false">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+                <line x1="3" y1="18" x2="21" y2="18"/>
+              </svg>
+            </button>
+            <h1 class="header__page-title" id="header-page-title">TutorCode</h1>
+          </div>
+
+          <div class="header__right">
+            <button class="header__icon-btn" aria-label="Notifications" id="notifications-btn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+              </svg>
+              <span class="header__badge hidden" id="notification-badge" aria-label="You have notifications"></span>
+            </button>
+
+            <div class="header__avatar" id="header-avatar" role="button" tabindex="0" aria-label="User menu" aria-haspopup="true">?</div>
+          </div>
+        </header>
+
+        <main class="page-content" id="page-content" role="main" aria-live="polite">
+          <div class="empty-state" id="loading-placeholder">
+            <div class="skeleton skeleton--title" style="width:200px; margin:0 auto 16px;"></div>
+            <div class="skeleton skeleton--text" style="width:300px; margin:0 auto 8px;"></div>
+            <div class="skeleton skeleton--text" style="width:250px; margin:0 auto;"></div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script type="module" src="/src/js/main.js"></script>
+  </body>
+</html>
