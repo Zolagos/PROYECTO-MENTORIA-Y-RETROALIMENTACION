@@ -14,7 +14,8 @@
  */
 
 // ---- BACKEND BASE URL ----
-const AUTH_API_URL = 'http://localhost:3000/api';
+// Set VITE_API_URL at build time in production (e.g. Railway); falls back to local dev server.
+const AUTH_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 // ---- ROLE MAPPING ----
 // The backend uses the names from the roles table; the frontend uses
