@@ -23,8 +23,8 @@
 import { navigateTo } from '../router.js';
 
 // ---- BACKEND BASE URL ----
-// TODO Sprint 4: change to your team's real server URL
-const API_BASE_URL = 'http://localhost:3000/api';
+// Set VITE_API_URL at build time in production (e.g. Railway); falls back to local dev server.
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 // ============================================================
 // BASE FETCH FUNCTION
